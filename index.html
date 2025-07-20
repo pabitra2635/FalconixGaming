@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FalconixGaming - Gaming Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+            color: #F9FAFB; /* text-gray-50 */
+        }
+        .font-black-ops {
+            font-family: 'Inter', sans-serif;
+            font-weight: 900;
+        }
+        #gameCanvas, #racerGameCanvas, #towerDefenseCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        .glassmorphism {
+            background: rgba(31, 41, 55, 0.6); /* bg-gray-800 with opacity */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-primary {
+            @apply px-6 py-3 font-semibold text-white bg-sky-500 rounded-lg shadow-md hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
+        }
+        .btn-secondary {
+            @apply px-6 py-3 font-semibold text-white bg-indigo-500 rounded-lg shadow-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
+        }
+        .btn-danger {
+            @apply px-6 py-3 font-semibold text-white bg-pink-600 rounded-lg shadow-md hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
+        }
+        .btn-success {
+            @apply px-6 py-3 font-semibold text-white bg-green-600 rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
+        }
+        .game-card:hover .game-card-overlay {
+            opacity: 1;
+        }
+        .game-card-overlay {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        #pixelRacerModal, #towerDefenseModal {
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .pointer-events-passthrough {
+            pointer-events: none;
+        }
+        .pointer-events-auto {
+            pointer-events: auto;
+        }
+        
+        /* Fullscreen on mobile */
+        @media (max-width: 768px) {
+            #pixelRacerModal, #towerDefenseModal {
+                padding: 0;
+            }
+            #pixelRacerModal > div, #towerDefenseModal > div {
+                width: 100%;
+                height: 100%;
+                max-width: 100%;
+                max-height: 100%;
+                border-radius: 0;
+            }
+            #pixelRacerModal .aspect-\[3\/4\], #towerDefenseModal .aspect-\[4\/3\] {
+                aspect-ratio: auto; /* Remove fixed aspect ratio */
+                height: 100%;
+                width: 100%;
+            }
+            #closeRacerModal, #closeTowerDefenseModal {
+                top: 1rem;
+                right: 1rem;
+                background-color: rgba(0,0,0,0.5);
+                color: white;
+                z-index: 100;
+            }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col">
+    <!-- Firebase Setup Message -->
+    <div id="firebase-error-message" class="hidden fixed top-0 left-0 w-full bg-red-600 p-4 text-white text-center z-[100]">
+        <!-- Error messages will be inserted here by JavaScript -->
+    </div>
+
+    <!-- Header -->
+    <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
+        <nav class="container mx-auto px-4 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="#" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="text-gray-300 hover:text-sky-400 transition-colors">Home</a>
+                    <a href="#games" class="text-gray-300 hover:text-sky-400 transition-colors">Games</a>
+                    <a href="#how-to-play" class="text-gray-300 hover:text-sky-400 transition-colors">How to Play</a>
+                    <a href="#" class="text-gray-300 hover:text-sky-400 transition-colors">Leaderboards</a>
+                </div>
+                <!-- Auth Buttons -->
+                <div id="auth-container" class="hidden md:flex items-center gap-4">
+                    <div id="user-info" class="hidden items-center gap-2">
+                        <span id="user-name" class="text-white font-semibold"></span>
+                        <button id="logout-button" class="btn-secondary text-sm">Logout</button>
+                    </div>
+                    <button id="login-button" class="btn-primary">Login with Google</button>
+                </div>
+                <!-- Mobile Menu Button -->
+                 <button id="mobile-menu-button" class="md:hidden text-gray-300 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Home</a>
+                <a href="#games" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Games</a>
+                <a href="#how-to-play" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">How to Play</a>
+                <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Leaderboards</a>
+                <div id="mobile-auth-container" class="px-3 py-2">
+                    <!-- Mobile auth buttons will be injected here -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <!-- Hero Section / Featured Game -->
+        <section id="featured-game" class="relative h-[600px] bg-gray-900 overflow-hidden">
+            <div id="gameContainer" class="absolute inset-0">
+                <canvas id="gameCanvas"></canvas>
+            </div>
+            <div id="uiLayer" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                <div id="startScreen" class="flex flex-col items-center justify-center pointer-events-auto">
+                    <h1 class="text-5xl md:text-7xl font-black-ops text-white uppercase tracking-wider">Astro <span class="text-sky-400">Jumper</span></h1>
+                    <p class="mt-4 text-lg text-gray-300 max-w-2xl">Survive the longest in the asteroid belt. Click to jump. Don't fall into the void!</p>
+                    <button id="playButton" class="btn-primary mt-8 text-xl">Play Now</button>
+                </div>
+                <div id="inGameUI" class="hidden absolute top-5 left-5 text-left pointer-events-passthrough">
+                    <p class="text-2xl font-bold">Score: <span id="score">0</span></p>
+                </div>
+                <div id="gameOverScreen" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
+                    <h2 class="text-5xl font-black-ops text-white">GAME OVER</h2>
+                    <p class="mt-4 text-2xl text-gray-200">Final Score: <span id="finalScore" class="font-bold text-sky-400">0</span></p>
+                    <p class="mt-2 text-lg text-gray-300">High Score: <span id="astroHighScore" class="font-bold text-sky-300">0</span></p>
+                    <button id="restartButton" class="btn-primary mt-6 text-xl">Play Again</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Games Grid Section -->
+        <section id="games" class="py-16 sm:py-24 bg-gray-800/50">
+            <div class="container mx-auto px-4 lg:px-8">
+                <h2 class="text-4xl font-black-ops text-center mb-12">Our Games</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    <!-- Game Card 1 -->
+                    <div class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer" onclick="document.getElementById('featured-game').scrollIntoView({ behavior: 'smooth' });">
+                        <img src="https://img.gamepix.com/games/astro-jumper/cover/astro-jumper.png?w=400&ar=16:10" alt="Astro Jumper" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-8 h-8 text-sky-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <h3 class="text-2xl font-bold text-white">Astro Jumper</h3>
+                            </div>
+                            <p class="text-sky-300 mt-1">3D Platformer</p>
+                        </div>
+                        <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
+                            <span class="btn-primary pointer-events-none">Play Now</span>
+                        </div>
+                    </div>
+                    <!-- Game Card 2 -->
+                    <div class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer" onclick="document.getElementById('playPixelRacerBtn').click();">
+                        <img src="https://as2.ftcdn.net/v2/jpg/04/81/59/51/1000_F_481595196_xeOLb1vk53gjYT1o2cz8hvfN4hkg83PB.jpg" alt="Pixel Racer" class="w-full h-full object-cover">
+                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
+                             <div class="flex items-center gap-3">
+                                <svg class="w-8 h-8 text-pink-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <h3 class="text-2xl font-bold text-white">Pixel Racer</h3>
+                            </div>
+                            <p class="text-pink-400 mt-1">2D Arcade Racer</p>
+                        </div>
+                         <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
+                            <button id="playPixelRacerBtn" class="btn-danger pointer-events-none">Play Now</button>
+                        </div>
+                    </div>
+                    <!-- Game Card 3 -->
+                    <div class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer" onclick="document.getElementById('playTowerDefenseBtn').click();">
+                        <img src="https://fs-prod-cdn.nintendo-europe.com/media/images/10_share_images/games_15/nintendo_switch_download_software_1/2x1_NSwitchDS_FantasyTowerDefense_image1600w.jpg" alt="Tower Defense" class="w-full h-full object-cover">
+                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <h3 class="text-2xl font-bold text-white">Tower Defense</h3>
+                            </div>
+                            <p class="text-green-400 mt-1">Strategy</p>
+                        </div>
+                         <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
+                            <button id="playTowerDefenseBtn" class="btn-success pointer-events-none">Play Now</button>
+                        </div>
+                    </div>
+                    <!-- Game Card 4 -->
+                    <div class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+                        <img src="https://placehold.co/600x400/ca8a04/white?text=Galactic+Clash" alt="Galactic Clash" class="w-full h-full object-cover">
+                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-8 h-8 text-yellow-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <h3 class="text-2xl font-bold text-white">Galactic Clash</h3>
+                            </div>
+                            <p class="text-yellow-400 mt-1">Coming Soon</p>
+                        </div>
+                         <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
+                            <span class="text-xl font-semibold text-white">Coming Soon!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How to Play Section -->
+        <section id="how-to-play" class="py-16 sm:py-24 bg-gray-900">
+            <div class="container mx-auto px-4 lg:px-8 text-center">
+                <h2 class="text-4xl font-black-ops text-center mb-4">How to Play</h2>
+                <p class="text-lg text-gray-400 mb-8 max-w-3xl mx-auto">Select a game below for instructions on its objective and controls.</p>
+                <div class="flex flex-wrap justify-center gap-4 mb-12">
+                    <button class="btn-primary game-info-btn" data-game="Astro Jumper">Astro Jumper</button>
+                    <button class="btn-danger game-info-btn" data-game="Pixel Racer">Pixel Racer</button>
+                    <button class="btn-success game-info-btn" data-game="Tower Defense">Tower Defense</button>
+                </div>
+                <div id="gameExplanationResult" class="mt-12 min-h-[200px] flex items-center justify-center">
+                    <p class="text-gray-500">Select a game to see instructions.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 border-t border-gray-700">
+        <div class="container mx-auto px-4 lg:px-8 py-8 text-center text-gray-400">
+            <p>&copy; 2025 FalconixGaming. All Rights Reserved.</p>
+            <div class="flex justify-center space-x-6 mt-4">
+                <a href="#" class="hover:text-white">Privacy Policy</a>
+                <a href="#" class="hover:text-white">Terms of Service</a>
+                <a href="#" class="hover:text-white">Contact</a>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Pixel Racer Game Modal -->
+    <div id="pixelRacerModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
+        <div class="w-full max-w-md lg:max-w-lg relative">
+            <div class="bg-gray-800 rounded-lg shadow-2xl overflow-hidden aspect-[3/4] relative">
+                <canvas id="racerGameCanvas"></canvas>
+                <div id="racerUiLayer" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 pointer-events-none">
+                    <div id="racerStartScreen" class="pointer-events-auto">
+                        <h2 class="text-5xl font-black-ops text-white">PIXEL <span class="text-pink-500">RACER</span></h2>
+                        <p class="mt-4 text-gray-300 px-4">Use Arrow Keys on desktop, or Drag your finger on mobile to move!</p>
+                        <button id="racerStartButton" class="btn-danger mt-8 text-xl">Start Race</button>
+                    </div>
+                    <div id="racerInGameUI" class="hidden absolute top-5 left-5 text-left">
+                        <p class="text-2xl font-bold text-white">Score: <span id="racerScore">0</span></p>
+                    </div>
+                    <div id="racerGameOverScreen" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
+                        <h2 class="text-5xl font-black-ops text-white">CRASHED!</h2>
+                        <p class="mt-4 text-2xl text-gray-200">Final Score: <span id="racerFinalScore" class="font-bold text-pink-400">0</span></p>
+                        <p class="mt-2 text-lg text-gray-300">High Score: <span id="racerHighScore" class="font-bold text-pink-300">0</span></p>
+                        <button id="racerRestartButton" class="btn-danger mt-6 text-xl">Try Again</button>
+                    </div>
+                </div>
+            </div>
+            <button id="closeRacerModal" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-gray-800 hover:bg-gray-200">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Tower Defense Game Modal -->
+    <div id="towerDefenseModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
+        <div class="w-full max-w-4xl relative">
+            <div class="bg-gray-800 rounded-lg shadow-2xl overflow-hidden aspect-[4/3] relative">
+                <canvas id="towerDefenseCanvas"></canvas>
+                <div id="tdUiLayer" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 pointer-events-none">
+                    <div id="tdStartScreen" class="pointer-events-auto">
+                        <h2 class="text-5xl font-black-ops text-white">TOWER <span class="text-green-500">DEFENSE</span></h2>
+                        <p class="mt-4 text-gray-300">Place towers to stop the enemies from reaching the end!</p>
+                        <button id="tdStartButton" class="btn-success mt-8 text-xl">Start Game</button>
+                    </div>
+                     <div id="tdInGameUI" class="hidden absolute top-0 left-0 w-full h-full pointer-events-none">
+                        <div class="absolute top-2 left-2 text-left bg-gray-900/50 p-2 rounded-lg">
+                            <p class="font-bold text-white">❤️ Health: <span id="tdHealth"></span></p>
+                            <p class="font-bold text-white">💰 Gold: <span id="tdGold"></span></p>
+                            <p class="font-bold text-white">🌊 Wave: <span id="tdWave"></span></p>
+                        </div>
+                        <div id="tdTowerSelection" class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-4 pointer-events-auto">
+                            <button id="buyTurretButton" class="bg-gray-700 p-3 rounded-lg border-2 border-transparent hover:border-green-400">
+                                <p class="font-bold">Turret</p>
+                                <p class="text-sm">Cost: 100💰</p>
+                            </button>
+                        </div>
+                        <button id="nextWaveButton" class="absolute bottom-2 right-2 btn-success pointer-events-auto">Next Wave</button>
+                    </div>
+                    <div id="tdGameOverScreen" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
+                        <h2 id="tdEndTitle" class="text-5xl font-black-ops text-white"></h2>
+                        <p class="mt-4 text-2xl text-gray-200">You survived <span id="tdFinalWave" class="font-bold text-green-400">0</span> waves.</p>
+                        <p class="mt-2 text-lg text-gray-300">High Score: Wave <span id="tdHighScore" class="font-bold text-green-300">0</span></p>
+                        <button id="tdRestartButton" class="btn-success mt-8 text-xl">Play Again</button>
+                    </div>
+                </div>
+            </div>
+            <button id="closeTowerDefenseModal" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-gray-800 hover:bg-gray-200">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Scripts -->
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.157.0/three.module.js",
+            "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js",
+            "firebase/app": "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js",
+            "firebase/auth": "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js",
+            "firebase/firestore": "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"
+        }
+    }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import * as CANNON from 'cannon-es';
+        import { initializeApp } from 'firebase/app';
+        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from 'firebase/auth';
+        import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+
+        window.onload = function() {
+
+            // #############################################
+            // ### FIREBASE & AUTHENTICATION SETUP       ###
+            // #############################################
+            const firebaseConfig = {
+                apiKey: "AIzaSyDF0_iKY77c5yW1FcFxkVliURW0pPakLgs",
+                authDomain: "falconixgaming-8deb6.firebaseapp.com",
+                projectId: "falconixgaming-8deb6",
+                storageBucket: "falconixgaming-8deb6.appspot.com",
+                messagingSenderId: "597317356293",
+                appId: "1:597317356293:web:477d075d4762e2859f456c",
+                measurementId: "G-WW5JVW6E75"
+            };
+
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            const provider = new GoogleAuthProvider();
+            let currentUser = null;
+
+            const loginButton = document.getElementById('login-button');
+            const logoutButton = document.getElementById('logout-button');
+            const userInfo = document.getElementById('user-info');
+            const userName = document.getElementById('user-name');
+            const mobileAuthContainer = document.getElementById('mobile-auth-container');
+
+            function handleLogin() {
+                signInWithRedirect(auth, provider);
+            }
+
+            loginButton.addEventListener('click', handleLogin);
+            logoutButton.addEventListener('click', () => signOut(auth));
+
+            getRedirectResult(auth)
+                .catch((error) => {
+                    console.error("Login redirect failed:", error);
+                    const errorBanner = document.getElementById('firebase-error-message');
+                    let errorMessage = `<strong>Login Error:</strong> ${error.message}`;
+                    if (error.code === 'auth/unauthorized-domain') {
+                        errorMessage = `<strong>Configuration Error:</strong> This website's domain is not authorized for login. Please go to your Firebase project > Authentication > Settings > Authorized domains and add the following domain: <strong>${window.location.hostname}</strong>`;
+                    }
+                    errorBanner.innerHTML = errorMessage;
+                    errorBanner.classList.remove('hidden');
+                });
+
+            onAuthStateChanged(auth, user => {
+                currentUser = user;
+                if (user) {
+                    userName.textContent = user.displayName;
+                    userInfo.classList.remove('hidden');
+                    loginButton.classList.add('hidden');
+                    mobileAuthContainer.innerHTML = `
+                        <p class="px-3 py-2 text-base font-medium text-white">${user.displayName}</p>
+                        <button id="mobile-logout-button" class="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Logout</button>
+                    `;
+                    document.getElementById('mobile-logout-button').addEventListener('click', () => signOut(auth));
+                } else {
+                    userInfo.classList.add('hidden');
+                    loginButton.classList.remove('hidden');
+                    mobileAuthContainer.innerHTML = `<button id="mobile-login-button" class="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Login with Google</button>`;
+                    const mobileLoginButton = document.getElementById('mobile-login-button');
+                    if (mobileLoginButton) {
+                        mobileLoginButton.addEventListener('click', handleLogin);
+                    }
+                }
+            });
+
+            async function saveScore(gameName, score) {
+                if (!currentUser) return;
+                const scoreRef = doc(db, "users", currentUser.uid, "scores", gameName);
+                const docSnap = await getDoc(scoreRef);
+                const currentHighScore = docSnap.exists() ? docSnap.data().highScore : 0;
+                if (score > currentHighScore) {
+                    await setDoc(scoreRef, { highScore: score });
+                }
+            }
+
+            async function getHighScore(gameName) {
+                if (!currentUser) return 0;
+                const scoreRef = doc(db, "users", currentUser.uid, "scores", gameName);
+                const docSnap = await getDoc(scoreRef);
+                return docSnap.exists() ? docSnap.data().highScore : 0;
+            }
+
+
+            // #############################################
+            // ### MOBILE MENU TOGGLE                    ###
+            // #############################################
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // #############################################
+            // ### HOW TO PLAY SECTION                   ###
+            // #############################################
+            const gameInfoButtons = document.querySelectorAll('.game-info-btn');
+            const gameExplanationResultEl = document.getElementById('gameExplanationResult');
+
+            const gameExplanations = {
+                "Astro Jumper": {
+                    objective: "Survive as long as possible by jumping from one platform to the next without falling into the void.",
+                    gameplay: "Your character moves forward automatically. Your only job is to time your jumps perfectly to land on the next platform.",
+                    desktop_controls: "Click anywhere on the screen to jump.",
+                    mobile_controls: "Tap anywhere on the screen to jump."
+                },
+                "Pixel Racer": {
+                    objective: "Dodge the oncoming traffic for as long as you can to get the highest possible score.",
+                    gameplay: "You control a car at the bottom of the screen. Other cars will drive down towards you, and you must move left and right to avoid crashing.",
+                    desktop_controls: "Use the Left and Right Arrow Keys to move your car.",
+                    mobile_controls: "Touch and drag your finger left or right on the screen to move the car."
+                },
+                "Tower Defense": {
+                    objective: "Prevent enemies from reaching the end of the path by building and placing defensive towers.",
+                    gameplay: "Use your starting gold to build turrets on the grass. Defeated enemies give you more gold to build more towers. Survive as many waves as you can!",
+                    desktop_controls: "Click the 'Turret' button, then click on a valid green tile to place it. Click 'Next Wave' to start the attack.",
+                    mobile_controls: "Tap the 'Turret' button, then tap on a valid green tile to place it. Tap 'Next Wave' to start the attack."
+                }
+            };
+
+            gameInfoButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const gameName = button.dataset.game;
+                    showGameExplanation(gameName);
+                });
+            });
+
+            function showGameExplanation(gameName) {
+                const info = gameExplanations[gameName];
+                if (info) {
+                    gameExplanationResultEl.innerHTML = `
+                        <div class="glassmorphism p-8 rounded-2xl text-left max-w-2xl w-full">
+                            <h3 class="text-2xl font-bold text-indigo-300">Objective</h3>
+                            <p class="mt-2 text-gray-300">${info.objective}</p>
+                            <h3 class="text-2xl font-bold text-indigo-300 mt-4">Gameplay</h3>
+                            <p class="mt-2 text-gray-300">${info.gameplay}</p>
+                            <h3 class="text-2xl font-bold text-indigo-300 mt-4">Controls</h3>
+                            <p class="mt-2 text-gray-300"><strong class="text-white">Desktop:</strong> ${info.desktop_controls}</p>
+                            <p class="mt-2 text-gray-300"><strong class="text-white">Mobile:</strong> ${info.mobile_controls}</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // #############################################
+            // ### ASTRO JUMPER (3D GAME) CODE           ###
+            // #############################################
+            const gameContainer = document.getElementById('gameContainer');
+            const canvas = document.getElementById('gameCanvas');
+            const startScreen = document.getElementById('startScreen');
+            const playButton = document.getElementById('playButton');
+            const restartButton = document.getElementById('restartButton');
+            const scoreElement = document.getElementById('score');
+            const finalScoreElement = document.getElementById('finalScore');
+            const astroHighScoreElement = document.getElementById('astroHighScore');
+            let isGameRunning = false;
+            let score = 0;
+            let scoreInterval;
+            let player, playerBody;
+            const platforms = [];
+            const platformBodies = [];
+            let nextPlatformX = 0;
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+            const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -20, 0) });
+            function initAstroJumper() {
+                renderer.setSize(gameContainer.clientWidth, gameContainer.clientHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.shadowMap.enabled = true;
+                renderer.setClearColor(0x111827, 1);
+                camera.position.set(0, 5, 15);
+                camera.lookAt(0, 0, 0);
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                scene.add(ambientLight);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                directionalLight.position.set(10, 20, 5);
+                directionalLight.castShadow = true;
+                scene.add(directionalLight);
+                createStarfield();
+                resetAstroJumper();
+                animateAstroJumper();
+            }
+            function createStarfield() {
+                const starVertices = [];
+                for (let i = 0; i < 10000; i++) { starVertices.push(THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000)); }
+                const starGeometry = new THREE.BufferGeometry();
+                starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+                const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: 0x888888 }));
+                scene.add(stars);
+            }
+            function createPlayer() {
+                const geometry = new THREE.IcosahedronGeometry(0.5, 0);
+                const material = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, flatShading: true });
+                player = new THREE.Mesh(geometry, material);
+                player.castShadow = true;
+                scene.add(player);
+                const shape = new CANNON.Sphere(0.5);
+                playerBody = new CANNON.Body({ mass: 1, shape });
+                playerBody.position.set(0, 5, 0);
+                world.addBody(playerBody);
+            }
+            function createPlatform(x, y, z, isFirst = false) {
+                const width = isFirst ? 4 : THREE.MathUtils.randFloat(2.5, 4);
+                const geometry = new THREE.BoxGeometry(width, 0.5, 3);
+                const material = new THREE.MeshStandardMaterial({ color: 0x475569, flatShading: true });
+                const platform = new THREE.Mesh(geometry, material);
+                platform.position.set(x, y, z);
+                platform.receiveShadow = true;
+                scene.add(platform);
+                platforms.push(platform);
+                const shape = new CANNON.Box(new CANNON.Vec3(width / 2, 0.5 / 2, 3 / 2));
+                const platformBody = new CANNON.Body({ mass: 0, shape, material: new CANNON.Material() });
+                platformBody.position.set(x, y, z);
+                world.addBody(platformBody);
+                platformBodies.push(platformBody);
+            }
+            function generatePlatforms() {
+                createPlatform(0, 0, 0, true);
+                nextPlatformX = 0;
+                for (let i = 0; i < 15; i++) generateNextPlatform();
+            }
+            function generateNextPlatform() {
+                const lastPlatform = platforms[platforms.length - 1];
+                const x = lastPlatform.position.x + THREE.MathUtils.randFloat(5, 8);
+                const y = lastPlatform.position.y + THREE.MathUtils.randFloat(-1.5, 1.5);
+                createPlatform(x, y, 0);
+                nextPlatformX = x;
+            }
+            function playerJump() {
+                if (!isGameRunning) return;
+                const from = playerBody.position;
+                const to = new CANNON.Vec3(from.x, from.y - 0.51, from.z);
+                if (world.raycastClosest(from, to, {}, new CANNON.RaycastResult())) { playerBody.velocity.y = 10; }
+            }
+            function resetAstroJumper() {
+                platforms.forEach(p => scene.remove(p));
+                platformBodies.forEach(b => world.removeBody(b));
+                if (player) scene.remove(player);
+                if (playerBody) world.removeBody(playerBody);
+                platforms.length = 0;
+                platformBodies.length = 0;
+                createPlayer();
+                playerBody.velocity.x = 6;
+                generatePlatforms();
+                score = 0;
+                scoreElement.innerText = '0';
+                camera.position.set(0, 5, 15);
+            }
+            function startAstroJumper() {
+                resetAstroJumper();
+                isGameRunning = true;
+                document.getElementById('uiLayer').classList.add('pointer-events-passthrough');
+                document.getElementById('uiLayer').style.backgroundColor = 'transparent';
+                document.getElementById('startScreen').style.display = 'none';
+                document.getElementById('gameOverScreen').style.display = 'none';
+                document.getElementById('inGameUI').style.display = 'block';
+                scoreInterval = setInterval(() => { score++; scoreElement.innerText = score; }, 1000);
+            }
+            async function endAstroJumper() {
+                isGameRunning = false;
+                if (scoreInterval) clearInterval(scoreInterval);
+                await saveScore('Astro Jumper', score);
+                const highScore = await getHighScore('Astro Jumper');
+                astroHighScoreElement.textContent = highScore;
+                document.getElementById('uiLayer').classList.remove('pointer-events-passthrough');
+                document.getElementById('uiLayer').style.backgroundColor = 'rgba(0,0,0,0.5)';
+                finalScoreElement.innerText = score;
+                document.getElementById('inGameUI').style.display = 'none';
+                document.getElementById('gameOverScreen').style.display = 'flex';
+            }
+            function animateAstroJumper() {
+                requestAnimationFrame(animateAstroJumper);
+                if (isGameRunning) {
+                    world.step(1 / 60);
+                    if (player && playerBody) {
+                        player.position.copy(playerBody.position);
+                        player.quaternion.copy(playerBody.quaternion);
+                    }
+                    const targetCameraX = player.position.x + 5;
+                    const targetCameraY = player.position.y + 5;
+                    camera.position.x += (targetCameraX - camera.position.x) * 0.05;
+                    camera.position.y += (targetCameraY - camera.position.y) * 0.05;
+                    camera.lookAt(player.position.x, player.position.y, player.position.z);
+                    if (player.position.x > nextPlatformX - 20) generateNextPlatform();
+                    if (platforms.length > 20) {
+                        scene.remove(platforms.shift());
+                        world.removeBody(platformBodies.shift());
+                    }
+                    if (player.position.y < -10) endAstroJumper();
+                }
+                renderer.render(scene, camera);
+            }
+            playButton.addEventListener('click', startAstroJumper);
+            restartButton.addEventListener('click', startAstroJumper);
+            gameContainer.addEventListener('click', playerJump);
+            initAstroJumper();
+
+            // #############################################
+            // ### PIXEL RACER (2D GAME) CODE            ###
+            // #############################################
+            const racerModal = document.getElementById('pixelRacerModal');
+            const playRacerBtn = document.getElementById('playPixelRacerBtn');
+            const closeRacerBtn = document.getElementById('closeRacerModal');
+            const racerCanvas = document.getElementById('racerGameCanvas');
+            const racerCtx = racerCanvas.getContext('2d');
+            const racerStartScreen = document.getElementById('racerStartScreen');
+            const racerInGameUI = document.getElementById('racerInGameUI');
+            const racerGameOverScreen = document.getElementById('racerGameOverScreen');
+            const racerStartButton = document.getElementById('racerStartButton');
+            const racerRestartButton = document.getElementById('racerRestartButton');
+            const racerScoreEl = document.getElementById('racerScore');
+            const racerFinalScoreEl = document.getElementById('racerFinalScore');
+            const racerHighScoreEl = document.getElementById('racerHighScore');
+            let racerRunning = false;
+            let racerScore = 0;
+            let animationFrameId;
+            let playerCar, obstacles, roadLines;
+            const keys = { ArrowLeft: false, ArrowRight: false };
+            function openRacerModal() {
+                racerModal.classList.remove('invisible', 'opacity-0');
+                racerCanvas.width = racerCanvas.parentElement.clientWidth;
+                racerCanvas.height = racerCanvas.parentElement.clientHeight;
+                showRacerStartScreen();
+            }
+            function closeRacerModal() {
+                racerModal.classList.add('invisible', 'opacity-0');
+                stopRacerGame();
+            }
+            function showRacerStartScreen() {
+                racerStartScreen.style.display = 'flex';
+                racerInGameUI.style.display = 'none';
+                racerGameOverScreen.style.display = 'none';
+            }
+            function startRacerGame() {
+                stopRacerGame();
+                racerRunning = true;
+                racerScore = 0;
+                playerCar = { x: racerCanvas.width / 2 - 20, y: racerCanvas.height - 100, width: 40, height: 60, speed: 5 };
+                obstacles = [];
+                roadLines = [];
+                for (let i = 0; i < 5; i++) spawnObstacle();
+                for (let i = 0; i < 5; i++) roadLines.push({ y: i * (racerCanvas.height / 4) });
+                racerStartScreen.style.display = 'none';
+                racerGameOverScreen.style.display = 'none';
+                racerInGameUI.style.display = 'block';
+                gameLoop();
+            }
+            function stopRacerGame() {
+                racerRunning = false;
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+            }
+            async function endRacerGame() {
+                stopRacerGame();
+                const finalRacerScore = Math.floor(racerScore);
+                await saveScore('Pixel Racer', finalRacerScore);
+                const highScore = await getHighScore('Pixel Racer');
+                racerHighScoreEl.textContent = highScore;
+                racerFinalScoreEl.textContent = finalRacerScore;
+                racerGameOverScreen.style.display = 'flex';
+                racerInGameUI.style.display = 'none';
+            }
+            function spawnObstacle() {
+                const obsWidth = 40;
+                const lastObstacleY = obstacles.length > 0 ? obstacles[obstacles.length - 1].y : -200;
+                obstacles.push({ x: Math.random() * (racerCanvas.width - obsWidth), y: lastObstacleY - (Math.random() * 200 + 300), width: obsWidth, height: 60, speed: 2 + Math.random() * 2 + (racerScore / 100) });
+            }
+            function update() {
+                if (!racerRunning) return;
+                racerScore += 0.1;
+                racerScoreEl.textContent = Math.floor(racerScore);
+                if (keys.ArrowLeft && playerCar.x > 0) playerCar.x -= playerCar.speed;
+                if (keys.ArrowRight && playerCar.x < racerCanvas.width - playerCar.width) playerCar.x += playerCar.speed;
+                roadLines.forEach(line => { line.y += 4; if (line.y > racerCanvas.height) line.y = -40; });
+                obstacles.forEach((obs, index) => {
+                    obs.y += obs.speed;
+                    if (obs.y > racerCanvas.height) {
+                        obstacles.splice(index, 1);
+                        spawnObstacle();
+                    }
+                    if (playerCar.x < obs.x + obs.width && playerCar.x + playerCar.width > obs.x && playerCar.y < obs.y + obs.height && playerCar.y + playerCar.height > obs.y) {
+                        endRacerGame();
+                    }
+                });
+            }
+            function draw() {
+                racerCtx.fillStyle = '#374151';
+                racerCtx.fillRect(0, 0, racerCanvas.width, racerCanvas.height);
+                racerCtx.fillStyle = '#6b7280';
+                const laneWidth = racerCanvas.width / 3;
+                roadLines.forEach(line => {
+                    racerCtx.fillRect(laneWidth - 5, line.y, 10, 40);
+                    racerCtx.fillRect(laneWidth * 2 - 5, line.y, 10, 40);
+                });
+                racerCtx.fillStyle = '#ec4899';
+                racerCtx.fillRect(playerCar.x, playerCar.y, playerCar.width, playerCar.height);
+                racerCtx.fillStyle = '#a855f7';
+                obstacles.forEach(obs => {
+                    racerCtx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                });
+            }
+            function gameLoop() {
+                update();
+                draw();
+                if (racerRunning) {
+                    animationFrameId = requestAnimationFrame(gameLoop);
+                }
+            }
+            playRacerBtn.addEventListener('click', openRacerModal);
+            closeRacerBtn.addEventListener('click', closeRacerModal);
+            racerStartButton.addEventListener('click', startRacerGame);
+            racerRestartButton.addEventListener('click', startRacerGame);
+            window.addEventListener('keydown', (e) => {
+                if (racerModal.classList.contains('invisible')) return;
+                if (e.key in keys) { e.preventDefault(); keys[e.key] = true; }
+            });
+            window.addEventListener('keyup', (e) => {
+                if (racerModal.classList.contains('invisible')) return;
+                if (e.key in keys) { e.preventDefault(); keys[e.key] = false; }
+            });
+            function handleTouch(e) {
+                if (racerModal.classList.contains('invisible') || !racerRunning) return;
+                e.preventDefault();
+                const touchX = e.touches[0].clientX;
+                const racerCanvasRect = racerCanvas.getBoundingClientRect();
+                let targetX = touchX - racerCanvasRect.left - (playerCar.width / 2);
+                if (targetX < 0) targetX = 0;
+                if (targetX > racerCanvas.width - playerCar.width) targetX = racerCanvas.width - playerCar.width;
+                playerCar.x = targetX;
+            }
+            racerCanvas.addEventListener('touchstart', handleTouch, { passive: false });
+            racerCanvas.addEventListener('touchmove', handleTouch, { passive: false });
+
+            // #############################################
+            // ### TOWER DEFENSE (2D GAME) CODE          ###
+            // #############################################
+            
+            const tdModal = document.getElementById('towerDefenseModal');
+            const playTDButton = document.getElementById('playTowerDefenseBtn');
+            const closeTDButton = document.getElementById('closeTowerDefenseModal');
+            const tdCanvas = document.getElementById('towerDefenseCanvas');
+            const tdCtx = tdCanvas.getContext('2d');
+            const tdStartScreen = document.getElementById('tdStartScreen');
+            const tdInGameUI = document.getElementById('tdInGameUI');
+            const tdGameOverScreen = document.getElementById('tdGameOverScreen');
+            const tdStartButton = document.getElementById('tdStartButton');
+            const tdRestartButton = document.getElementById('tdRestartButton');
+            const tdHealthEl = document.getElementById('tdHealth');
+            const tdGoldEl = document.getElementById('tdGold');
+            const tdWaveEl = document.getElementById('tdWave');
+            const tdEndTitleEl = document.getElementById('tdEndTitle');
+            const tdFinalWaveEl = document.getElementById('tdFinalWave');
+            const tdHighScoreEl = document.getElementById('tdHighScore');
+            const buyTurretButton = document.getElementById('buyTurretButton');
+            const nextWaveButton = document.getElementById('nextWaveButton');
+            let tdRunning = false;
+            let health, gold, wave;
+            let enemies = [];
+            let towers = [];
+            let projectiles = [];
+            let selectedTower = null;
+            let waveInProgress = false;
+            let mousePos = { x: 0, y: 0 };
+            let grid = [];
+            let TILE_SIZE = 50;
+            const GRID_COLS = 16;
+            const GRID_ROWS = 12;
+            const pathCoords = [ {x: 0, y: 5}, {x: 3, y: 5}, {x: 3, y: 2}, {x: 7, y: 2}, {x: 7, y: 8}, {x: 12, y: 8}, {x: 12, y: 4}, {x: 16, y: 4} ];
+
+            function openTDModal() {
+                tdModal.classList.remove('invisible', 'opacity-0');
+                setupTDGrid();
+                tdStartScreen.style.display = 'block';
+                tdInGameUI.style.display = 'none';
+                tdGameOverScreen.style.display = 'none';
+            }
+            function closeTDModal() {
+                tdModal.classList.add('invisible', 'opacity-0');
+                stopTDGame();
+            }
+            function setupTDGrid() {
+                const parent = tdCanvas.parentElement;
+                const size = Math.min(parent.clientWidth, parent.clientHeight);
+                tdCanvas.width = size;
+                tdCanvas.height = size * (GRID_ROWS / GRID_COLS);
+                TILE_SIZE = tdCanvas.width / GRID_COLS;
+                grid = [];
+                for (let y = 0; y < GRID_ROWS; y++) { grid.push(Array(GRID_COLS).fill(0)); }
+                for (let i = 0; i < pathCoords.length - 1; i++) {
+                    let start = pathCoords[i];
+                    let end = pathCoords[i+1];
+                    if (start.x === end.x) {
+                        for (let y = Math.min(start.y, end.y); y <= Math.max(start.y, end.y); y++) { if (grid[y]) grid[y][start.x] = 1; }
+                    } else {
+                        for (let x = Math.min(start.x, end.x); x <= Math.max(start.x, end.x); x++) { if (grid[start.y]) grid[start.y][x] = 1; }
+                    }
+                }
+            }
+            function startTDGame() {
+                tdRunning = true;
+                health = 20;
+                gold = 250;
+                wave = 0;
+                enemies = [];
+                towers = [];
+                projectiles = [];
+                selectedTower = null;
+                waveInProgress = false;
+                setupTDGrid();
+                updateTDUI();
+                tdStartScreen.style.display = 'none';
+                tdGameOverScreen.style.display = 'none';
+                tdInGameUI.style.display = 'block';
+                nextWaveButton.style.display = 'block';
+                gameLoopTD();
+            }
+            function stopTDGame() { tdRunning = false; }
+            function updateTDUI() {
+                tdHealthEl.textContent = health;
+                tdGoldEl.textContent = gold;
+                tdWaveEl.textContent = wave;
+            }
+            function startNextWave() {
+                if (waveInProgress) return;
+                wave++;
+                waveInProgress = true;
+                nextWaveButton.style.display = 'none';
+                updateTDUI();
+                const enemyCount = wave * 5 + 5;
+                for (let i = 0; i < enemyCount; i++) {
+                    const enemyHealth = 50 + wave * 15;
+                    enemies.push({ x: -TILE_SIZE * i * 1.5, y: pathCoords[0].y * TILE_SIZE, speed: 1 + wave * 0.05, health: enemyHealth, maxHealth: enemyHealth, pathIndex: 0 });
+                }
+            }
+            function gameLoopTD() {
+                if (!tdRunning) return;
+                tdCtx.clearRect(0, 0, tdCanvas.width, tdCanvas.height);
+                drawTDGrid();
+                drawTDPath();
+                towers.forEach(t => { t.update(); t.draw(); });
+                projectiles.forEach((p, i) => { p.update(i); p.draw(); });
+                
+                for (let i = enemies.length - 1; i >= 0; i--) {
+                    const e = enemies[i];
+                    const status = updateEnemy(e);
+                    if (status === 'finished') {
+                        enemies.splice(i, 1);
+                        health--;
+                        updateTDUI();
+                        if (health <= 0) endGameTD(false);
+                    } else if (e.health <= 0) {
+                        enemies.splice(i, 1);
+                        gold += 10;
+                        updateTDUI();
+                    } else {
+                        drawEnemy(e);
+                    }
+                }
+
+                if (waveInProgress && enemies.length === 0) {
+                    waveInProgress = false;
+                    nextWaveButton.style.display = 'block';
+                    if (wave >= 10) endGameTD(true);
+                }
+                if (selectedTower) drawPlacementPreview();
+                requestAnimationFrame(gameLoopTD);
+            }
+            function drawTDGrid() {
+                tdCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                for (let i = 0; i < GRID_COLS; i++) {
+                    tdCtx.beginPath();
+                    tdCtx.moveTo(i * TILE_SIZE, 0);
+                    tdCtx.lineTo(i * TILE_SIZE, tdCanvas.height);
+                    tdCtx.stroke();
+                }
+                for (let i = 0; i < GRID_ROWS; i++) {
+                    tdCtx.beginPath();
+                    tdCtx.moveTo(0, i * TILE_SIZE);
+                    tdCtx.lineTo(tdCanvas.width, i * TILE_SIZE);
+                    tdCtx.stroke();
+                }
+            }
+            function drawTDPath() {
+                tdCtx.fillStyle = '#374151';
+                for(let y=0; y < grid.length; y++) {
+                    for(let x=0; x < grid[y].length; x++) {
+                        if(grid[y][x] === 1) {
+                            tdCtx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        }
+                    }
+                }
+            }
+            function drawEnemy(enemy) {
+                tdCtx.fillStyle = '#ef4444';
+                tdCtx.fillRect(enemy.x, enemy.y, TILE_SIZE * 0.6, TILE_SIZE * 0.6);
+                tdCtx.fillStyle = '#4b5563';
+                tdCtx.fillRect(enemy.x, enemy.y - 10, TILE_SIZE * 0.6, 5);
+                tdCtx.fillStyle = '#22c55e';
+                tdCtx.fillRect(enemy.x, enemy.y - 10, TILE_SIZE * 0.6 * (enemy.health / enemy.maxHealth), 5);
+            }
+            function updateEnemy(enemy) {
+                if (enemy.pathIndex >= pathCoords.length - 1) {
+                    return 'finished';
+                }
+                const endPoint = pathCoords[enemy.pathIndex + 1];
+                const targetX = endPoint.x * TILE_SIZE;
+                const targetY = endPoint.y * TILE_SIZE;
+                const dx = targetX - enemy.x;
+                const dy = targetY - enemy.y;
+                const distance = Math.sqrt(dx*dx + dy*dy);
+                if (distance < enemy.speed) {
+                    enemy.pathIndex++;
+                } else {
+                    enemy.x += (dx / distance) * enemy.speed;
+                    enemy.y += (dy / distance) * enemy.speed;
+                }
+                return 'alive';
+            }
+            function createTower(gridX, gridY) {
+                const tower = {
+                    x: (gridX + 0.5) * TILE_SIZE, y: (gridY + 0.5) * TILE_SIZE, range: TILE_SIZE * 2.5, fireRate: 45, fireCooldown: 0,
+                    draw() {
+                        tdCtx.fillStyle = '#10b981';
+                        tdCtx.beginPath();
+                        tdCtx.arc(this.x, this.y, TILE_SIZE/3, 0, Math.PI * 2);
+                        tdCtx.fill();
+                    },
+                    update() {
+                        this.fireCooldown--;
+                        if (this.fireCooldown <= 0) {
+                            const target = this.findTarget();
+                            if (target) { this.shoot(target); this.fireCooldown = this.fireRate; }
+                        }
+                    },
+                    findTarget() {
+                        for (const enemy of enemies) {
+                            const dx = this.x - (enemy.x + (TILE_SIZE * 0.3));
+                            const dy = this.y - (enemy.y + (TILE_SIZE * 0.3));
+                            if (Math.sqrt(dx*dx + dy*dy) < this.range) return enemy;
+                        }
+                        return null;
+                    },
+                    shoot(target) {
+                        projectiles.push({
+                            x: this.x, y: this.y, target: target, speed: 5,
+                            update(i) {
+                                if(!this.target || this.target.health <= 0) { projectiles.splice(i, 1); return; }
+                                const dx = (this.target.x + TILE_SIZE * 0.3) - this.x;
+                                const dy = (this.target.y + TILE_SIZE * 0.3) - this.y;
+                                const dist = Math.sqrt(dx*dx + dy*dy);
+                                if (dist < this.speed) {
+                                    this.target.health -= 25;
+                                    projectiles.splice(i, 1);
+                                } else {
+                                    this.x += (dx/dist) * this.speed;
+                                    this.y += (dy/dist) * this.speed;
+                                }
+                            },
+                            draw() {
+                                tdCtx.fillStyle = '#facc15';
+                                tdCtx.beginPath();
+                                tdCtx.arc(this.x, this.y, 5, 0, Math.PI * 2);
+                                tdCtx.fill();
+                            }
+                        });
+                    }
+                };
+                towers.push(tower);
+                grid[gridY][gridX] = 2;
+            }
+            function getMousePos(canvas, evt) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const clientX = evt.clientX || (evt.touches && evt.touches[0].clientX);
+                const clientY = evt.clientY || (evt.touches && evt.touches[0].clientY);
+                if (clientX === undefined) return {x:0, y:0};
+                return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+            }
+            function handleCanvasClick(e) {
+                if (!selectedTower) return;
+                const pos = getMousePos(tdCanvas, e);
+                const gridX = Math.floor(pos.x / TILE_SIZE);
+                const gridY = Math.floor(pos.y / TILE_SIZE);
+                if (grid[gridY] && grid[gridY][gridX] === 0) {
+                    createTower(gridX, gridY);
+                    gold -= 100;
+                    updateTDUI();
+                    selectedTower = null;
+                }
+            }
+            function drawPlacementPreview() {
+                const gridX = Math.floor(mousePos.x / TILE_SIZE);
+                const gridY = Math.floor(mousePos.y / TILE_SIZE);
+                const centerX = (gridX + 0.5) * TILE_SIZE;
+                const centerY = (gridY + 0.5) * TILE_SIZE;
+                let isValidPlacement = false;
+                if(grid[gridY] && grid[gridY][gridX] === 0) { isValidPlacement = true; }
+                tdCtx.fillStyle = isValidPlacement ? 'rgba(0, 255, 0, 0.3)' : 'rgba(255, 0, 0, 0.3)';
+                tdCtx.beginPath();
+                tdCtx.arc(centerX, centerY, TILE_SIZE * 2.5, 0, Math.PI * 2);
+                tdCtx.fill();
+                tdCtx.fillStyle = '#16a34a';
+                tdCtx.beginPath();
+                tdCtx.arc(centerX, centerY, TILE_SIZE/3, 0, Math.PI * 2);
+                tdCtx.fill();
+            }
+            async function endGameTD(win) {
+                stopTDGame();
+                await saveScore('Tower Defense', wave);
+                const highScore = await getHighScore('Tower Defense');
+                tdHighScoreEl.textContent = highScore;
+                tdInGameUI.style.display = 'none';
+                tdGameOverScreen.style.display = 'flex';
+                tdEndTitleEl.textContent = win ? "VICTORY!" : "DEFEAT!";
+                tdFinalWaveEl.textContent = wave;
+            }
+            playTDButton.addEventListener('click', openTDModal);
+            closeTDButton.addEventListener('click', closeTDModal);
+            tdStartButton.addEventListener('click', startTDGame);
+            tdRestartButton.addEventListener('click', startTDGame);
+            nextWaveButton.addEventListener('click', startNextWave);
+            buyTurretButton.addEventListener('click', () => { if (gold >= 100) selectedTower = 'turret'; });
+            tdCanvas.addEventListener('mousemove', e => { mousePos = getMousePos(tdCanvas, e); });
+            tdCanvas.addEventListener('touchmove', e => { mousePos = getMousePos(tdCanvas, e); });
+            tdCanvas.addEventListener('click', handleCanvasClick);
+            tdCanvas.addEventListener('touchend', e => { if (selectedTower) { handleCanvasClick(e); e.preventDefault(); } });
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = gameContainer.clientWidth / gameContainer.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(gameContainer.clientWidth, gameContainer.clientHeight);
+                if(racerCanvas) {
+                    racerCanvas.width = racerCanvas.parentElement.clientWidth;
+                    racerCanvas.height = racerCanvas.parentElement.clientHeight;
+                }
+                if(tdCanvas) {
+                    setupTDGrid();
+                }
+            });
+        };
+    </script>
+</body>
+</html>
