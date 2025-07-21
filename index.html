@@ -40,6 +40,9 @@
         .btn-success {
             @apply px-6 py-3 font-semibold text-white bg-green-600 rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
         }
+         .btn-warning {
+            @apply px-6 py-3 font-semibold text-white bg-yellow-500 rounded-lg shadow-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
+        }
         .game-card:hover .game-card-overlay {
             opacity: 1;
         }
@@ -85,10 +88,6 @@
     </style>
 </head>
 <body class="h-full flex flex-col">
-    <!-- Firebase Setup Message -->
-    <div id="firebase-error-message" class="hidden fixed top-0 left-0 w-full bg-red-600 p-4 text-white text-center z-[100]">
-        <!-- Error messages will be inserted here by JavaScript -->
-    </div>
 
     <!-- Header -->
     <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
@@ -102,14 +101,7 @@
                     <a href="#how-to-play" class="text-gray-300 hover:text-sky-400 transition-colors">How to Play</a>
                     <a href="#" class="text-gray-300 hover:text-sky-400 transition-colors">Leaderboards</a>
                 </div>
-                <!-- Auth Buttons -->
-                <div id="auth-container" class="hidden md:flex items-center gap-4">
-                    <div id="user-info" class="hidden items-center gap-2">
-                        <span id="user-name" class="text-white font-semibold"></span>
-                        <button id="logout-button" class="btn-secondary text-sm">Logout</button>
-                    </div>
-                    <button id="login-button" class="btn-primary">Login with Google</button>
-                </div>
+                <button class="btn-primary hidden md:block">Login</button>
                 <!-- Mobile Menu Button -->
                  <button id="mobile-menu-button" class="md:hidden text-gray-300 hover:text-white">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
@@ -123,9 +115,7 @@
                 <a href="#games" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Games</a>
                 <a href="#how-to-play" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">How to Play</a>
                 <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Leaderboards</a>
-                <div id="mobile-auth-container" class="px-3 py-2">
-                    <!-- Mobile auth buttons will be injected here -->
-                </div>
+                <button class="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Login</button>
             </div>
         </div>
     </header>
@@ -149,7 +139,6 @@
                 <div id="gameOverScreen" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
                     <h2 class="text-5xl font-black-ops text-white">GAME OVER</h2>
                     <p class="mt-4 text-2xl text-gray-200">Final Score: <span id="finalScore" class="font-bold text-sky-400">0</span></p>
-                    <p class="mt-2 text-lg text-gray-300">High Score: <span id="astroHighScore" class="font-bold text-sky-300">0</span></p>
                     <button id="restartButton" class="btn-primary mt-6 text-xl">Play Again</button>
                 </div>
             </div>
@@ -159,9 +148,9 @@
         <section id="games" class="py-16 sm:py-24 bg-gray-800/50">
             <div class="container mx-auto px-4 lg:px-8">
                 <h2 class="text-4xl font-black-ops text-center mb-12">Our Games</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     <!-- Game Card 1 -->
-                    <div class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer" onclick="document.getElementById('featured-game').scrollIntoView({ behavior: 'smooth' });">
+                    <div id="astro-jumper-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
                         <img src="https://img.gamepix.com/games/astro-jumper/cover/astro-jumper.png?w=400&ar=16:10" alt="Astro Jumper" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-end">
@@ -176,7 +165,7 @@
                         </div>
                     </div>
                     <!-- Game Card 2 -->
-                    <div class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer" onclick="document.getElementById('playPixelRacerBtn').click();">
+                    <div id="pixel-racer-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
                         <img src="https://as2.ftcdn.net/v2/jpg/04/81/59/51/1000_F_481595196_xeOLb1vk53gjYT1o2cz8hvfN4hkg83PB.jpg" alt="Pixel Racer" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-end">
@@ -187,11 +176,11 @@
                             <p class="text-pink-400 mt-1">2D Arcade Racer</p>
                         </div>
                          <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
-                            <button id="playPixelRacerBtn" class="btn-danger pointer-events-none">Play Now</button>
+                            <span class="btn-danger pointer-events-none">Play Now</span>
                         </div>
                     </div>
                     <!-- Game Card 3 -->
-                    <div class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer" onclick="document.getElementById('playTowerDefenseBtn').click();">
+                    <div id="tower-defense-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
                         <img src="https://fs-prod-cdn.nintendo-europe.com/media/images/10_share_images/games_15/nintendo_switch_download_software_1/2x1_NSwitchDS_FantasyTowerDefense_image1600w.jpg" alt="Tower Defense" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-end">
@@ -202,22 +191,7 @@
                             <p class="text-green-400 mt-1">Strategy</p>
                         </div>
                          <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
-                            <button id="playTowerDefenseBtn" class="btn-success pointer-events-none">Play Now</button>
-                        </div>
-                    </div>
-                    <!-- Game Card 4 -->
-                    <div class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
-                        <img src="https://placehold.co/600x400/ca8a04/white?text=Galactic+Clash" alt="Galactic Clash" class="w-full h-full object-cover">
-                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
-                            <div class="flex items-center gap-3">
-                                <svg class="w-8 h-8 text-yellow-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <h3 class="text-2xl font-bold text-white">Galactic Clash</h3>
-                            </div>
-                            <p class="text-yellow-400 mt-1">Coming Soon</p>
-                        </div>
-                         <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
-                            <span class="text-xl font-semibold text-white">Coming Soon!</span>
+                            <span class="btn-success pointer-events-none">Play Now</span>
                         </div>
                     </div>
                 </div>
@@ -259,7 +233,7 @@
             <div class="bg-gray-800 rounded-lg shadow-2xl overflow-hidden aspect-[3/4] relative">
                 <canvas id="racerGameCanvas"></canvas>
                 <div id="racerUiLayer" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 pointer-events-none">
-                    <div id="racerStartScreen" class="pointer-events-auto">
+                    <div id="racerStartScreen" class="pointer-events-auto flex flex-col items-center">
                         <h2 class="text-5xl font-black-ops text-white">PIXEL <span class="text-pink-500">RACER</span></h2>
                         <p class="mt-4 text-gray-300 px-4">Use Arrow Keys on desktop, or Drag your finger on mobile to move!</p>
                         <button id="racerStartButton" class="btn-danger mt-8 text-xl">Start Race</button>
@@ -270,7 +244,6 @@
                     <div id="racerGameOverScreen" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
                         <h2 class="text-5xl font-black-ops text-white">CRASHED!</h2>
                         <p class="mt-4 text-2xl text-gray-200">Final Score: <span id="racerFinalScore" class="font-bold text-pink-400">0</span></p>
-                        <p class="mt-2 text-lg text-gray-300">High Score: <span id="racerHighScore" class="font-bold text-pink-300">0</span></p>
                         <button id="racerRestartButton" class="btn-danger mt-6 text-xl">Try Again</button>
                     </div>
                 </div>
@@ -287,7 +260,7 @@
             <div class="bg-gray-800 rounded-lg shadow-2xl overflow-hidden aspect-[4/3] relative">
                 <canvas id="towerDefenseCanvas"></canvas>
                 <div id="tdUiLayer" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 pointer-events-none">
-                    <div id="tdStartScreen" class="pointer-events-auto">
+                    <div id="tdStartScreen" class="pointer-events-auto flex flex-col items-center">
                         <h2 class="text-5xl font-black-ops text-white">TOWER <span class="text-green-500">DEFENSE</span></h2>
                         <p class="mt-4 text-gray-300">Place towers to stop the enemies from reaching the end!</p>
                         <button id="tdStartButton" class="btn-success mt-8 text-xl">Start Game</button>
@@ -309,7 +282,6 @@
                     <div id="tdGameOverScreen" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
                         <h2 id="tdEndTitle" class="text-5xl font-black-ops text-white"></h2>
                         <p class="mt-4 text-2xl text-gray-200">You survived <span id="tdFinalWave" class="font-bold text-green-400">0</span> waves.</p>
-                        <p class="mt-2 text-lg text-gray-300">High Score: Wave <span id="tdHighScore" class="font-bold text-green-300">0</span></p>
                         <button id="tdRestartButton" class="btn-success mt-8 text-xl">Play Again</button>
                     </div>
                 </div>
@@ -319,114 +291,23 @@
             </button>
         </div>
     </div>
-
-
+    
     <!-- Scripts -->
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
     <script type="importmap">
     {
         "imports": {
             "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.157.0/three.module.js",
-            "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js",
-            "firebase/app": "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js",
-            "firebase/auth": "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js",
-            "firebase/firestore": "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"
+            "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
         }
     }
     </script>
     <script type="module">
         import * as THREE from 'three';
         import * as CANNON from 'cannon-es';
-        import { initializeApp } from 'firebase/app';
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from 'firebase/auth';
-        import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 
-        window.onload = function() {
-
-            // #############################################
-            // ### FIREBASE & AUTHENTICATION SETUP       ###
-            // #############################################
-            const firebaseConfig = {
-                apiKey: "AIzaSyDF0_iKY77c5yW1FcFxkVliURW0pPakLgs",
-                authDomain: "falconixgaming-8deb6.firebaseapp.com",
-                projectId: "falconixgaming-8deb6",
-                storageBucket: "falconixgaming-8deb6.appspot.com",
-                messagingSenderId: "597317356293",
-                appId: "1:597317356293:web:477d075d4762e2859f456c",
-                measurementId: "G-WW5JVW6E75"
-            };
-
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const db = getFirestore(app);
-            const provider = new GoogleAuthProvider();
-            let currentUser = null;
-
-            const loginButton = document.getElementById('login-button');
-            const logoutButton = document.getElementById('logout-button');
-            const userInfo = document.getElementById('user-info');
-            const userName = document.getElementById('user-name');
-            const mobileAuthContainer = document.getElementById('mobile-auth-container');
-
-            function handleLogin() {
-                signInWithRedirect(auth, provider);
-            }
-
-            loginButton.addEventListener('click', handleLogin);
-            logoutButton.addEventListener('click', () => signOut(auth));
-
-            getRedirectResult(auth)
-                .catch((error) => {
-                    console.error("Login redirect failed:", error);
-                    const errorBanner = document.getElementById('firebase-error-message');
-                    let errorMessage = `<strong>Login Error:</strong> ${error.message}`;
-                    if (error.code === 'auth/unauthorized-domain') {
-                        errorMessage = `<strong>Configuration Error:</strong> This website's domain is not authorized for login. Please go to your Firebase project > Authentication > Settings > Authorized domains and add the following domain: <strong>${window.location.hostname}</strong>`;
-                    }
-                    errorBanner.innerHTML = errorMessage;
-                    errorBanner.classList.remove('hidden');
-                });
-
-            onAuthStateChanged(auth, user => {
-                currentUser = user;
-                if (user) {
-                    userName.textContent = user.displayName;
-                    userInfo.classList.remove('hidden');
-                    loginButton.classList.add('hidden');
-                    mobileAuthContainer.innerHTML = `
-                        <p class="px-3 py-2 text-base font-medium text-white">${user.displayName}</p>
-                        <button id="mobile-logout-button" class="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Logout</button>
-                    `;
-                    document.getElementById('mobile-logout-button').addEventListener('click', () => signOut(auth));
-                } else {
-                    userInfo.classList.add('hidden');
-                    loginButton.classList.remove('hidden');
-                    mobileAuthContainer.innerHTML = `<button id="mobile-login-button" class="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Login with Google</button>`;
-                    const mobileLoginButton = document.getElementById('mobile-login-button');
-                    if (mobileLoginButton) {
-                        mobileLoginButton.addEventListener('click', handleLogin);
-                    }
-                }
-            });
-
-            async function saveScore(gameName, score) {
-                if (!currentUser) return;
-                const scoreRef = doc(db, "users", currentUser.uid, "scores", gameName);
-                const docSnap = await getDoc(scoreRef);
-                const currentHighScore = docSnap.exists() ? docSnap.data().highScore : 0;
-                if (score > currentHighScore) {
-                    await setDoc(scoreRef, { highScore: score });
-                }
-            }
-
-            async function getHighScore(gameName) {
-                if (!currentUser) return 0;
-                const scoreRef = doc(db, "users", currentUser.uid, "scores", gameName);
-                const docSnap = await getDoc(scoreRef);
-                return docSnap.exists() ? docSnap.data().highScore : 0;
-            }
-
-
+        document.addEventListener('DOMContentLoaded', () => {
+            
             // #############################################
             // ### MOBILE MENU TOGGLE                    ###
             // #############################################
@@ -498,7 +379,6 @@
             const restartButton = document.getElementById('restartButton');
             const scoreElement = document.getElementById('score');
             const finalScoreElement = document.getElementById('finalScore');
-            const astroHighScoreElement = document.getElementById('astroHighScore');
             let isGameRunning = false;
             let score = 0;
             let scoreInterval;
@@ -601,17 +481,12 @@
                 document.getElementById('startScreen').style.display = 'none';
                 document.getElementById('gameOverScreen').style.display = 'none';
                 document.getElementById('inGameUI').style.display = 'block';
-                scoreInterval = setInterval(() => { score++; scoreElement.innerText = score; }, 1000);
             }
             async function endAstroJumper() {
                 isGameRunning = false;
-                if (scoreInterval) clearInterval(scoreInterval);
-                await saveScore('Astro Jumper', score);
-                const highScore = await getHighScore('Astro Jumper');
-                astroHighScoreElement.textContent = highScore;
+                finalScoreElement.innerText = score;
                 document.getElementById('uiLayer').classList.remove('pointer-events-passthrough');
                 document.getElementById('uiLayer').style.backgroundColor = 'rgba(0,0,0,0.5)';
-                finalScoreElement.innerText = score;
                 document.getElementById('inGameUI').style.display = 'none';
                 document.getElementById('gameOverScreen').style.display = 'flex';
             }
@@ -622,6 +497,12 @@
                     if (player && playerBody) {
                         player.position.copy(playerBody.position);
                         player.quaternion.copy(playerBody.quaternion);
+
+                        const newScore = Math.floor(player.position.x);
+                        if (newScore > score) {
+                            score = newScore;
+                            scoreElement.innerText = score;
+                        }
                     }
                     const targetCameraX = player.position.x + 5;
                     const targetCameraY = player.position.y + 5;
@@ -640,13 +521,16 @@
             playButton.addEventListener('click', startAstroJumper);
             restartButton.addEventListener('click', startAstroJumper);
             gameContainer.addEventListener('click', playerJump);
+            document.getElementById('astro-jumper-card').addEventListener('click', () => {
+                document.getElementById('featured-game').scrollIntoView({ behavior: 'smooth' });
+            });
             initAstroJumper();
 
             // #############################################
             // ### PIXEL RACER (2D GAME) CODE            ###
             // #############################################
             const racerModal = document.getElementById('pixelRacerModal');
-            const playRacerBtn = document.getElementById('playPixelRacerBtn');
+            const playRacerBtn = document.getElementById('pixel-racer-card');
             const closeRacerBtn = document.getElementById('closeRacerModal');
             const racerCanvas = document.getElementById('racerGameCanvas');
             const racerCtx = racerCanvas.getContext('2d');
@@ -657,7 +541,6 @@
             const racerRestartButton = document.getElementById('racerRestartButton');
             const racerScoreEl = document.getElementById('racerScore');
             const racerFinalScoreEl = document.getElementById('racerFinalScore');
-            const racerHighScoreEl = document.getElementById('racerHighScore');
             let racerRunning = false;
             let racerScore = 0;
             let animationFrameId;
@@ -702,9 +585,6 @@
             async function endRacerGame() {
                 stopRacerGame();
                 const finalRacerScore = Math.floor(racerScore);
-                await saveScore('Pixel Racer', finalRacerScore);
-                const highScore = await getHighScore('Pixel Racer');
-                racerHighScoreEl.textContent = highScore;
                 racerFinalScoreEl.textContent = finalRacerScore;
                 racerGameOverScreen.style.display = 'flex';
                 racerInGameUI.style.display = 'none';
@@ -785,7 +665,7 @@
             // #############################################
             
             const tdModal = document.getElementById('towerDefenseModal');
-            const playTDButton = document.getElementById('playTowerDefenseBtn');
+            const playTDButton = document.getElementById('tower-defense-card');
             const closeTDButton = document.getElementById('closeTowerDefenseModal');
             const tdCanvas = document.getElementById('towerDefenseCanvas');
             const tdCtx = tdCanvas.getContext('2d');
@@ -799,7 +679,6 @@
             const tdWaveEl = document.getElementById('tdWave');
             const tdEndTitleEl = document.getElementById('tdEndTitle');
             const tdFinalWaveEl = document.getElementById('tdFinalWave');
-            const tdHighScoreEl = document.getElementById('tdHighScore');
             const buyTurretButton = document.getElementById('buyTurretButton');
             const nextWaveButton = document.getElementById('nextWaveButton');
             let tdRunning = false;
@@ -1056,9 +935,6 @@
             }
             async function endGameTD(win) {
                 stopTDGame();
-                await saveScore('Tower Defense', wave);
-                const highScore = await getHighScore('Tower Defense');
-                tdHighScoreEl.textContent = highScore;
                 tdInGameUI.style.display = 'none';
                 tdGameOverScreen.style.display = 'flex';
                 tdEndTitleEl.textContent = win ? "VICTORY!" : "DEFEAT!";
@@ -1087,7 +963,7 @@
                     setupTDGrid();
                 }
             });
-        };
+        });
     </script>
 </body>
 </html>
