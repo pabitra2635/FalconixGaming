@@ -565,10 +565,10 @@
                 stopRacerGame();
                 racerRunning = true;
                 racerScore = 0;
-                playerCar = { x: racerCanvas.width / 2 - 20, y: racerCanvas.height - 100, width: 40, height: 60, speed: 4 };
+                playerCar = { x: racerCanvas.width / 2 - 20, y: racerCanvas.height - 100, width: 40, height: 60, speed: 7 };
                 obstacles = [];
                 roadLines = [];
-                for (let i = 0; i < 5; i++) spawnObstacle();
+                for (let i = 0; i < 8; i++) spawnObstacle();
                 for (let i = 0; i < 5; i++) roadLines.push({ y: i * (racerCanvas.height / 4) });
                 racerStartScreen.style.display = 'none';
                 racerGameOverScreen.style.display = 'none';
@@ -592,7 +592,26 @@
             function spawnObstacle() {
                 const obsWidth = 40;
                 const lastObstacleY = obstacles.length > 0 ? obstacles[obstacles.length - 1].y : -200;
-                obstacles.push({ x: Math.random() * (racerCanvas.width - obsWidth), y: lastObstacleY - (Math.random() * 200 + 300), width: obsWidth, height: 60, speed: 3 + Math.random() * 2 + (racerScore / 50) });
+                let speed;
+                let color;
+
+                // 20% chance to spawn a fast car
+                if (Math.random() < 0.2) { 
+                    speed = 6 + Math.random() * 2 + (racerScore / 50); // Faster base speed
+                    color = '#ef4444'; // Red color for fast cars
+                } else {
+                    speed = 3 + Math.random() * 2 + (racerScore / 50); // Normal speed
+                    color = '#a855f7'; // Original purple color
+                }
+
+                obstacles.push({ 
+                    x: Math.random() * (racerCanvas.width - obsWidth), 
+                    y: lastObstacleY - (Math.random() * 200 + 300), 
+                    width: obsWidth, 
+                    height: 60, 
+                    speed: speed,
+                    color: color 
+                });
             }
             function update() {
                 if (!racerRunning) return;
@@ -623,8 +642,8 @@
                 });
                 racerCtx.fillStyle = '#ec4899';
                 racerCtx.fillRect(playerCar.x, playerCar.y, playerCar.width, playerCar.height);
-                racerCtx.fillStyle = '#a855f7';
                 obstacles.forEach(obs => {
+                    racerCtx.fillStyle = obs.color;
                     racerCtx.fillRect(obs.x, obs.y, obs.width, obs.height);
                 });
             }
