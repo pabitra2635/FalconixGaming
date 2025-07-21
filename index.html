@@ -565,7 +565,7 @@
                 stopRacerGame();
                 racerRunning = true;
                 racerScore = 0;
-                playerCar = { x: racerCanvas.width / 2 - 20, y: racerCanvas.height - 100, width: 40, height: 60, speed: 5 };
+                playerCar = { x: racerCanvas.width / 2 - 20, y: racerCanvas.height - 100, width: 40, height: 60, speed: 4 };
                 obstacles = [];
                 roadLines = [];
                 for (let i = 0; i < 5; i++) spawnObstacle();
@@ -592,7 +592,7 @@
             function spawnObstacle() {
                 const obsWidth = 40;
                 const lastObstacleY = obstacles.length > 0 ? obstacles[obstacles.length - 1].y : -200;
-                obstacles.push({ x: Math.random() * (racerCanvas.width - obsWidth), y: lastObstacleY - (Math.random() * 200 + 300), width: obsWidth, height: 60, speed: 2 + Math.random() * 2 + (racerScore / 100) });
+                obstacles.push({ x: Math.random() * (racerCanvas.width - obsWidth), y: lastObstacleY - (Math.random() * 200 + 300), width: obsWidth, height: 60, speed: 3 + Math.random() * 2 + (racerScore / 50) });
             }
             function update() {
                 if (!racerRunning) return;
