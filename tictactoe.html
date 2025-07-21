@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Fredoka+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font for the game title and player marks */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        h1, .cell {
+            font-family: 'Fredoka One', cursive;
+        }
+        /* Simple transition for a smooth hover effect */
+        .cell {
+            transition: background-color 0.2s ease-in-out;
+        }
+        /* Winning cells animation */
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .winning-cell {
+            animation: celebrate 0.8s ease-in-out;
+            background-color: rgba(59, 130, 246, 0.3) !important; /* A transparent blue to highlight the win */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen">
+
+    <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-sm mx-4 border border-gray-700">
+        
+        <!-- Game Title -->
+        <div class="text-center mb-6">
+            <h1 class="text-5xl font-bold text-gray-100">Tic-Tac-Toe</h1>
+        </div>
+
+        <!-- Status Display: Shows whose turn it is or the game result -->
+        <div id="status" class="text-center text-xl font-semibold text-gray-400 mb-6 h-8 flex items-center justify-center">
+            <!-- Content will be set by JavaScript -->
+        </div>
+
+        <!-- Game Board: A 3x3 grid for gameplay -->
+        <div id="game-board" class="grid grid-cols-3 gap-3 mb-6">
+            <!-- Cells will be dynamically identified by JavaScript using data attributes -->
+            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="0"></div>
+            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="1"></div>
+            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="2"></div>
+            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="3"></div>
+            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="4"></div>
+            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="5"></div>
+            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="6"></div>
+            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="7"></div>
+            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="8"></div>
+        </div>
+
+        <!-- Restart Button -->
+        <button id="restart-button" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">
+            Restart Game
+        </button>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 1. GET REFERENCES TO HTML ELEMENTS ---
+            // We need to interact with the status display, the cells, and the restart button.
+            const statusDisplay = document.getElementById('status');
+            const cells = document.querySelectorAll('.cell');
+            const restartButton = document.getElementById('restart-button');
+
+            // --- 2. DEFINE GAME STATE VARIABLES ---
+            // These variables will track the current state of the game.
+            let gameActive = true;       // Is the game currently playable?
+            let currentPlayer = 'X';     // 'X' always goes first.
+            let gameState = ["", "", "", "", "", "", "", "", ""]; // Represents the 3x3 board as an array.
+
+            // --- 3. DEFINE WINNING COMBINATIONS ---
+            // These are all the possible ways to win in Tic-Tac-Toe, represented by the board indexes.
+            const winningConditions = [
+                [0, 1, 2], // Top row
+                [3, 4, 5], // Middle row
+                [6, 7, 8], // Bottom row
+                [0, 3, 6], // Left column
+                [1, 4, 7], // Middle column
+                [2, 5, 8], // Right column
+                [0, 4, 8], // Diagonal from top-left
+                [2, 4, 6]  // Diagonal from top-right
+            ];
+
+            // --- 4. DEFINE MESSAGES FOR THE STATUS DISPLAY ---
+            const winningMessage = () => `Player ${currentPlayer} wins! 🎉`;
+            const drawMessage = () => `It's a draw! 🤝`;
+            const currentPlayerTurn = () => `Player ${currentPlayer}'s turn`;
+
+            // --- 5. CORE GAME LOGIC FUNCTIONS ---
+
+            /**
+             * Handles a click on any of the 9 cells.
+             * This is the main function that orchestrates the game flow on each turn.
+             */
+            function handleCellClick(event) {
+                const clickedCell = event.target;
+                const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+
+                // If the cell is already filled or the game is over, do nothing.
+                if (gameState[clickedCellIndex] !== "" || !gameActive) {
+                    return;
+                }
+
+                // If the move is valid, process it.
+                handleCellPlayed(clickedCell, clickedCellIndex);
+                handleResultValidation();
+            }
+
+            /**
+             * Updates the UI and internal game state for a played move.
+             */
+            function handleCellPlayed(clickedCell, clickedCellIndex) {
+                // Update our internal state array.
+                gameState[clickedCellIndex] = currentPlayer;
+                
+                // Update the UI to show the player's mark.
+                clickedCell.textContent = currentPlayer;
+                
+                // Add a class for styling 'X' and 'O' differently.
+                if (currentPlayer === 'X') {
+                    clickedCell.classList.add('text-red-500');
+                } else {
+                    clickedCell.classList.add('text-blue-400'); // Lightened blue for better contrast
+                }
+            }
+
+            /**
+             * Checks if the game has been won, is a draw, or should continue.
+             */
+            function handleResultValidation() {
+                let roundWon = false;
+                let winningLine = [];
+
+                for (let i = 0; i < winningConditions.length; i++) {
+                    const winCondition = winningConditions[i];
+                    const a = gameState[winCondition[0]];
+                    const b = gameState[winCondition[1]];
+                    const c = gameState[winCondition[2]];
+
+                    // If any cell in a winning line is empty, we can skip it.
+                    if (a === '' || b === '' || c === '') {
+                        continue;
+                    }
+                    // If all three cells in a line are the same, we have a winner.
+                    if (a === b && b === c) {
+                        roundWon = true;
+                        winningLine = winCondition;
+                        break;
+                    }
+                }
+
+                if (roundWon) {
+                    statusDisplay.textContent = winningMessage();
+                    gameActive = false;
+                    // Highlight the winning cells
+                    winningLine.forEach(index => {
+                        cells[index].classList.add('winning-cell');
+                    });
+                    return;
+                }
+
+                // Check for a draw: if all cells are filled and there's no winner.
+                const roundDraw = !gameState.includes("");
+                if (roundDraw) {
+                    statusDisplay.textContent = drawMessage();
+                    gameActive = false;
+                    return;
+                }
+
+                // If no win or draw, it's the next player's turn.
+                handlePlayerChange();
+            }
+
+            /**
+             * Switches the current player and updates the status display.
+             */
+            function handlePlayerChange() {
+                currentPlayer = currentPlayer === "X" ? "O" : "X";
+                statusDisplay.textContent = currentPlayerTurn();
+            }
+
+            /**
+             * Resets the game to its initial state for a new round.
+             */
+            function handleRestartGame() {
+                gameActive = true;
+                currentPlayer = "X";
+                gameState = ["", "", "", "", "", "", "", "", ""];
+                statusDisplay.textContent = currentPlayerTurn();
+                cells.forEach(cell => {
+                    cell.textContent = "";
+                    // Remove all styling classes to reset the board's appearance
+                    cell.classList.remove('text-red-500', 'text-blue-400', 'winning-cell');
+                });
+            }
+
+            // --- 6. SET UP EVENT LISTENERS ---
+            // We need to listen for clicks on the cells and the restart button.
+            cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+            restartButton.addEventListener('click', handleRestartGame);
+
+            // --- 7. INITIALIZE THE GAME ---
+            // Set the initial message when the page loads.
+            statusDisplay.textContent = currentPlayerTurn();
+        });
+    </script>
+</body>
+</html>
