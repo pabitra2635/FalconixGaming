@@ -108,7 +108,7 @@
 
             <!-- Game Board: A 3x3 grid for gameplay -->
             <div id="game-board" class="grid grid-cols-3 gap-3 mb-6">
-                <!-- Cells will be dynamically identified by JavaScript using data attributes -->
+                <!-- Cells are identified by data-index -->
                 <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="0"></div>
                 <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="1"></div>
                 <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="2"></div>
@@ -120,10 +120,15 @@
                 <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="8"></div>
             </div>
 
-            <!-- Restart Button -->
-            <button id="restart-button" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">
-                Restart Game
-            </button>
+            <!-- Action Buttons -->
+            <div id="button-container" class="space-y-2">
+                 <button id="next-round-button" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-200 hidden">
+                    Next Round
+                </button>
+                <button id="restart-button" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">
+                    Restart Game
+                </button>
+            </div>
 
         </div>
     </main>
@@ -133,22 +138,21 @@
             // --- HEADER SCRIPT ---
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
-
-            mobileMenuButton.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
+            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
 
             // --- GAME SCRIPT ---
             // --- 1. GET REFERENCES TO HTML ELEMENTS ---
             const statusDisplay = document.getElementById('status');
             const cells = document.querySelectorAll('.cell');
             const restartButton = document.getElementById('restart-button');
+            const nextRoundButton = document.getElementById('next-round-button');
             const scoreXDisplay = document.getElementById('score-x');
             const scoreODisplay = document.getElementById('score-o');
 
             // --- 2. DEFINE GAME STATE VARIABLES ---
             let gameActive = true;
-            let currentPlayer = 'X';
+            let startingPlayer = 'X'; // Who starts the first game
+            let currentPlayer = 'X';  // Who is playing now
             let gameState = ["", "", "", "", "", "", "", "", ""];
             let scoreX = 0;
             let scoreO = 0;
@@ -160,19 +164,17 @@
                 [0, 4, 8], [2, 4, 6]
             ];
 
-            // --- 4. DEFINE MESSAGES FOR THE STATUS DISPLAY ---
+            // --- 4. DEFINE MESSAGES ---
             const winningMessage = () => `Player ${currentPlayer} wins! 🎉`;
             const drawMessage = () => `It's a draw! 🤝`;
             const currentPlayerTurn = () => `Player ${currentPlayer}'s turn`;
 
-            // --- 5. CORE GAME LOGIC FUNCTIONS ---
+            // --- 5. CORE GAME LOGIC ---
             function handleCellClick(event) {
                 const clickedCell = event.target;
                 const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
-
-                if (gameState[clickedCellIndex] !== "" || !gameActive) {
-                    return;
-                }
+                if (gameState[clickedCellIndex] !== "" || !gameActive) return;
+                
                 handleCellPlayed(clickedCell, clickedCellIndex);
                 handleResultValidation();
             }
@@ -180,18 +182,13 @@
             function handleCellPlayed(clickedCell, clickedCellIndex) {
                 gameState[clickedCellIndex] = currentPlayer;
                 clickedCell.textContent = currentPlayer;
-                if (currentPlayer === 'X') {
-                    clickedCell.classList.add('text-red-500');
-                } else {
-                    clickedCell.classList.add('text-blue-400');
-                }
+                clickedCell.classList.add(currentPlayer === 'X' ? 'text-red-500' : 'text-blue-400');
             }
 
             function handleResultValidation() {
                 let roundWon = false;
                 let winningLine = [];
-                for (let i = 0; i < winningConditions.length; i++) {
-                    const winCondition = winningConditions[i];
+                for (const winCondition of winningConditions) {
                     const a = gameState[winCondition[0]];
                     const b = gameState[winCondition[1]];
                     const c = gameState[winCondition[2]];
@@ -206,7 +203,6 @@
                 if (roundWon) {
                     statusDisplay.textContent = winningMessage();
                     gameActive = false;
-                    // Update score based on the winner
                     if (currentPlayer === 'X') {
                         scoreX++;
                         scoreXDisplay.textContent = scoreX;
@@ -214,15 +210,15 @@
                         scoreO++;
                         scoreODisplay.textContent = scoreO;
                     }
-                    winningLine.forEach(index => {
-                        cells[index].classList.add('winning-cell');
-                    });
+                    winningLine.forEach(index => cells[index].classList.add('winning-cell'));
+                    nextRoundButton.classList.remove('hidden'); // Show next round button
                     return;
                 }
 
                 if (!gameState.includes("")) {
                     statusDisplay.textContent = drawMessage();
                     gameActive = false;
+                    nextRoundButton.classList.remove('hidden'); // Show next round button
                     return;
                 }
                 handlePlayerChange();
@@ -232,20 +228,39 @@
                 currentPlayer = currentPlayer === "X" ? "O" : "X";
                 statusDisplay.textContent = currentPlayerTurn();
             }
-
-            function handleRestartGame() {
+            
+            /**
+             * Starts the next round, alternating the starting player.
+             */
+            function startNextRound() {
                 gameActive = true;
-                currentPlayer = "X";
+                // Alternate the starting player for the new round
+                startingPlayer = startingPlayer === 'X' ? 'O' : 'X';
+                currentPlayer = startingPlayer;
                 gameState = ["", "", "", "", "", "", "", "", ""];
                 statusDisplay.textContent = currentPlayerTurn();
                 cells.forEach(cell => {
                     cell.textContent = "";
                     cell.classList.remove('text-red-500', 'text-blue-400', 'winning-cell');
                 });
+                nextRoundButton.classList.add('hidden'); // Hide button until round ends
+            }
+
+            /**
+             * Resets the entire game, including scores and who starts.
+             */
+            function handleRestartGame() {
+                scoreX = 0;
+                scoreO = 0;
+                scoreXDisplay.textContent = '0';
+                scoreODisplay.textContent = '0';
+                startingPlayer = 'X'; // Reset starting player to X
+                startNextRound();
             }
 
             // --- 6. SET UP EVENT LISTENERS ---
             cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+            nextRoundButton.addEventListener('click', startNextRound);
             restartButton.addEventListener('click', handleRestartGame);
 
             // --- 7. INITIALIZE THE GAME ---
