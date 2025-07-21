@@ -6,15 +6,18 @@
     <title>Tic-Tac-Toe</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Fredoka+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Fredoka+One&family=Black+Ops+One&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom font for the game title and player marks */
+        /* Custom fonts */
         body {
             font-family: 'Inter', sans-serif;
         }
         h1, .cell {
             font-family: 'Fredoka One', cursive;
+        }
+        .font-black-ops {
+            font-family: 'Black Ops One', cursive;
         }
         /* Simple transition for a smooth hover effect */
         .cell {
@@ -30,68 +33,131 @@
             animation: celebrate 0.8s ease-in-out;
             background-color: rgba(59, 130, 246, 0.3) !important; /* A transparent blue to highlight the win */
         }
+        /* Custom button style */
+        .btn-primary {
+            background-color: #3b82f6; /* bg-blue-600 */
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb; /* bg-blue-700 */
+        }
     </style>
 </head>
-<body class="bg-gray-900 flex items-center justify-center min-h-screen">
+<body class="bg-gray-900 text-gray-50">
 
-    <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-sm mx-4 border border-gray-700">
-        
-        <!-- Game Title -->
-        <div class="text-center mb-6">
-            <h1 class="text-5xl font-bold text-gray-100">Tic-Tac-Toe</h1>
+    <!-- Header -->
+    <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
+        <nav class="w-full max-w-7xl mx-auto px-4 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors">Home</a>
+                    <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors">Games</a>
+                    <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors">How to Play</a>
+                    <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors">Leaderboards</a>
+                </div>
+                <button class="btn-primary hidden md:block">Login</button>
+                <!-- Mobile Menu Button -->
+                 <button id="mobile-menu-button" class="md:hidden text-gray-300 hover:text-white">
+                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                 </button>
+            </div>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Home</a>
+                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Games</a>
+                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">How to Play</a>
+                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Leaderboards</a>
+                <button class="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Login</button>
+            </div>
         </div>
+    </header>
 
-        <!-- Status Display: Shows whose turn it is or the game result -->
-        <div id="status" class="text-center text-xl font-semibold text-gray-400 mb-6 h-8 flex items-center justify-center">
-            <!-- Content will be set by JavaScript -->
+    <!-- Main Game Content -->
+    <main class="flex items-center justify-center flex-grow w-full px-4">
+        <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-sm my-8 border border-gray-700">
+            
+            <!-- Game Title -->
+            <div class="text-center mb-4">
+                <h1 class="text-5xl font-bold text-gray-100">Tic-Tac-Toe</h1>
+            </div>
+            
+            <!-- Scoreboard -->
+            <div id="scoreboard" class="flex justify-around text-center mb-4">
+                <div>
+                    <p class="text-lg font-bold text-red-500">Player X</p>
+                    <p id="score-x" class="text-3xl font-bold text-gray-100">0</p>
+                </div>
+                <div>
+                    <p class="text-lg font-bold text-blue-400">Player O</p>
+                    <p id="score-o" class="text-3xl font-bold text-gray-100">0</p>
+                </div>
+            </div>
+
+            <!-- Status Display: Shows whose turn it is or the game result -->
+            <div id="status" class="text-center text-xl font-semibold text-gray-400 mb-6 h-8 flex items-center justify-center">
+                <!-- Content will be set by JavaScript -->
+            </div>
+
+            <!-- Game Board: A 3x3 grid for gameplay -->
+            <div id="game-board" class="grid grid-cols-3 gap-3 mb-6">
+                <!-- Cells will be dynamically identified by JavaScript using data attributes -->
+                <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="0"></div>
+                <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="1"></div>
+                <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="2"></div>
+                <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="3"></div>
+                <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="4"></div>
+                <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="5"></div>
+                <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="6"></div>
+                <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="7"></div>
+                <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="8"></div>
+            </div>
+
+            <!-- Restart Button -->
+            <button id="restart-button" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">
+                Restart Game
+            </button>
+
         </div>
-
-        <!-- Game Board: A 3x3 grid for gameplay -->
-        <div id="game-board" class="grid grid-cols-3 gap-3 mb-6">
-            <!-- Cells will be dynamically identified by JavaScript using data attributes -->
-            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="0"></div>
-            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="1"></div>
-            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="2"></div>
-            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="3"></div>
-            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="4"></div>
-            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="5"></div>
-            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="6"></div>
-            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="7"></div>
-            <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="8"></div>
-        </div>
-
-        <!-- Restart Button -->
-        <button id="restart-button" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">
-            Restart Game
-        </button>
-
-    </div>
+    </main>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- HEADER SCRIPT ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // --- GAME SCRIPT ---
             // --- 1. GET REFERENCES TO HTML ELEMENTS ---
-            // We need to interact with the status display, the cells, and the restart button.
             const statusDisplay = document.getElementById('status');
             const cells = document.querySelectorAll('.cell');
             const restartButton = document.getElementById('restart-button');
+            const scoreXDisplay = document.getElementById('score-x');
+            const scoreODisplay = document.getElementById('score-o');
 
             // --- 2. DEFINE GAME STATE VARIABLES ---
-            // These variables will track the current state of the game.
-            let gameActive = true;       // Is the game currently playable?
-            let currentPlayer = 'X';     // 'X' always goes first.
-            let gameState = ["", "", "", "", "", "", "", "", ""]; // Represents the 3x3 board as an array.
+            let gameActive = true;
+            let currentPlayer = 'X';
+            let gameState = ["", "", "", "", "", "", "", "", ""];
+            let scoreX = 0;
+            let scoreO = 0;
 
             // --- 3. DEFINE WINNING COMBINATIONS ---
-            // These are all the possible ways to win in Tic-Tac-Toe, represented by the board indexes.
             const winningConditions = [
-                [0, 1, 2], // Top row
-                [3, 4, 5], // Middle row
-                [6, 7, 8], // Bottom row
-                [0, 3, 6], // Left column
-                [1, 4, 7], // Middle column
-                [2, 5, 8], // Right column
-                [0, 4, 8], // Diagonal from top-left
-                [2, 4, 6]  // Diagonal from top-right
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
             ];
 
             // --- 4. DEFINE MESSAGES FOR THE STATUS DISPLAY ---
@@ -100,61 +166,36 @@
             const currentPlayerTurn = () => `Player ${currentPlayer}'s turn`;
 
             // --- 5. CORE GAME LOGIC FUNCTIONS ---
-
-            /**
-             * Handles a click on any of the 9 cells.
-             * This is the main function that orchestrates the game flow on each turn.
-             */
             function handleCellClick(event) {
                 const clickedCell = event.target;
                 const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
 
-                // If the cell is already filled or the game is over, do nothing.
                 if (gameState[clickedCellIndex] !== "" || !gameActive) {
                     return;
                 }
-
-                // If the move is valid, process it.
                 handleCellPlayed(clickedCell, clickedCellIndex);
                 handleResultValidation();
             }
 
-            /**
-             * Updates the UI and internal game state for a played move.
-             */
             function handleCellPlayed(clickedCell, clickedCellIndex) {
-                // Update our internal state array.
                 gameState[clickedCellIndex] = currentPlayer;
-                
-                // Update the UI to show the player's mark.
                 clickedCell.textContent = currentPlayer;
-                
-                // Add a class for styling 'X' and 'O' differently.
                 if (currentPlayer === 'X') {
                     clickedCell.classList.add('text-red-500');
                 } else {
-                    clickedCell.classList.add('text-blue-400'); // Lightened blue for better contrast
+                    clickedCell.classList.add('text-blue-400');
                 }
             }
 
-            /**
-             * Checks if the game has been won, is a draw, or should continue.
-             */
             function handleResultValidation() {
                 let roundWon = false;
                 let winningLine = [];
-
                 for (let i = 0; i < winningConditions.length; i++) {
                     const winCondition = winningConditions[i];
                     const a = gameState[winCondition[0]];
                     const b = gameState[winCondition[1]];
                     const c = gameState[winCondition[2]];
-
-                    // If any cell in a winning line is empty, we can skip it.
-                    if (a === '' || b === '' || c === '') {
-                        continue;
-                    }
-                    // If all three cells in a line are the same, we have a winner.
+                    if (a === '' || b === '' || c === '') continue;
                     if (a === b && b === c) {
                         roundWon = true;
                         winningLine = winCondition;
@@ -165,36 +206,33 @@
                 if (roundWon) {
                     statusDisplay.textContent = winningMessage();
                     gameActive = false;
-                    // Highlight the winning cells
+                    // Update score based on the winner
+                    if (currentPlayer === 'X') {
+                        scoreX++;
+                        scoreXDisplay.textContent = scoreX;
+                    } else {
+                        scoreO++;
+                        scoreODisplay.textContent = scoreO;
+                    }
                     winningLine.forEach(index => {
                         cells[index].classList.add('winning-cell');
                     });
                     return;
                 }
 
-                // Check for a draw: if all cells are filled and there's no winner.
-                const roundDraw = !gameState.includes("");
-                if (roundDraw) {
+                if (!gameState.includes("")) {
                     statusDisplay.textContent = drawMessage();
                     gameActive = false;
                     return;
                 }
-
-                // If no win or draw, it's the next player's turn.
                 handlePlayerChange();
             }
 
-            /**
-             * Switches the current player and updates the status display.
-             */
             function handlePlayerChange() {
                 currentPlayer = currentPlayer === "X" ? "O" : "X";
                 statusDisplay.textContent = currentPlayerTurn();
             }
 
-            /**
-             * Resets the game to its initial state for a new round.
-             */
             function handleRestartGame() {
                 gameActive = true;
                 currentPlayer = "X";
@@ -202,18 +240,15 @@
                 statusDisplay.textContent = currentPlayerTurn();
                 cells.forEach(cell => {
                     cell.textContent = "";
-                    // Remove all styling classes to reset the board's appearance
                     cell.classList.remove('text-red-500', 'text-blue-400', 'winning-cell');
                 });
             }
 
             // --- 6. SET UP EVENT LISTENERS ---
-            // We need to listen for clicks on the cells and the restart button.
             cells.forEach(cell => cell.addEventListener('click', handleCellClick));
             restartButton.addEventListener('click', handleRestartGame);
 
             // --- 7. INITIALIZE THE GAME ---
-            // Set the initial message when the page loads.
             statusDisplay.textContent = currentPlayerTurn();
         });
     </script>
