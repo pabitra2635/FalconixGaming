@@ -148,7 +148,7 @@
         <section id="games" class="py-16 sm:py-24 bg-gray-800/50">
             <div class="container mx-auto px-4 lg:px-8">
                 <h2 class="text-4xl font-black-ops text-center mb-12">Our Games</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                     <!-- Game Card 1 -->
                     <div id="astro-jumper-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
                         <img src="https://img.gamepix.com/games/astro-jumper/cover/astro-jumper.png?w=400&ar=16:10" alt="Astro Jumper" class="w-full h-full object-cover">
@@ -194,6 +194,21 @@
                             <span class="btn-success pointer-events-none">Play Now</span>
                         </div>
                     </div>
+                     <!-- Game Card 4 -->
+                    <a href="tictactoe.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+                        <img src="https://www.rd.com/wp-content/uploads/2019/10/tic-tac-toe-scaled.jpg" alt="Tic-Tac-Toe" class="w-full h-full object-cover">
+                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-8 h-8 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <h3 class="text-2xl font-bold text-white">Tic-Tac-Toe</h3>
+                            </div>
+                            <p class="text-purple-400 mt-1">Classic Puzzle</p>
+                        </div>
+                         <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
+                            <span class="btn-secondary pointer-events-none">Play Now</span>
+                        </div>
+                    </a>
                 </div>
             </div>
         </section>
@@ -207,6 +222,7 @@
                     <button class="btn-primary game-info-btn" data-game="Astro Jumper">Astro Jumper</button>
                     <button class="btn-danger game-info-btn" data-game="Pixel Racer">Pixel Racer</button>
                     <button class="btn-success game-info-btn" data-game="Tower Defense">Tower Defense</button>
+                    <button class="btn-secondary game-info-btn" data-game="Tic-Tac-Toe">Tic-Tac-Toe</button>
                 </div>
                 <div id="gameExplanationResult" class="mt-12 min-h-[200px] flex items-center justify-center">
                     <p class="text-gray-500">Select a game to see instructions.</p>
@@ -342,6 +358,12 @@
                     gameplay: "Use your starting gold to build turrets on the grass. Defeated enemies give you more gold to build more towers. Survive as many waves as you can!",
                     desktop_controls: "Click the 'Turret' button, then click on a valid green tile to place it. Click 'Next Wave' to start the attack.",
                     mobile_controls: "Tap the 'Turret' button, then tap on a valid green tile to place it. Tap 'Next Wave' to start the attack."
+                },
+                 "Tic-Tac-Toe": {
+                    objective: "Be the first player to get three of your marks in a row, either horizontally, vertically, or diagonally.",
+                    gameplay: "Players take turns placing their mark ('X' or 'O') in an empty square on a 3x3 grid. The game ends when one player wins or the board is full, resulting in a draw.",
+                    desktop_controls: "Click on an empty square to place your mark.",
+                    mobile_controls: "Tap on an empty square to place your mark."
                 }
             };
 
