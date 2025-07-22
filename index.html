@@ -43,6 +43,9 @@
          .btn-warning {
             @apply px-6 py-3 font-semibold text-white bg-yellow-500 rounded-lg shadow-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
         }
+        .btn-orange {
+            @apply px-6 py-3 font-semibold text-white bg-orange-500 rounded-lg shadow-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
+        }
         .game-card:hover .game-card-overlay {
             opacity: 1;
         }
@@ -209,9 +212,24 @@
                             <span class="btn-secondary pointer-events-none">Play Now</span>
                         </div>
                     </a>
+                     <!-- Game Card 5 -->
+                    <a href="memorymatch.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+                        <img src="https://img.gamedistribution.com/854fd8048c814acaa86b0faffe364290-1280x720.jpeg" alt="Memory Match" class="w-full h-full object-cover">
+                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-8 h-8 text-orange-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <h3 class="text-2xl font-bold text-white">Memory Match</h3>
+                            </div>
+                            <p class="text-orange-400 mt-1">Puzzle</p>
+                        </div>
+                         <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
+                            <span class="btn-warning pointer-events-none">Play Now</span>
+                        </div>
+                    </a>
                 </div>
                  <div class="mt-16 text-center">
-                    <a href="memorymatch.html" class="btn-primary text-lg">View More Games</a>
+                    <a href="#" class="btn-primary text-lg">View More Games</a>
                 </div>
             </div>
         </section>
@@ -226,6 +244,7 @@
                     <button class="btn-danger game-info-btn" data-game="Pixel Racer">Pixel Racer</button>
                     <button class="btn-success game-info-btn" data-game="Tower Defense">Tower Defense</button>
                     <button class="btn-secondary game-info-btn" data-game="Tic-Tac-Toe">Tic-Tac-Toe</button>
+                    <button class="btn-warning game-info-btn" data-game="Memory Match">Memory Match</button>
                 </div>
                 <div id="gameExplanationResult" class="mt-12 min-h-[200px] flex items-center justify-center">
                     <p class="text-gray-500">Select a game to see instructions.</p>
@@ -237,7 +256,7 @@
     <!-- Footer -->
     <footer class="bg-gray-900 border-t border-gray-700">
         <div class="container mx-auto px-4 lg:px-8 py-8 text-center text-gray-400">
-            <p>&copy; 2025 FalconixGaming. All Rights Reserved.</p>
+            <p>&copy; 2025 <a href="https://chat.whatsapp.com/DUXdfaOxJoPC87KjRWbkjo" style="text-decoration:underline;">FalconixGaming</a>. All Rights Reserved.</p>
             <div class="flex justify-center space-x-6 mt-4">
                 <a href="#" class="hover:text-white">Privacy Policy</a>
                 <a href="#" class="hover:text-white">Terms of Service</a>
@@ -367,6 +386,12 @@
                     gameplay: "Players take turns placing their mark ('X' or 'O') in an empty square on a 3x3 grid. The game ends when one player wins or the board is full, resulting in a draw.",
                     desktop_controls: "Click on an empty square to place your mark.",
                     mobile_controls: "Tap on an empty square to place your mark."
+                },
+                "Memory Match": {
+                    objective: "Find all the matching pairs of cards in the fewest number of moves.",
+                    gameplay: "Click or tap on a card to flip it over. Then, try to find its matching pair. If the cards don't match, they will be flipped back over.",
+                    desktop_controls: "Click on a card to flip it.",
+                    mobile_controls: "Tap on a card to flip it."
                 }
             };
 
@@ -539,7 +564,7 @@
                         scene.remove(platforms.shift());
                         world.removeBody(platformBodies.shift());
                     }
-                    if (player.position.y < -10) endAstroJumper();
+                    if (player.position.y < -10 || player.position.y > 20) endAstroJumper();
                 }
                 renderer.render(scene, camera);
             }
