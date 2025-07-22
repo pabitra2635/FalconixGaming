@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FalconixGaming - Gaming Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Fredoka+One&family=Black+Ops+One&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -13,8 +13,7 @@
             color: #F9FAFB; /* text-gray-50 */
         }
         .font-black-ops {
-            font-family: 'Inter', sans-serif;
-            font-weight: 900;
+            font-family: 'Black Ops One', cursive;
         }
         #gameCanvas, #racerGameCanvas, #towerDefenseCanvas {
             display: block;
@@ -53,7 +52,7 @@
             opacity: 0;
             transition: opacity 0.3s ease-in-out;
         }
-        #pixelRacerModal, #towerDefenseModal {
+        #pixelRacerModal, #towerDefenseModal, #ticTacToeModal, #memoryMatchModal {
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
         }
         .pointer-events-passthrough {
@@ -63,12 +62,65 @@
             pointer-events: auto;
         }
         
+        /* Tic-Tac-Toe Styles */
+        .ttt-cell, .memory-card-face {
+            font-family: 'Fredoka One', cursive;
+        }
+        .ttt-cell {
+            transition: background-color 0.2s ease-in-out;
+        }
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .winning-cell {
+            animation: celebrate 0.8s ease-in-out;
+            background-color: rgba(59, 130, 246, 0.3) !important;
+        }
+
+        /* Memory Game Specific Styles */
+        .memory-game-board {
+            perspective: 1000px;
+        }
+        .memory-card {
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+        .memory-card.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .memory-card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+        }
+        .memory-card-front {
+            background-color: #4b5563; /* bg-gray-600 */
+        }
+        .memory-card-back {
+            background-color: #3b82f6; /* bg-blue-600 */
+            transform: rotateY(180deg);
+            font-size: 2.5rem; /* Emoji size */
+        }
+        .memory-card.matched .memory-card-back {
+            background-color: #16a34a; /* bg-green-600 */
+        }
+
+
         /* Fullscreen on mobile */
         @media (max-width: 768px) {
-            #pixelRacerModal, #towerDefenseModal {
+            #pixelRacerModal, #towerDefenseModal, #ticTacToeModal, #memoryMatchModal {
                 padding: 0;
             }
-            #pixelRacerModal > div, #towerDefenseModal > div {
+            #pixelRacerModal > div, #towerDefenseModal > div, #ticTacToeModal > div, #memoryMatchModal > div {
                 width: 100%;
                 height: 100%;
                 max-width: 100%;
@@ -80,7 +132,7 @@
                 height: 100%;
                 width: 100%;
             }
-            #closeRacerModal, #closeTowerDefenseModal {
+            #closeRacerModal, #closeTowerDefenseModal, #closeTicTacToeModal, #closeMemoryMatchModal {
                 top: 1rem;
                 right: 1rem;
                 background-color: rgba(0,0,0,0.5);
@@ -208,7 +260,7 @@
                         </div>
                     </div>
                     <!-- Game Card 4 -->
-                    <a href="tictactoe.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+                    <div id="tic-tac-toe-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
                         <img src="https://wallpapercave.com/wp/wp8984750.jpg" alt="Tic-Tac-Toe" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-end">
@@ -221,9 +273,9 @@
                          <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
                             <span class="btn-secondary pointer-events-none">Play Now</span>
                         </div>
-                    </a>
+                    </div>
                      <!-- Game Card 5 -->
-                    <a href="memorymatch.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+                    <div id="memory-match-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
                         <img src="https://img.gamedistribution.com/854fd8048c814acaa86b0faffe364290-1280x720.jpeg" alt="Memory Match" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-end">
@@ -236,7 +288,7 @@
                          <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
                             <span class="btn-warning pointer-events-none">Play Now</span>
                         </div>
-                    </a>
+                    </div>
                 </div>
             </div>
         </section>
@@ -413,6 +465,67 @@
             </button>
         </div>
     </div>
+
+    <!-- Tic-Tac-Toe Game Modal -->
+    <div id="ticTacToeModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
+        <div class="w-full max-w-sm relative">
+            <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full border border-gray-700">
+                <div class="text-center mb-4">
+                    <h1 class="text-5xl font-bold text-gray-100" style="font-family: 'Fredoka One', cursive;">Tic-Tac-Toe</h1>
+                </div>
+                <div id="ttt-scoreboard" class="flex justify-around text-center mb-4">
+                    <div>
+                        <p class="text-lg font-bold text-red-500">Player X</p>
+                        <p id="ttt-score-x" class="text-3xl font-bold text-gray-100">0</p>
+                    </div>
+                    <div>
+                        <p class="text-lg font-bold text-blue-400">Player O</p>
+                        <p id="ttt-score-o" class="text-3xl font-bold text-gray-100">0</p>
+                    </div>
+                </div>
+                <div id="ttt-status" class="text-center text-xl font-semibold text-gray-400 mb-6 h-8 flex items-center justify-center"></div>
+                <div id="ttt-game-board" class="grid grid-cols-3 gap-3 mb-6">
+                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="0"></div>
+                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="1"></div>
+                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="2"></div>
+                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="3"></div>
+                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="4"></div>
+                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="5"></div>
+                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="6"></div>
+                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="7"></div>
+                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="8"></div>
+                </div>
+                <div id="ttt-button-container" class="space-y-2">
+                    <button id="ttt-next-round-button" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-200 hidden">Next Round</button>
+                    <button id="ttt-restart-button" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">Restart Game</button>
+                </div>
+            </div>
+            <button id="closeTicTacToeModal" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-gray-800 hover:bg-gray-200">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Memory Match Game Modal -->
+    <div id="memoryMatchModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
+        <div class="w-full max-w-lg relative">
+             <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full border border-gray-700">
+                <div class="text-center mb-4">
+                    <h1 class="text-5xl font-bold text-gray-100" style="font-family: 'Fredoka One', cursive;">Memory Match</h1>
+                    <p class="text-gray-400 mt-2">Moves: <span id="moves-count" class="font-bold">0</span></p>
+                </div>
+                <div id="memory-game-board" class="grid grid-cols-4 gap-4 mb-6 memory-game-board">
+                    <!-- Cards will be generated by JavaScript -->
+                </div>
+                <button id="memory-restart-button" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">
+                    Restart Game
+                </button>
+            </div>
+            <button id="closeMemoryMatchModal" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-gray-800 hover:bg-gray-200">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>
+        </div>
+    </div>
     
     <!-- Scripts -->
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
@@ -514,7 +627,7 @@
 
 
             // --- High Score Functions ---
-            const saveHighScore = async (gameName, newScore) => {
+            const saveHighScore = async (gameName, newScore, scoreType = 'desc') => {
                 const user = auth.currentUser;
                 if (!user || !gameName || typeof newScore !== 'number') return;
 
@@ -522,12 +635,22 @@
                 try {
                     const docSnap = await getDoc(scoreRef);
                     const currentData = docSnap.exists() ? docSnap.data() : {};
-                    const currentScore = currentData[gameName] || 0;
+                    const currentScore = currentData[gameName];
 
-                    if (newScore > currentScore) {
+                    let shouldUpdate = false;
+                    if (scoreType === 'desc') { // Higher is better
+                        if (currentScore === undefined || newScore > currentScore) {
+                            shouldUpdate = true;
+                        }
+                    } else { // Lower is better (asc)
+                        if (currentScore === undefined || newScore < currentScore) {
+                            shouldUpdate = true;
+                        }
+                    }
+
+                    if (shouldUpdate) {
                         await setDoc(scoreRef, { [gameName]: newScore }, { merge: true });
                         console.log(`New high score for ${gameName}: ${newScore}`);
-                        // Refresh leaderboards after setting a new score
                         displayUserHighScores(user);
                     }
                 } catch (error) {
@@ -543,14 +666,18 @@
                     const docSnap = await getDoc(scoreRef);
                     const scores = docSnap.exists() ? docSnap.data() : {};
                     
-                    const games = ["Astro Jumper", "Pixel Racer", "Tower Defense"];
+                    const games = ["Astro Jumper", "Pixel Racer", "Tower Defense", "Memory Match"];
                     leaderboardContent.innerHTML = games.map(game => {
                         const score = scores[game] || 0;
+                        let scoreLabel = 'Points';
+                        if (game === 'Tower Defense') scoreLabel = 'Waves';
+                        if (game === 'Memory Match') scoreLabel = 'Moves';
+
                         return `
                         <div class="glassmorphism p-6 rounded-xl text-center">
                             <h3 class="text-2xl font-bold text-indigo-300">${game}</h3>
                             <p class="text-4xl font-black-ops text-white mt-4">${score}</p>
-                            <p class="text-gray-400 mt-1">${game === 'Tower Defense' ? 'Waves Survived' : 'Points'}</p>
+                            <p class="text-gray-400 mt-1">${scoreLabel}</p>
                         </div>
                         `;
                     }).join('');
@@ -1262,6 +1389,281 @@
             tdCanvas.addEventListener('click', handleCanvasClick);
             tdCanvas.addEventListener('touchend', e => { if (selectedTower) { handleCanvasClick(e); e.preventDefault(); } });
             
+            // #############################################
+            // ### TIC-TAC-TOE (2D GAME) CODE            ###
+            // #############################################
+            const ticTacToeModal = document.getElementById('ticTacToeModal');
+            const playTTTBtn = document.getElementById('tic-tac-toe-card');
+            const closeTTTBtn = document.getElementById('closeTicTacToeModal');
+            let tttInitialized = false;
+
+            function openTTTModal() {
+                ticTacToeModal.classList.remove('invisible', 'opacity-0');
+                if (!tttInitialized) {
+                    initTicTacToe();
+                    tttInitialized = true;
+                }
+            }
+
+            function closeTTTModal() {
+                ticTacToeModal.classList.add('invisible', 'opacity-0');
+            }
+            
+            playTTTBtn.addEventListener('click', openTTTModal);
+            closeTTTBtn.addEventListener('click', closeTTTModal);
+
+            function initTicTacToe() {
+                const statusDisplay = document.getElementById('ttt-status');
+                const cells = document.querySelectorAll('.ttt-cell');
+                const restartButton = document.getElementById('ttt-restart-button');
+                const nextRoundButton = document.getElementById('ttt-next-round-button');
+                const scoreXDisplay = document.getElementById('ttt-score-x');
+                const scoreODisplay = document.getElementById('ttt-score-o');
+
+                let gameActive = true;
+                let startingPlayer = 'X';
+                let currentPlayer = 'X';
+                let gameState = ["", "", "", "", "", "", "", "", ""];
+                let scoreX = 0;
+                let scoreO = 0;
+
+                const winningConditions = [
+                    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                    [0, 4, 8], [2, 4, 6]
+                ];
+
+                const winningMessage = () => `Player ${currentPlayer} wins! 🎉`;
+                const drawMessage = () => `It's a draw! �`;
+                const currentPlayerTurn = () => `Player ${currentPlayer}'s turn`;
+
+                function handleCellClick(event) {
+                    const clickedCell = event.target;
+                    const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+                    if (gameState[clickedCellIndex] !== "" || !gameActive) return;
+                    
+                    handleCellPlayed(clickedCell, clickedCellIndex);
+                    handleResultValidation();
+                }
+
+                function handleCellPlayed(clickedCell, clickedCellIndex) {
+                    gameState[clickedCellIndex] = currentPlayer;
+                    clickedCell.textContent = currentPlayer;
+                    clickedCell.classList.add(currentPlayer === 'X' ? 'text-red-500' : 'text-blue-400');
+                }
+
+                function handleResultValidation() {
+                    let roundWon = false;
+                    let winningLine = [];
+                    for (const winCondition of winningConditions) {
+                        const a = gameState[winCondition[0]];
+                        const b = gameState[winCondition[1]];
+                        const c = gameState[winCondition[2]];
+                        if (a === '' || b === '' || c === '') continue;
+                        if (a === b && b === c) {
+                            roundWon = true;
+                            winningLine = winCondition;
+                            break;
+                        }
+                    }
+
+                    if (roundWon) {
+                        statusDisplay.textContent = winningMessage();
+                        gameActive = false;
+                        if (currentPlayer === 'X') {
+                            scoreX++;
+                            scoreXDisplay.textContent = scoreX;
+                        } else {
+                            scoreO++;
+                            scoreODisplay.textContent = scoreO;
+                        }
+                        winningLine.forEach(index => cells[index].classList.add('winning-cell'));
+                        nextRoundButton.classList.remove('hidden');
+                        return;
+                    }
+
+                    if (!gameState.includes("")) {
+                        statusDisplay.textContent = drawMessage();
+                        gameActive = false;
+                        nextRoundButton.classList.remove('hidden');
+                        return;
+                    }
+                    handlePlayerChange();
+                }
+
+                function handlePlayerChange() {
+                    currentPlayer = currentPlayer === "X" ? "O" : "X";
+                    statusDisplay.textContent = currentPlayerTurn();
+                }
+                
+                function startNextRound() {
+                    gameActive = true;
+                    startingPlayer = startingPlayer === 'X' ? 'O' : 'X';
+                    currentPlayer = startingPlayer;
+                    gameState = ["", "", "", "", "", "", "", "", ""];
+                    statusDisplay.textContent = currentPlayerTurn();
+                    cells.forEach(cell => {
+                        cell.textContent = "";
+                        cell.classList.remove('text-red-500', 'text-blue-400', 'winning-cell');
+                    });
+                    nextRoundButton.classList.add('hidden');
+                }
+
+                function handleRestartGame() {
+                    scoreX = 0;
+                    scoreO = 0;
+                    scoreXDisplay.textContent = '0';
+                    scoreODisplay.textContent = '0';
+                    startingPlayer = 'X';
+                    startNextRound();
+                }
+
+                cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+                nextRoundButton.addEventListener('click', startNextRound);
+                restartButton.addEventListener('click', handleRestartGame);
+
+                statusDisplay.textContent = currentPlayerTurn();
+            }
+
+            // #############################################
+            // ### MEMORY MATCH (2D GAME) CODE           ###
+            // #############################################
+            const memoryMatchModal = document.getElementById('memoryMatchModal');
+            const playMemoryMatchBtn = document.getElementById('memory-match-card');
+            const closeMemoryMatchBtn = document.getElementById('closeMemoryMatchModal');
+            let memoryMatchInitialized = false;
+
+            function openMemoryMatchModal() {
+                memoryMatchModal.classList.remove('invisible', 'opacity-0');
+                if (!memoryMatchInitialized) {
+                    initMemoryMatch();
+                    memoryMatchInitialized = true;
+                }
+            }
+
+            function closeMemoryMatchModal() {
+                memoryMatchModal.classList.add('invisible', 'opacity-0');
+            }
+            
+            playMemoryMatchBtn.addEventListener('click', openMemoryMatchModal);
+            closeMemoryMatchBtn.addEventListener('click', closeMemoryMatchModal);
+
+            function initMemoryMatch() {
+                const gameBoard = document.getElementById('memory-game-board');
+                const movesCountSpan = document.getElementById('moves-count');
+                const restartButton = document.getElementById('memory-restart-button');
+                const cardSymbols = ['🚀', '🔥', '⭐', '🎉', '💎', '💯', '👾', '🏆'];
+                let cards = [...cardSymbols, ...cardSymbols];
+
+                let flippedCards = [];
+                let matchedPairs = 0;
+                let moves = 0;
+                let lockBoard = false;
+
+                function shuffle(array) {
+                    for (let i = array.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [array[i], array[j]] = [array[j], array[i]];
+                    }
+                }
+
+                function createBoard() {
+                    shuffle(cards);
+                    gameBoard.innerHTML = '';
+                    cards.forEach(symbol => {
+                        const cardElement = document.createElement('div');
+                        cardElement.classList.add('memory-card', 'h-24');
+                        cardElement.dataset.symbol = symbol;
+
+                        cardElement.innerHTML = `
+                            <div class="memory-card-face memory-card-front"></div>
+                            <div class="memory-card-face memory-card-back">${symbol}</div>
+                        `;
+
+                        cardElement.addEventListener('click', handleCardClick);
+                        gameBoard.appendChild(cardElement);
+                    });
+                }
+
+                function handleCardClick(event) {
+                    const clickedCard = event.currentTarget;
+                    if (lockBoard || clickedCard.classList.contains('is-flipped')) return;
+
+                    flipCard(clickedCard);
+
+                    if (flippedCards.length < 2) {
+                        flippedCards.push(clickedCard);
+                    }
+
+                    if (flippedCards.length === 2) {
+                        incrementMoves();
+                        checkForMatch();
+                    }
+                }
+
+                function flipCard(card) {
+                    card.classList.add('is-flipped');
+                }
+                
+                function unflipCards() {
+                    lockBoard = true;
+                    setTimeout(() => {
+                        flippedCards.forEach(card => card.classList.remove('is-flipped'));
+                        resetFlippedCards();
+                    }, 1000);
+                }
+
+                function checkForMatch() {
+                    const [card1, card2] = flippedCards;
+                    const isMatch = card1.dataset.symbol === card2.dataset.symbol;
+
+                    if (isMatch) {
+                        disableMatchedCards();
+                    } else {
+                        unflipCards();
+                    }
+                }
+                
+                async function disableMatchedCards() {
+                    flippedCards.forEach(card => {
+                        card.removeEventListener('click', handleCardClick);
+                        card.classList.add('matched');
+                    });
+                    matchedPairs++;
+                    resetFlippedCards();
+
+                    if (matchedPairs === cardSymbols.length) {
+                       await saveHighScore('Memory Match', moves, 'asc');
+                       setTimeout(() => {
+                           // A simple alert for now, can be replaced with a custom modal
+                           alert(`You won in ${moves} moves! Your score has been saved.`);
+                       }, 500);
+                    }
+                }
+                
+                function resetFlippedCards() {
+                    flippedCards = [];
+                    lockBoard = false;
+                }
+
+                function incrementMoves() {
+                    moves++;
+                    movesCountSpan.textContent = moves;
+                }
+                
+                function restartGame() {
+                    moves = 0;
+                    matchedPairs = 0;
+                    movesCountSpan.textContent = '0';
+                    resetFlippedCards();
+                    createBoard();
+                }
+
+                restartButton.addEventListener('click', restartGame);
+                createBoard();
+            }
+
+
             window.addEventListener('resize', () => {
                 camera.aspect = gameContainer.clientWidth / gameContainer.clientHeight;
                 camera.updateProjectionMatrix();
