@@ -334,6 +334,20 @@
             </div>
         </div>
     </div>
+
+    <!-- Mobile Welcome Modal -->
+    <div id="mobile-welcome-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden md:hidden">
+        <div class="glassmorphism p-8 rounded-2xl text-center max-w-sm w-full relative">
+            <button id="close-welcome-modal" class="absolute top-2 right-2 text-gray-400 hover:text-white">
+                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-3xl font-black-ops text-white">Welcome to <br>FALCONIX<span class="text-sky-400">GAMING</span></h2>
+            <p class="mt-4 text-gray-300">Log in to save your high scores and compete on the leaderboards!</p>
+            <button id="modal-login-button" class="btn-primary w-full mt-6 text-lg">
+                Login with Google
+            </button>
+        </div>
+    </div>
     
     <!-- Pixel Racer Game Modal -->
     <div id="pixelRacerModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
@@ -455,9 +469,15 @@
             const logoutModal = document.getElementById('logout-modal');
             const confirmLogoutBtn = document.getElementById('confirm-logout-btn');
             const cancelLogoutBtn = document.getElementById('cancel-logout-btn');
+            const mobileWelcomeModal = document.getElementById('mobile-welcome-modal');
+            const closeWelcomeModal = document.getElementById('close-welcome-modal');
+            const modalLoginButton = document.getElementById('modal-login-button');
 
             // --- Auth Functions ---
-            const signInWithGoogle = () => signInWithPopup(auth, provider).catch(e => console.error(e));
+            const signInWithGoogle = () => {
+                signInWithPopup(auth, provider).catch(e => console.error(e));
+                hideWelcomeModal();
+            };
             
             const showLogoutModal = () => logoutModal.classList.remove('hidden');
             const hideLogoutModal = () => logoutModal.classList.add('hidden');
@@ -467,16 +487,29 @@
                 hideLogoutModal();
             };
 
+            const showWelcomeModal = () => {
+                if (sessionStorage.getItem('welcomeModalShown')) return;
+                setTimeout(() => {
+                    mobileWelcomeModal.classList.remove('hidden');
+                    sessionStorage.setItem('welcomeModalShown', 'true');
+                }, 2000);
+            };
+
+            const hideWelcomeModal = () => mobileWelcomeModal.classList.add('hidden');
+
             loginButton.addEventListener('click', signInWithGoogle);
             mobileLoginButton.addEventListener('click', signInWithGoogle);
+            modalLoginButton.addEventListener('click', signInWithGoogle);
             logoutButton.addEventListener('click', showLogoutModal);
             mobileLogoutButton.addEventListener('click', showLogoutModal);
             confirmLogoutBtn.addEventListener('click', logout);
             cancelLogoutBtn.addEventListener('click', hideLogoutModal);
+            closeWelcomeModal.addEventListener('click', hideWelcomeModal);
             logoutModal.addEventListener('click', (e) => {
-                if (e.target === logoutModal) {
-                    hideLogoutModal();
-                }
+                if (e.target === logoutModal) hideLogoutModal();
+            });
+            mobileWelcomeModal.addEventListener('click', (e) => {
+                if (e.target === mobileWelcomeModal) hideWelcomeModal();
             });
 
 
@@ -541,6 +574,12 @@
                 if (user) {
                     userDisplayName.innerHTML = `${user.displayName} <br> <span class="text-xs text-gray-400">${user.email}</span>`;
                     mobileUserDisplayName.innerHTML = `${user.displayName} <br> <span class="text-xs text-gray-400">${user.email}</span>`;
+                    hideWelcomeModal();
+                } else {
+                    const isMobile = window.innerWidth <= 768;
+                    if (isMobile) {
+                        showWelcomeModal();
+                    }
                 }
                 displayUserHighScores(user);
             });
