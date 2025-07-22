@@ -322,6 +322,18 @@
             </div>
         </div>
     </footer>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logout-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
+        <div class="glassmorphism p-8 rounded-2xl text-center max-w-sm w-full">
+            <h3 class="text-2xl font-bold text-white">Are you sure?</h3>
+            <p class="mt-2 text-gray-300">You will be logged out of your account.</p>
+            <div class="mt-6 flex justify-center gap-4">
+                <button id="cancel-logout-btn" class="btn-secondary">Cancel</button>
+                <button id="confirm-logout-btn" class="btn-danger">Confirm Logout</button>
+            </div>
+        </div>
+    </div>
     
     <!-- Pixel Racer Game Modal -->
     <div id="pixelRacerModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
@@ -440,15 +452,33 @@
             const mobileUserDisplayName = document.getElementById('mobile-user-display-name');
             const leaderboardContent = document.getElementById('leaderboard-content');
             const leaderboardLoginPrompt = document.getElementById('leaderboard-login-prompt');
+            const logoutModal = document.getElementById('logout-modal');
+            const confirmLogoutBtn = document.getElementById('confirm-logout-btn');
+            const cancelLogoutBtn = document.getElementById('cancel-logout-btn');
 
             // --- Auth Functions ---
             const signInWithGoogle = () => signInWithPopup(auth, provider).catch(e => console.error(e));
-            const logout = () => signOut(auth).catch(e => console.error(e));
+            
+            const showLogoutModal = () => logoutModal.classList.remove('hidden');
+            const hideLogoutModal = () => logoutModal.classList.add('hidden');
+
+            const logout = () => {
+                signOut(auth).catch(e => console.error(e));
+                hideLogoutModal();
+            };
 
             loginButton.addEventListener('click', signInWithGoogle);
             mobileLoginButton.addEventListener('click', signInWithGoogle);
-            logoutButton.addEventListener('click', logout);
-            mobileLogoutButton.addEventListener('click', logout);
+            logoutButton.addEventListener('click', showLogoutModal);
+            mobileLogoutButton.addEventListener('click', showLogoutModal);
+            confirmLogoutBtn.addEventListener('click', logout);
+            cancelLogoutBtn.addEventListener('click', hideLogoutModal);
+            logoutModal.addEventListener('click', (e) => {
+                if (e.target === logoutModal) {
+                    hideLogoutModal();
+                }
+            });
+
 
             // --- High Score Functions ---
             const saveHighScore = async (gameName, newScore) => {
