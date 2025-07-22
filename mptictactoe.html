@@ -26,11 +26,10 @@
         @keyframes celebrate {
             0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); }
         }
-        /* Make disabled buttons look different */
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        /* Chat Box Styles */
+        #chat-messages { height: 150px; }
+        #chat-messages div:nth-child(odd) { background-color: #374151; } /* bg-gray-700 */
     </style>
 </head>
 <body class="bg-gray-900 text-gray-50 flex flex-col min-h-screen">
@@ -46,24 +45,18 @@
 
     <!-- Main Content -->
     <main class="flex items-center justify-center flex-grow w-full px-4">
-        <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md my-8 border border-gray-700">
+        <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-lg my-8 border border-gray-700">
 
             <!-- Lobby View -->
             <div id="lobby-view">
                 <h1 class="text-4xl text-center font-bold text-gray-100 mb-6">Multiplayer Tic-Tac-Toe</h1>
                 <div class="space-y-4">
                     <button id="create-game-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700" disabled>Create New Game</button>
-                    <div class="relative flex py-2 items-center">
-                        <div class="flex-grow border-t border-gray-600"></div>
-                        <span class="flex-shrink mx-4 text-gray-400">OR</span>
-                        <div class="flex-grow border-t border-gray-600"></div>
-                    </div>
+                    <div class="relative flex py-2 items-center"><div class="flex-grow border-t border-gray-600"></div><span class="flex-shrink mx-4 text-gray-400">OR</span><div class="flex-grow border-t border-gray-600"></div></div>
                     <input type="text" id="game-id-input" placeholder="Enter Game ID to Join" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-400">
                     <button id="join-game-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700" disabled>Join Game</button>
                 </div>
-                 <div id="user-info" class="text-center mt-6 text-xs text-gray-500">
-                    <p>Your User ID: <span id="user-id-display" class="font-mono">Connecting...</span></p>
-                </div>
+                 <div id="user-info" class="text-center mt-6 text-xs text-gray-500"><p>Your User ID: <span id="user-id-display" class="font-mono">Connecting...</span></p></div>
             </div>
 
             <!-- Game View -->
@@ -71,13 +64,15 @@
                 <div class="text-center mb-4">
                     <p class="text-sm text-gray-400">Game ID: <span id="game-id-display" class="font-mono cursor-pointer" title="Click to copy"></span></p>
                 </div>
-
+                <!-- Scoreboard -->
+                <div id="scoreboard" class="flex justify-around text-center mb-4">
+                    <div><p class="text-lg font-bold text-red-500">Player X</p><p id="score-x" class="text-3xl font-bold text-gray-100">0</p></div>
+                    <div><p class="text-lg font-bold text-blue-400">Player O</p><p id="score-o" class="text-3xl font-bold text-gray-100">0</p></div>
+                </div>
                 <!-- Status Display -->
-                <div id="status" class="text-center text-xl font-semibold text-gray-400 mb-6 h-8 flex items-center justify-center"></div>
-
+                <div id="status" class="text-center text-xl font-semibold text-gray-400 mb-4 h-8 flex items-center justify-center"></div>
                 <!-- Game Board -->
                 <div id="game-board" class="grid grid-cols-3 gap-3 mb-6">
-                    <!-- Cells 0-8 -->
                     <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="0"></div>
                     <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="1"></div>
                     <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="2"></div>
@@ -88,23 +83,30 @@
                     <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="7"></div>
                     <div class="cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="8"></div>
                 </div>
-                 <button id="leave-game-btn" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700">Leave Game</button>
-            </div>
-             <!-- Message Modal -->
-            <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div class="bg-gray-800 p-6 rounded-lg shadow-xl text-center">
-                    <p id="message-text" class="text-lg mb-4"></p>
-                    <button id="close-modal-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Close</button>
+                 <!-- Chat Box -->
+                <div id="chat-box" class="mb-4">
+                    <div id="chat-messages" class="bg-gray-900 rounded-lg p-2 overflow-y-auto border border-gray-600"></div>
+                    <div class="flex mt-2">
+                        <input type="text" id="chat-input" placeholder="Type a message..." class="flex-grow p-2 bg-gray-700 border border-gray-600 rounded-l-lg text-white focus:outline-none focus:ring-2 focus:ring-sky-400">
+                        <button id="send-chat-btn" class="bg-sky-500 text-white font-bold py-2 px-4 rounded-r-lg hover:bg-sky-600">Send</button>
+                    </div>
+                </div>
+                 <!-- Action Buttons -->
+                <div class="space-y-2">
+                    <button id="rematch-btn" class="w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 hidden">Request Rematch</button>
+                    <button id="leave-game-btn" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700">Leave Game</button>
                 </div>
             </div>
+             <!-- Message Modal -->
+            <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"><div class="bg-gray-800 p-6 rounded-lg shadow-xl text-center"><p id="message-text" class="text-lg mb-4"></p><button id="close-modal-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Close</button></div></div>
         </div>
     </main>
 
     <script type="module">
-        // --- FIREBASE IMPORTS (Updated to v12.0.0) ---
+        // --- FIREBASE IMPORTS ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
         // --- YOUR FIREBASE CONFIGURATION ---
         const firebaseConfig = {
@@ -117,80 +119,63 @@
             measurementId: "G-MH72MYGDVD"
         };
         
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
         // --- DOM ELEMENTS ---
-        const lobbyView = document.getElementById('lobby-view');
-        const gameView = document.getElementById('game-view');
-        const createGameBtn = document.getElementById('create-game-btn');
-        const joinGameBtn = document.getElementById('join-game-btn');
-        const leaveGameBtn = document.getElementById('leave-game-btn');
-        const gameIdInput = document.getElementById('game-id-input');
-        const userIdDisplay = document.getElementById('user-id-display');
-        const gameIdDisplay = document.getElementById('game-id-display');
-        const statusDisplay = document.getElementById('status');
+        const lobbyView = document.getElementById('lobby-view'), gameView = document.getElementById('game-view');
+        const createGameBtn = document.getElementById('create-game-btn'), joinGameBtn = document.getElementById('join-game-btn');
+        const leaveGameBtn = document.getElementById('leave-game-btn'), rematchBtn = document.getElementById('rematch-btn');
+        const gameIdInput = document.getElementById('game-id-input'), userIdDisplay = document.getElementById('user-id-display');
+        const gameIdDisplay = document.getElementById('game-id-display'), statusDisplay = document.getElementById('status');
+        const scoreXDisplay = document.getElementById('score-x'), scoreODisplay = document.getElementById('score-o');
         const cells = document.querySelectorAll('.cell');
-        const messageModal = document.getElementById('message-modal');
-        const messageText = document.getElementById('message-text');
-        const closeModalBtn = document.getElementById('close-modal-btn');
+        const chatMessages = document.getElementById('chat-messages'), chatInput = document.getElementById('chat-input'), sendChatBtn = document.getElementById('send-chat-btn');
+        const messageModal = document.getElementById('message-modal'), messageText = document.getElementById('message-text'), closeModalBtn = document.getElementById('close-modal-btn');
 
         // --- GAME STATE ---
-        let currentUserId = null;
-        let currentGameId = null;
-        let playerSymbol = null;
-        let unsubscribeGame = null; // To stop listening to game updates
+        let currentUserId = null, currentGameId = null, playerSymbol = null;
+        let unsubscribeGame = null, unsubscribeChat = null;
 
         // --- AUTHENTICATION ---
-        onAuthStateChanged(auth, async (user) => {
+        onAuthStateChanged(auth, user => {
             if (user) {
                 currentUserId = user.uid;
                 userIdDisplay.textContent = currentUserId;
-                createGameBtn.disabled = false;
-                joinGameBtn.disabled = false;
+                createGameBtn.disabled = false; joinGameBtn.disabled = false;
             } else {
-                 try {
-                    await signInAnonymously(auth);
-                } catch (error) {
-                    console.error("Authentication failed:", error);
-                    showMessage("Could not authenticate. Please refresh.");
-                }
+                signInAnonymously(auth).catch(err => showMessage("Authentication failed."));
             }
         });
         
         // --- LOBBY LOGIC ---
         createGameBtn.onclick = async () => {
-            const gameId = crypto.randomUUID().split('-')[0]; // A simple, short, unique ID
+            const gameId = crypto.randomUUID().split('-')[0];
             const gameRef = doc(db, "tic-tac-toe-games", gameId);
-            
-            const newGame = {
+            await setDoc(gameRef, {
                 board: Array(9).fill(null),
                 players: { [currentUserId]: 'X' },
                 playerIds: [currentUserId],
                 currentPlayer: 'X',
-                status: 'waiting', // waiting, active, finished
+                startingPlayer: 'X',
+                status: 'waiting',
                 winner: null,
-            };
-
-            await setDoc(gameRef, newGame);
+                scores: { X: 0, O: 0 },
+                rematch: {}
+            });
             switchToGameView(gameId, 'X');
         };
 
         joinGameBtn.onclick = async () => {
             const gameId = gameIdInput.value.trim();
-            if (!gameId) {
-                showMessage("Please enter a Game ID.");
-                return;
-            }
+            if (!gameId) return showMessage("Please enter a Game ID.");
             const gameRef = doc(db, "tic-tac-toe-games", gameId);
             const gameSnap = await getDoc(gameRef);
 
             if (gameSnap.exists()) {
                 const gameData = gameSnap.data();
                 if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUserId)) {
-                    // Join as player O
                     await updateDoc(gameRef, {
                         [`players.${currentUserId}`]: 'O',
                         playerIds: [...gameData.playerIds, currentUserId],
@@ -198,7 +183,6 @@
                     });
                     switchToGameView(gameId, 'O');
                 } else if (gameData.playerIds.includes(currentUserId)) {
-                    // Re-joining a game
                     switchToGameView(gameId, gameData.players[currentUserId]);
                 } else {
                     showMessage("This game is full.");
@@ -210,32 +194,38 @@
         
         leaveGameBtn.onclick = () => {
             if (unsubscribeGame) unsubscribeGame();
-            unsubscribeGame = null;
-            currentGameId = null;
-            playerSymbol = null;
+            if (unsubscribeChat) unsubscribeChat();
+            unsubscribeGame = null; unsubscribeChat = null;
+            currentGameId = null; playerSymbol = null;
             switchToLobbyView();
         };
 
         // --- GAME LOGIC ---
         function switchToGameView(gameId, symbol) {
-            currentGameId = gameId;
-            playerSymbol = symbol;
+            currentGameId = gameId; playerSymbol = symbol;
             gameIdDisplay.textContent = gameId;
-            
             lobbyView.classList.add('hidden');
             gameView.classList.remove('hidden');
 
-            // Listen for real-time updates to the game
             const gameRef = doc(db, "tic-tac-toe-games", gameId);
             unsubscribeGame = onSnapshot(gameRef, (doc) => {
                 const gameData = doc.data();
-                if (gameData) {
-                    updateUI(gameData);
-                } else {
-                    // Game was deleted or left
-                    showMessage("The game session has ended.");
-                    leaveGameBtn.click();
-                }
+                if (gameData) updateUI(gameData);
+                else { showMessage("The game session has ended."); leaveGameBtn.click(); }
+            });
+
+            const chatRef = collection(db, "tic-tac-toe-games", gameId, "messages");
+            const q = query(chatRef, orderBy("timestamp"));
+            unsubscribeChat = onSnapshot(q, (snapshot) => {
+                chatMessages.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const msg = doc.data();
+                    const msgDiv = document.createElement('div');
+                    msgDiv.classList.add('p-2', 'rounded-lg');
+                    msgDiv.textContent = `${msg.senderSymbol}: ${msg.text}`;
+                    chatMessages.appendChild(msgDiv);
+                });
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             });
         }
         
@@ -249,96 +239,113 @@
             // Update board
             gameData.board.forEach((symbol, index) => {
                 cells[index].textContent = symbol;
-                cells[index].classList.remove('text-red-500', 'text-blue-400', 'winning-cell');
+                cells[index].className = 'cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600';
                 if (symbol === 'X') cells[index].classList.add('text-red-500');
                 if (symbol === 'O') cells[index].classList.add('text-blue-400');
             });
+            
+            // Update scores
+            scoreXDisplay.textContent = gameData.scores.X;
+            scoreODisplay.textContent = gameData.scores.O;
 
-            // Update status
+            // Update status & buttons
+            rematchBtn.classList.add('hidden');
             if (gameData.status === 'finished') {
                 statusDisplay.textContent = gameData.winner ? `Player ${gameData.winner} wins! 🎉` : "It's a draw! 🤝";
+                rematchBtn.classList.remove('hidden');
+                if (gameData.rematch[currentUserId]) {
+                    rematchBtn.textContent = 'Waiting for opponent...';
+                    rematchBtn.disabled = true;
+                } else {
+                    rematchBtn.textContent = 'Request Rematch';
+                    rematchBtn.disabled = false;
+                }
             } else if (gameData.status === 'waiting') {
-                statusDisplay.textContent = 'Waiting for Player O to join...';
+                statusDisplay.textContent = 'Waiting for Player O...';
             } else {
-                statusDisplay.textContent = gameData.currentPlayer === playerSymbol 
-                    ? "Your turn" 
-                    : `Player ${gameData.currentPlayer}'s turn`;
+                statusDisplay.textContent = gameData.currentPlayer === playerSymbol ? "Your turn" : `Player ${gameData.currentPlayer}'s turn`;
             }
         }
         
-        cells.forEach(cell => {
+        cells.forEach((cell, index) => {
             cell.onclick = async () => {
-                const index = parseInt(cell.dataset.index);
                 const gameRef = doc(db, "tic-tac-toe-games", currentGameId);
                 const gameSnap = await getDoc(gameRef);
                 const gameData = gameSnap.data();
 
-                // Check if it's a valid move
                 if (gameData.status === 'active' && gameData.currentPlayer === playerSymbol && !gameData.board[index]) {
                     const newBoard = [...gameData.board];
                     newBoard[index] = playerSymbol;
-                    
                     const { winner, isDraw } = checkWinner(newBoard);
                     
-                    const nextPlayer = playerSymbol === 'X' ? 'O' : 'X';
-                    let newStatus = 'active';
-                    if (winner || isDraw) {
-                        newStatus = 'finished';
-                    }
-
-                    await updateDoc(gameRef, {
+                    const updates = {
                         board: newBoard,
-                        currentPlayer: nextPlayer,
-                        status: newStatus,
-                        winner: winner
-                    });
+                        currentPlayer: playerSymbol === 'X' ? 'O' : 'X',
+                    };
+
+                    if (winner || isDraw) {
+                        updates.status = 'finished';
+                        if (winner) {
+                            updates.winner = winner;
+                            updates[`scores.${winner}`] = gameData.scores[winner] + 1;
+                        }
+                    }
+                    await updateDoc(gameRef, updates);
                 }
             };
         });
         
-        function checkWinner(board) {
-            const winningConditions = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8],
-                [0, 3, 6], [1, 4, 7], [2, 5, 8],
-                [0, 4, 8], [2, 4, 6]
-            ];
-            let winner = null;
-            for (const condition of winningConditions) {
-                const [a, b, c] = condition;
-                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-                    winner = board[a];
-                    break;
-                }
+        rematchBtn.onclick = async () => {
+            const gameRef = doc(db, "tic-tac-toe-games", currentGameId);
+            const gameSnap = await getDoc(gameRef);
+            const gameData = gameSnap.data();
+            
+            const newRematchState = { ...gameData.rematch, [currentUserId]: true };
+            
+            if (Object.keys(newRematchState).length === 2) {
+                // Both players want a rematch, reset the game
+                const nextStarter = gameData.startingPlayer === 'X' ? 'O' : 'X';
+                await updateDoc(gameRef, {
+                    board: Array(9).fill(null),
+                    currentPlayer: nextStarter,
+                    startingPlayer: nextStarter,
+                    status: 'active',
+                    winner: null,
+                    rematch: {}
+                });
+            } else {
+                // Only one player wants a rematch, just record their vote
+                await updateDoc(gameRef, { rematch: newRematchState });
             }
-            const isDraw = !winner && board.every(cell => cell !== null);
-            return { winner, isDraw };
+        };
+
+        sendChatBtn.onclick = async () => {
+            const text = chatInput.value.trim();
+            if (text) {
+                const chatRef = collection(db, "tic-tac-toe-games", currentGameId, "messages");
+                await addDoc(chatRef, {
+                    text: text,
+                    senderId: currentUserId,
+                    senderSymbol: playerSymbol,
+                    timestamp: serverTimestamp()
+                });
+                chatInput.value = '';
+            }
+        };
+        chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatBtn.click(); });
+        
+        function checkWinner(board) {
+            const conditions = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            for (const c of conditions) {
+                if (board[c[0]] && board[c[0]] === board[c[1]] && board[c[0]] === board[c[2]]) return { winner: board[c[0]] };
+            }
+            return { isDraw: board.every(cell => cell !== null) };
         }
         
         // --- UTILITY FUNCTIONS ---
-        function showMessage(msg) {
-            messageText.textContent = msg;
-            messageModal.classList.remove('hidden');
-        }
+        function showMessage(msg) { messageText.textContent = msg; messageModal.classList.remove('hidden'); }
         closeModalBtn.onclick = () => messageModal.classList.add('hidden');
-        
-        gameIdDisplay.onclick = () => {
-            navigator.clipboard.writeText(currentGameId).then(() => {
-                showMessage("Game ID copied to clipboard!");
-            }).catch(err => {
-                 // Fallback for older browsers or restricted contexts
-                const textArea = document.createElement("textarea");
-                textArea.value = currentGameId;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    showMessage("Game ID copied to clipboard!");
-                } catch (err) {
-                    showMessage("Could not copy text.");
-                }
-                document.body.removeChild(textArea);
-            });
-        };
+        gameIdDisplay.onclick = () => navigator.clipboard.writeText(currentGameId).then(() => showMessage("Game ID copied!"));
 
     </script>
 </body>
