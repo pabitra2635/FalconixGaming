@@ -62,6 +62,9 @@
         .pointer-events-auto {
             pointer-events: auto;
         }
+        .leaderboard-tab.active {
+            @apply bg-sky-500 text-white;
+        }
         
         /* Fullscreen on mobile */
         @media (max-width: 768px) {
@@ -299,12 +302,34 @@
         <!-- Leaderboards Section -->
         <section id="leaderboards" class="py-16 sm:py-24 bg-gray-800/50">
             <div class="container mx-auto px-4 lg:px-8">
-                <h2 class="text-4xl font-black-ops text-center mb-12">Your High Scores</h2>
-                <div id="leaderboard-content" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Leaderboard cards will be injected here -->
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-black-ops text-center mb-4">Leaderboards</h2>
+                    <div class="inline-flex rounded-md shadow-sm" role="group">
+                        <button type="button" id="personal-leaderboard-btn" class="leaderboard-tab btn-primary rounded-l-lg">Your High Scores</button>
+                        <button type="button" id="global-leaderboard-btn" class="leaderboard-tab btn-secondary rounded-r-lg">Global Leaderboard</button>
+                    </div>
                 </div>
-                 <div id="leaderboard-login-prompt" class="text-center text-gray-400">
-                    <p>Please log in to see your high scores.</p>
+
+                <!-- Personal High Scores -->
+                <div id="personal-leaderboard">
+                    <div id="leaderboard-content" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Personal scores will be injected here -->
+                    </div>
+                    <div id="leaderboard-login-prompt" class="text-center text-gray-400">
+                        <p>Please log in to see your high scores.</p>
+                    </div>
+                </div>
+
+                <!-- Global Leaderboard -->
+                <div id="global-leaderboard" class="hidden">
+                     <div class="flex flex-wrap justify-center gap-4 mb-8">
+                        <button class="btn-primary global-game-tab active" data-game="Astro Jumper">Astro Jumper</button>
+                        <button class="btn-danger global-game-tab" data-game="Pixel Racer">Pixel Racer</button>
+                        <button class="btn-success global-game-tab" data-game="Tower Defense">Tower Defense</button>
+                    </div>
+                    <div id="global-leaderboard-content" class="max-w-3xl mx-auto">
+                        <!-- Global scores will be injected here -->
+                    </div>
                 </div>
             </div>
         </section>
@@ -406,7 +431,7 @@
         import * as CANNON from 'cannon-es';
         import { initializeApp } from 'firebase/app';
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
-        import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+        import { getFirestore, doc, setDoc, getDoc, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 
         document.addEventListener('DOMContentLoaded', () => {
 
@@ -440,6 +465,12 @@
             const mobileUserDisplayName = document.getElementById('mobile-user-display-name');
             const leaderboardContent = document.getElementById('leaderboard-content');
             const leaderboardLoginPrompt = document.getElementById('leaderboard-login-prompt');
+            const personalLeaderboardBtn = document.getElementById('personal-leaderboard-btn');
+            const globalLeaderboardBtn = document.getElementById('global-leaderboard-btn');
+            const personalLeaderboard = document.getElementById('personal-leaderboard');
+            const globalLeaderboard = document.getElementById('global-leaderboard');
+            const globalLeaderboardContent = document.getElementById('global-leaderboard-content');
+            const globalGameTabs = document.querySelectorAll('.global-game-tab');
 
             // --- Auth Functions ---
             const signInWithGoogle = () => signInWithPopup(auth, provider).catch(e => console.error(e));
@@ -449,6 +480,13 @@
             mobileLoginButton.addEventListener('click', signInWithGoogle);
             logoutButton.addEventListener('click', logout);
             mobileLogoutButton.addEventListener('click', logout);
+
+            // --- Save User Info ---
+            const saveUserInfo = async (user) => {
+                if (!user) return;
+                const userRef = doc(db, "users", user.uid);
+                await setDoc(userRef, { displayName: user.displayName }, { merge: true });
+            };
 
             // --- High Score Functions ---
             const saveHighScore = async (gameName, newScore) => {
@@ -464,8 +502,12 @@
                     if (newScore > currentScore) {
                         await setDoc(scoreRef, { [gameName]: newScore }, { merge: true });
                         console.log(`New high score for ${gameName}: ${newScore}`);
-                        // Refresh leaderboards after setting a new score
                         displayUserHighScores(user);
+                        // If the global leaderboard for the current game is active, refresh it
+                        const activeTab = document.querySelector('.global-game-tab.active');
+                        if (activeTab && activeTab.dataset.game === gameName) {
+                            displayGlobalLeaderboard(gameName);
+                        }
                     }
                 } catch (error) {
                     console.error("Error saving high score: ", error);
@@ -499,9 +541,52 @@
                 }
             };
 
+            const displayGlobalLeaderboard = async (gameName) => {
+                globalLeaderboardContent.innerHTML = '<p class="text-center text-gray-400">Loading...</p>';
+                const scoresQuery = query(collection(db, "highscores"), orderBy(gameName, "desc"), limit(10));
+                
+                try {
+                    const querySnapshot = await getDocs(scoresQuery);
+                    const scores = [];
+                    for (const scoreDoc of querySnapshot.docs) {
+                        if (scoreDoc.data()[gameName] !== undefined) {
+                            const userId = scoreDoc.id;
+                            const userDoc = await getDoc(doc(db, "users", userId));
+                            const userName = userDoc.exists() ? userDoc.data().displayName : "Anonymous";
+                            scores.push({
+                                name: userName,
+                                score: scoreDoc.data()[gameName]
+                            });
+                        }
+                    }
+
+                    if (scores.length === 0) {
+                         globalLeaderboardContent.innerHTML = '<p class="text-center text-gray-400">No scores yet for this game. Be the first!</p>';
+                         return;
+                    }
+
+                    globalLeaderboardContent.innerHTML = `
+                        <div class="space-y-4">
+                            ${scores.map((entry, index) => `
+                                <div class="glassmorphism p-4 rounded-lg flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <span class="text-lg font-bold w-8">${index + 1}.</span>
+                                        <span class="text-lg">${entry.name}</span>
+                                    </div>
+                                    <span class="text-2xl font-bold text-sky-400">${entry.score}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } catch (error) {
+                    console.error("Error fetching global leaderboard:", error);
+                    globalLeaderboardContent.innerHTML = '<p class="text-center text-red-400">Could not load leaderboard.</p>';
+                }
+            };
+
 
             // --- Auth State Change Listener ---
-            onAuthStateChanged(auth, (user) => {
+            onAuthStateChanged(auth, async (user) => {
                 const isLoggedIn = !!user;
                 loginButton.style.display = isLoggedIn ? 'none' : 'flex';
                 mobileLoginButton.style.display = isLoggedIn ? 'none' : 'block';
@@ -511,8 +596,38 @@
                 if (user) {
                     userDisplayName.textContent = user.displayName;
                     mobileUserDisplayName.textContent = user.displayName;
+                    await saveUserInfo(user);
                 }
                 displayUserHighScores(user);
+                // Load initial global leaderboard
+                displayGlobalLeaderboard('Astro Jumper');
+            });
+
+            // --- Leaderboard Tab Logic ---
+            personalLeaderboardBtn.addEventListener('click', () => {
+                personalLeaderboard.style.display = 'block';
+                globalLeaderboard.style.display = 'none';
+                personalLeaderboardBtn.classList.add('btn-primary');
+                personalLeaderboardBtn.classList.remove('btn-secondary');
+                globalLeaderboardBtn.classList.add('btn-secondary');
+                globalLeaderboardBtn.classList.remove('btn-primary');
+            });
+
+            globalLeaderboardBtn.addEventListener('click', () => {
+                personalLeaderboard.style.display = 'none';
+                globalLeaderboard.style.display = 'block';
+                personalLeaderboardBtn.classList.remove('btn-primary');
+                personalLeaderboardBtn.classList.add('btn-secondary');
+                globalLeaderboardBtn.classList.remove('btn-secondary');
+                globalLeaderboardBtn.classList.add('btn-primary');
+            });
+
+            globalGameTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    globalGameTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    displayGlobalLeaderboard(tab.dataset.game);
+                });
             });
 
             
