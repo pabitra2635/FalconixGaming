@@ -52,17 +52,17 @@
             <div id="lobby-view">
                 <h1 class="text-4xl text-center font-bold text-gray-100 mb-6">Multiplayer Tic-Tac-Toe</h1>
                 <div class="space-y-4">
-                    <button id="create-game-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700">Create New Game</button>
+                    <button id="create-game-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700" disabled>Create New Game</button>
                     <div class="relative flex py-2 items-center">
                         <div class="flex-grow border-t border-gray-600"></div>
                         <span class="flex-shrink mx-4 text-gray-400">OR</span>
                         <div class="flex-grow border-t border-gray-600"></div>
                     </div>
                     <input type="text" id="game-id-input" placeholder="Enter Game ID to Join" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-400">
-                    <button id="join-game-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700">Join Game</button>
+                    <button id="join-game-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700" disabled>Join Game</button>
                 </div>
                  <div id="user-info" class="text-center mt-6 text-xs text-gray-500">
-                    <p>Your User ID: <span id="user-id-display" class="font-mono"></span></p>
+                    <p>Your User ID: <span id="user-id-display" class="font-mono">Connecting...</span></p>
                 </div>
             </div>
 
@@ -91,7 +91,7 @@
                  <button id="leave-game-btn" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700">Leave Game</button>
             </div>
              <!-- Message Modal -->
-            <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div class="bg-gray-800 p-6 rounded-lg shadow-xl text-center">
                     <p id="message-text" class="text-lg mb-4"></p>
                     <button id="close-modal-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Close</button>
@@ -101,15 +101,23 @@
     </main>
 
     <script type="module">
-        // --- FIREBASE IMPORTS ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // --- FIREBASE IMPORTS (Updated to v12.0.0) ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-        // --- GLOBAL VARIABLES & CONFIG ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // --- YOUR FIREBASE CONFIGURATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAx4XGKJKQcLANt7gHs2ILrhSefoid39vM",
+            authDomain: "my-tictactoe-game-b9cf0.firebaseapp.com",
+            projectId: "my-tictactoe-game-b9cf0",
+            storageBucket: "my-tictactoe-game-b9cf0.appspot.com",
+            messagingSenderId: "483998697565",
+            appId: "1:483998697565:web:7b441bd1810e7bba6ae5b4",
+            measurementId: "G-MH72MYGDVD"
+        };
         
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -144,11 +152,7 @@
                 joinGameBtn.disabled = false;
             } else {
                  try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
+                    await signInAnonymously(auth);
                 } catch (error) {
                     console.error("Authentication failed:", error);
                     showMessage("Could not authenticate. Please refresh.");
@@ -159,7 +163,7 @@
         // --- LOBBY LOGIC ---
         createGameBtn.onclick = async () => {
             const gameId = crypto.randomUUID().split('-')[0]; // A simple, short, unique ID
-            const gameRef = doc(db, `artifacts/${appId}/public/data/tic-tac-toe-games`, gameId);
+            const gameRef = doc(db, "tic-tac-toe-games", gameId);
             
             const newGame = {
                 board: Array(9).fill(null),
@@ -180,7 +184,7 @@
                 showMessage("Please enter a Game ID.");
                 return;
             }
-            const gameRef = doc(db, `artifacts/${appId}/public/data/tic-tac-toe-games`, gameId);
+            const gameRef = doc(db, "tic-tac-toe-games", gameId);
             const gameSnap = await getDoc(gameRef);
 
             if (gameSnap.exists()) {
@@ -222,7 +226,7 @@
             gameView.classList.remove('hidden');
 
             // Listen for real-time updates to the game
-            const gameRef = doc(db, `artifacts/${appId}/public/data/tic-tac-toe-games`, gameId);
+            const gameRef = doc(db, "tic-tac-toe-games", gameId);
             unsubscribeGame = onSnapshot(gameRef, (doc) => {
                 const gameData = doc.data();
                 if (gameData) {
@@ -245,7 +249,7 @@
             // Update board
             gameData.board.forEach((symbol, index) => {
                 cells[index].textContent = symbol;
-                cells[index].classList.remove('text-red-500', 'text-blue-400');
+                cells[index].classList.remove('text-red-500', 'text-blue-400', 'winning-cell');
                 if (symbol === 'X') cells[index].classList.add('text-red-500');
                 if (symbol === 'O') cells[index].classList.add('text-blue-400');
             });
@@ -265,7 +269,7 @@
         cells.forEach(cell => {
             cell.onclick = async () => {
                 const index = parseInt(cell.dataset.index);
-                const gameRef = doc(db, `artifacts/${appId}/public/data/tic-tac-toe-games`, currentGameId);
+                const gameRef = doc(db, "tic-tac-toe-games", currentGameId);
                 const gameSnap = await getDoc(gameRef);
                 const gameData = gameSnap.data();
 
