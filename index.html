@@ -102,9 +102,15 @@
                     <a href="#" class="text-gray-300 hover:text-sky-400 transition-colors">Home</a>
                     <a href="#games" class="text-gray-300 hover:text-sky-400 transition-colors">Games</a>
                     <a href="#how-to-play" class="text-gray-300 hover:text-sky-400 transition-colors">How to Play</a>
-                    <a href="#" class="text-gray-300 hover:text-sky-400 transition-colors">Leaderboards</a>
+                    <a href="#leaderboards" class="text-gray-300 hover:text-sky-400 transition-colors">Leaderboards</a>
                 </div>
-                <button class="btn-primary hidden md:block">Login</button>
+                <div class="hidden md:flex items-center space-x-4">
+                    <button id="login-button" class="btn-primary">Login with Google</button>
+                    <div id="user-info" class="hidden items-center space-x-4">
+                        <span id="user-display-name" class="text-white font-semibold"></span>
+                        <button id="logout-button" class="btn-secondary">Logout</button>
+                    </div>
+                </div>
                 <!-- Mobile Menu Button -->
                  <button id="mobile-menu-button" class="md:hidden text-gray-300 hover:text-white">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
@@ -117,8 +123,12 @@
                 <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Home</a>
                 <a href="#games" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Games</a>
                 <a href="#how-to-play" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">How to Play</a>
-                <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Leaderboards</a>
-                <button class="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Login</button>
+                <a href="#leaderboards" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Leaderboards</a>
+                <button id="mobile-login-button" class="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Login with Google</button>
+                <div id="mobile-user-info" class="hidden px-3 py-2">
+                    <span id="mobile-user-display-name" class="block text-base font-medium text-white"></span>
+                    <button id="mobile-logout-button" class="w-full text-left mt-2 block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Logout</button>
+                </div>
             </div>
         </div>
     </header>
@@ -139,7 +149,7 @@
                 <div id="inGameUI" class="hidden absolute top-5 left-5 text-left pointer-events-passthrough">
                     <p class="text-2xl font-bold">Score: <span id="score">0</span></p>
                 </div>
-                <div id="gameOverScreen" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
+                <div id="gameOverScreen" data-game-name="Astro Jumper" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
                     <h2 class="text-5xl font-black-ops text-white">GAME OVER</h2>
                     <p class="mt-4 text-2xl text-gray-200">Final Score: <span id="finalScore" class="font-bold text-sky-400">0</span></p>
                     <button id="restartButton" class="btn-primary mt-6 text-xl">Play Again</button>
@@ -199,7 +209,7 @@
                     </div>
                     <!-- Game Card 4 -->
                     <a href="tictactoe.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
-                        <img src="https://www.rd.com/wp-content/uploads/2019/10/tic-tac-toe-scaled.jpg" alt="Tic-Tac-Toe" class="w-full h-full object-cover">
+                        <img src="https://wallpapercave.com/wp/wp8984750.jpg" alt="Tic-Tac-Toe" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-end">
                             <div class="flex items-center gap-3">
@@ -228,12 +238,46 @@
                         </div>
                     </a>
                 </div>
-                 <div class="mt-16 text-center">
-                    <a href="mptictactoe.html" class="btn-primary text-lg">View More Games</a>
-                </div>
             </div>
         </section>
-
+<!-- Multiplayer Games Section -->
+<section id="multiplayer-games" class="py-16 sm:py-24 bg-gray-900/50">
+    <div class="container mx-auto px-4 lg:px-8">
+        <h2 class="text-4xl font-black-ops text-center mb-12">Multiplayer Games</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Game Card 1 -->
+            <a href="mptictactoe.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+                <img src="https://www.rd.com/wp-content/uploads/2019/10/tic-tac-toe-scaled.jpg" alt="Tic-Tac-Toe" class="w-full h-full object-cover">
+                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                <div class="absolute inset-0 p-6 flex flex-col justify-end">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-8 h-8 text-orange-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <h3 class="text-2xl font-bold text-white">Tic-Tac-Toe</h3>
+                    </div>
+                    <p class="text-orange-400 mt-1">Puzzle</p>
+                </div>
+                 <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
+                    <span class="btn-warning pointer-events-none">Play Now</span>
+                </div>
+            </a>
+            <!-- Coming Soon Card 2 -->
+            <div class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+                <img src="https://placehold.co/600x400/ef4444/white?text=Starship+Defender" alt="Starship Defender" class="w-full h-full object-cover">
+                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                <div class="absolute inset-0 p-6 flex flex-col justify-end">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-8 h-8 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <h3 class="text-2xl font-bold text-white">Starship Defender</h3>
+                    </div>
+                    <p class="text-red-400 mt-1">Coming Soon</p>
+                </div>
+                 <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
+                    <span class="text-xl font-semibold text-white">Coming Soon!</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
         <!-- How to Play Section -->
         <section id="how-to-play" class="py-16 sm:py-24 bg-gray-900">
             <div class="container mx-auto px-4 lg:px-8 text-center">
@@ -251,6 +295,20 @@
                 </div>
             </div>
         </section>
+
+        <!-- Leaderboards Section -->
+        <section id="leaderboards" class="py-16 sm:py-24 bg-gray-800/50">
+            <div class="container mx-auto px-4 lg:px-8">
+                <h2 class="text-4xl font-black-ops text-center mb-12">Your High Scores</h2>
+                <div id="leaderboard-content" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Leaderboard cards will be injected here -->
+                </div>
+                 <div id="leaderboard-login-prompt" class="text-center text-gray-400">
+                    <p>Please log in to see your high scores.</p>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Footer -->
@@ -279,7 +337,7 @@
                     <div id="racerInGameUI" class="hidden absolute top-5 left-5 text-left">
                         <p class="text-2xl font-bold text-white">Score: <span id="racerScore">0</span></p>
                     </div>
-                    <div id="racerGameOverScreen" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
+                    <div id="racerGameOverScreen" data-game-name="Pixel Racer" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
                         <h2 class="text-5xl font-black-ops text-white">CRASHED!</h2>
                         <p class="mt-4 text-2xl text-gray-200">Final Score: <span id="racerFinalScore" class="font-bold text-pink-400">0</span></p>
                         <button id="racerRestartButton" class="btn-danger mt-6 text-xl">Try Again</button>
@@ -317,7 +375,7 @@
                         </div>
                         <button id="nextWaveButton" class="absolute bottom-2 right-2 btn-success pointer-events-auto">Next Wave</button>
                     </div>
-                    <div id="tdGameOverScreen" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
+                    <div id="tdGameOverScreen" data-game-name="Tower Defense" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
                         <h2 id="tdEndTitle" class="text-5xl font-black-ops text-white"></h2>
                         <p class="mt-4 text-2xl text-gray-200">You survived <span id="tdFinalWave" class="font-bold text-green-400">0</span> waves.</p>
                         <button id="tdRestartButton" class="btn-success mt-8 text-xl">Play Again</button>
@@ -336,15 +394,127 @@
     {
         "imports": {
             "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.157.0/three.module.js",
-            "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
+            "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js",
+            "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
+            "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
+            "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
         }
     }
     </script>
     <script type="module">
         import * as THREE from 'three';
         import * as CANNON from 'cannon-es';
+        import { initializeApp } from 'firebase/app';
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+        import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 
         document.addEventListener('DOMContentLoaded', () => {
+
+            // #############################################
+            // ### FIREBASE SETUP                        ###
+            // #############################################
+            
+            const firebaseConfig = {
+                apiKey: "AIzaSyD02ui4dhTuGLz-Ff1af36ERdqqsn4iIeU",
+                authDomain: "falconixgaming-46210.firebaseapp.com",
+                projectId: "falconixgaming-46210",
+                storageBucket: "falconixgaming-46210.appspot.com",
+                messagingSenderId: "1096905282147",
+                appId: "1:1096905282147:web:e2faa9105d31c6ec009e56",
+                measurementId: "G-VJ6YC0GXK5"
+            };
+
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            const provider = new GoogleAuthProvider();
+
+            // --- UI Elements ---
+            const loginButton = document.getElementById('login-button');
+            const mobileLoginButton = document.getElementById('mobile-login-button');
+            const logoutButton = document.getElementById('logout-button');
+            const mobileLogoutButton = document.getElementById('mobile-logout-button');
+            const userInfo = document.getElementById('user-info');
+            const mobileUserInfo = document.getElementById('mobile-user-info');
+            const userDisplayName = document.getElementById('user-display-name');
+            const mobileUserDisplayName = document.getElementById('mobile-user-display-name');
+            const leaderboardContent = document.getElementById('leaderboard-content');
+            const leaderboardLoginPrompt = document.getElementById('leaderboard-login-prompt');
+
+            // --- Auth Functions ---
+            const signInWithGoogle = () => signInWithPopup(auth, provider).catch(e => console.error(e));
+            const logout = () => signOut(auth).catch(e => console.error(e));
+
+            loginButton.addEventListener('click', signInWithGoogle);
+            mobileLoginButton.addEventListener('click', signInWithGoogle);
+            logoutButton.addEventListener('click', logout);
+            mobileLogoutButton.addEventListener('click', logout);
+
+            // --- High Score Functions ---
+            const saveHighScore = async (gameName, newScore) => {
+                const user = auth.currentUser;
+                if (!user || !gameName || typeof newScore !== 'number') return;
+
+                const scoreRef = doc(db, "highscores", user.uid);
+                try {
+                    const docSnap = await getDoc(scoreRef);
+                    const currentData = docSnap.exists() ? docSnap.data() : {};
+                    const currentScore = currentData[gameName] || 0;
+
+                    if (newScore > currentScore) {
+                        await setDoc(scoreRef, { [gameName]: newScore }, { merge: true });
+                        console.log(`New high score for ${gameName}: ${newScore}`);
+                        // Refresh leaderboards after setting a new score
+                        displayUserHighScores(user);
+                    }
+                } catch (error) {
+                    console.error("Error saving high score: ", error);
+                }
+            };
+            
+            const displayUserHighScores = async (user) => {
+                if (user) {
+                    leaderboardContent.style.display = 'grid';
+                    leaderboardLoginPrompt.style.display = 'none';
+                    const scoreRef = doc(db, "highscores", user.uid);
+                    const docSnap = await getDoc(scoreRef);
+                    const scores = docSnap.exists() ? docSnap.data() : {};
+                    
+                    const games = ["Astro Jumper", "Pixel Racer", "Tower Defense"];
+                    leaderboardContent.innerHTML = games.map(game => {
+                        const score = scores[game] || 0;
+                        return `
+                        <div class="glassmorphism p-6 rounded-xl text-center">
+                            <h3 class="text-2xl font-bold text-indigo-300">${game}</h3>
+                            <p class="text-4xl font-black-ops text-white mt-4">${score}</p>
+                            <p class="text-gray-400 mt-1">${game === 'Tower Defense' ? 'Waves Survived' : 'Points'}</p>
+                        </div>
+                        `;
+                    }).join('');
+
+                } else {
+                    leaderboardContent.style.display = 'none';
+                    leaderboardLoginPrompt.style.display = 'block';
+                    leaderboardContent.innerHTML = '';
+                }
+            };
+
+
+            // --- Auth State Change Listener ---
+            onAuthStateChanged(auth, (user) => {
+                const isLoggedIn = !!user;
+                loginButton.style.display = isLoggedIn ? 'none' : 'flex';
+                mobileLoginButton.style.display = isLoggedIn ? 'none' : 'block';
+                userInfo.style.display = isLoggedIn ? 'flex' : 'none';
+                mobileUserInfo.style.display = isLoggedIn ? 'block' : 'none';
+
+                if (user) {
+                    userDisplayName.textContent = user.displayName;
+                    mobileUserDisplayName.textContent = user.displayName;
+                }
+                displayUserHighScores(user);
+            });
+
             
             // #############################################
             // ### MOBILE MENU TOGGLE                    ###
@@ -535,6 +705,7 @@
             async function endAstroJumper() {
                 isGameRunning = false;
                 finalScoreElement.innerText = score;
+                await saveHighScore('Astro Jumper', score);
                 document.getElementById('uiLayer').classList.remove('pointer-events-passthrough');
                 document.getElementById('uiLayer').style.backgroundColor = 'rgba(0,0,0,0.5)';
                 document.getElementById('inGameUI').style.display = 'none';
@@ -636,6 +807,7 @@
                 stopRacerGame();
                 const finalRacerScore = Math.floor(racerScore);
                 racerFinalScoreEl.textContent = finalRacerScore;
+                await saveHighScore('Pixel Racer', finalRacerScore);
                 racerGameOverScreen.style.display = 'flex';
                 racerInGameUI.style.display = 'none';
             }
@@ -1004,6 +1176,7 @@
             }
             async function endGameTD(win) {
                 stopTDGame();
+                await saveHighScore('Tower Defense', wave);
                 tdInGameUI.style.display = 'none';
                 tdGameOverScreen.style.display = 'flex';
                 tdEndTitleEl.textContent = win ? "VICTORY!" : "DEFEAT!";
