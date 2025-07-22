@@ -192,7 +192,16 @@
             }
         };
         
-        leaveGameBtn.onclick = () => {
+        leaveGameBtn.onclick = async () => {
+            if (currentGameId) {
+                const gameRef = doc(db, "tic-tac-toe-games", currentGameId);
+                // Set status to abandoned to notify the other player
+                await updateDoc(gameRef, { status: 'abandoned' }).catch(err => {
+                    console.error("Couldn't update game status on leave:", err);
+                });
+            }
+            
+            // Perform local cleanup
             if (unsubscribeGame) unsubscribeGame();
             if (unsubscribeChat) unsubscribeChat();
             unsubscribeGame = null; unsubscribeChat = null;
@@ -233,9 +242,35 @@
             gameView.classList.add('hidden');
             lobbyView.classList.remove('hidden');
             gameIdInput.value = '';
+            delete document.body.dataset.abandoned; // Reset abandoned state flag
         }
 
         function updateUI(gameData) {
+            // Handle abandoned game state first
+            if (gameData.status === 'abandoned') {
+                if (document.body.dataset.abandoned === 'true') return;
+                document.body.dataset.abandoned = 'true';
+
+                showMessage("Your opponent has left the game.");
+                statusDisplay.textContent = "Opponent has left.";
+                
+                const returnToLobby = () => {
+                    if (!messageModal.classList.contains('hidden')) {
+                        messageModal.classList.add('hidden');
+                    }
+                    leaveGameBtn.click();
+                };
+
+                closeModalBtn.onclick = returnToLobby;
+                setTimeout(returnToLobby, 3000);
+                return;
+            } else {
+                delete document.body.dataset.abandoned;
+            }
+            
+            // Reset modal button to default behavior if not handled by a special case
+            closeModalBtn.onclick = () => messageModal.classList.add('hidden');
+
             // Update board
             gameData.board.forEach((symbol, index) => {
                 cells[index].textContent = symbol;
