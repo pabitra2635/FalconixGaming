@@ -87,7 +87,7 @@
             <div id="auth-view" class="text-center hidden">
                 <h1 class="text-4xl font-bold text-gray-100 mb-4">Welcome!</h1>
                 <p class="text-gray-400 mb-6">Please log in on the main page to play multiplayer chess.</p>
-                <a href="index.html?login=true" class="btn-primary w-full inline-block">Go to Login</a>
+                <a href="index.html?login=true" id="auth-view-login-button" class="btn-primary w-full inline-block">Go to Login</a>
             </div>
 
             <!-- Lobby View -->
@@ -175,6 +175,7 @@
 
         // DOM Elements
         const loadingView = document.getElementById('loading-view'), authView = document.getElementById('auth-view'), lobbyView = document.getElementById('lobby-view'), gameView = document.getElementById('game-view');
+        const authViewLoginButton = document.getElementById('auth-view-login-button');
         const userInfoHeader = document.getElementById('user-info-header'), userDisplayName = document.getElementById('user-display-name');
         const createGameBtn = document.getElementById('create-game-btn'), joinGameBtn = document.getElementById('join-game-btn'), leaveGameBtn = document.getElementById('leave-game-btn');
         const gameIdInput = document.getElementById('game-id-input'), userIdDisplay = document.getElementById('user-id-display'), gameIdDisplay = document.getElementById('game-id-display');
