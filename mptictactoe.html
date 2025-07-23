@@ -117,7 +117,7 @@
     <script type="module">
         // --- FIREBASE IMPORTS ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, indexedDBLocalPersistence, initializeAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // --- YOUR FALCONIXGAMING FIREBASE CONFIGURATION ---
@@ -132,8 +132,7 @@
         };
         
         const app = initializeApp(firebaseConfig);
-        // Use indexedDBLocalPersistence to share auth state across tabs
-        const auth = initializeAuth(app, { persistence: indexedDBLocalPersistence });
+        const auth = getAuth(app); // Simplified initialization
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
