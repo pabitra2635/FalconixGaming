@@ -103,24 +103,15 @@
                         <button id="send-chat-btn" class="bg-sky-500 text-white font-bold py-2 px-4 rounded-r-lg hover:bg-sky-600">Send</button>
                     </div>
                 </div>
-                <button id="leave-game-btn" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700">Leave Game</button>
+                <div class="space-y-2">
+                    <button id="rematch-btn" class="w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 hidden">Request Rematch</button>
+                    <button id="leave-game-btn" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700">Leave Game</button>
+                </div>
             </div>
              <!-- Message Modal -->
             <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"><div class="bg-gray-800 p-6 rounded-lg shadow-xl text-center"><p id="message-text" class="text-lg mb-4"></p><button id="close-modal-btn" class="btn-primary">Close</button></div></div>
         </div>
     </main>
-
-    <!-- Footer -->
-    <footer class="bg-gray-900 border-t border-gray-700">
-        <div class="container mx-auto px-4 lg:px-8 py-8 text-center text-gray-400">
-            <p>&copy; 2025 <a href="https://chat.whatsapp.com/DUXdfaOxJoPC87KjRWbkjo" style="text-decoration:underline;">FalconixGaming</a>. All Rights Reserved.</p>
-            <div class="flex justify-center space-x-6 mt-4">
-                <a href="https://wa.me/qr/MRKTOLBP5VHRI1" class="hover:text-white">Privacy Policy</a>
-                <a href="https://wa.me/qr/MRKTOLBP5VHRI1" class="hover:text-white">Terms of Service</a>
-                <a href="https://wa.me/qr/MRKTOLBP5VHRI1" class="hover:text-white">Contact</a>
-            </div>
-        </div>
-    </footer>
 
     <script type="module">
         // --- FIREBASE IMPORTS ---
@@ -148,7 +139,7 @@
         const authView = document.getElementById('auth-view'), lobbyView = document.getElementById('lobby-view'), gameView = document.getElementById('game-view');
         const userInfoHeader = document.getElementById('user-info-header'), userDisplayName = document.getElementById('user-display-name');
         const createGameBtn = document.getElementById('create-game-btn'), joinGameBtn = document.getElementById('join-game-btn');
-        const leaveGameBtn = document.getElementById('leave-game-btn');
+        const leaveGameBtn = document.getElementById('leave-game-btn'), rematchBtn = document.getElementById('rematch-btn');
         const gameIdInput = document.getElementById('game-id-input'), userIdDisplay = document.getElementById('user-id-display');
         const gameIdDisplay = document.getElementById('game-id-display'), statusDisplay = document.getElementById('status');
         const player1ScoreBox = document.getElementById('player1-score-box'), player2ScoreBox = document.getElementById('player2-score-box');
@@ -204,6 +195,7 @@
                 status: 'waiting',
                 flippedIndices: [],
                 lockBoard: false,
+                rematch: {}
             });
             switchToGameView(gameId, 'P1');
         };
@@ -241,6 +233,31 @@
             if (unsubscribeGame) unsubscribeGame();
             if (unsubscribeChat) unsubscribeChat();
             switchToLobbyView();
+        };
+
+        rematchBtn.onclick = async () => {
+            const gameRef = doc(db, "mp-memory-match", currentGameId);
+            const gameSnap = await getDoc(gameRef);
+            const gameData = gameSnap.data();
+            
+            const newRematchState = { ...gameData.rematch, [currentUser.uid]: true };
+            
+            if (Object.keys(newRematchState).length === 2) {
+                const fullDeck = [...cardSymbols, ...cardSymbols];
+                shuffleArray(fullDeck);
+                const newCards = fullDeck.map(symbol => ({ symbol, isFlipped: false, isMatched: false }));
+
+                await updateDoc(gameRef, {
+                    cards: newCards,
+                    status: 'active',
+                    flippedIndices: [],
+                    lockBoard: false,
+                    rematch: {},
+                    currentPlayerId: gameData.playerIds.find(id => id !== gameData.currentPlayerId) || gameData.playerIds[0] // Alternate starter
+                });
+            } else {
+                await updateDoc(gameRef, { rematch: newRematchState });
+            }
         };
 
         // --- GAME LOGIC ---
@@ -300,10 +317,19 @@
             scoreP2Display.textContent = gameData.scores.P2 || 0;
             player1ScoreBox.classList.toggle('turn-indicator', gameData.currentPlayerId === player1Id);
             player2ScoreBox.classList.toggle('turn-indicator', gameData.currentPlayerId === player2Id);
-
+            
+            rematchBtn.classList.add('hidden');
             if (gameData.status === 'finished') {
                 const winnerId = gameData.scores.P1 > gameData.scores.P2 ? player1Id : (gameData.scores.P2 > gameData.scores.P1 ? player2Id : null);
                 statusDisplay.textContent = winnerId ? `${gameData.players[winnerId].name} wins!` : "It's a draw!";
+                rematchBtn.classList.remove('hidden');
+                if (gameData.rematch[currentUser.uid]) {
+                    rematchBtn.textContent = 'Waiting for opponent...';
+                    rematchBtn.disabled = true;
+                } else {
+                    rematchBtn.textContent = 'Request Rematch';
+                    rematchBtn.disabled = false;
+                }
             } else if (gameData.status === 'waiting') {
                 statusDisplay.textContent = 'Waiting for Player 2...';
             } else {
