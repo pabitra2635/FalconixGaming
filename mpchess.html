@@ -6,11 +6,6 @@
     <title>Multiplayer Chess</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- Libraries for Chess Logic and Firebase -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -67,20 +62,17 @@
 
     <div id="main-container" class="w-full max-w-5xl mx-auto flex flex-col items-center">
         
-        <!-- Loading View -->
         <div id="loading-view" class="text-center p-8">
             <h1 class="text-3xl md:text-5xl font-bold text-center mb-4">Multiplayer Chess</h1>
             <p class="text-xl text-gray-400">Checking Login Status...</p>
         </div>
 
-        <!-- Auth View -->
         <div id="auth-view" class="text-center p-8 hidden">
             <h1 class="text-3xl md:text-5xl font-bold text-center mb-4">Welcome!</h1>
             <p class="text-xl text-gray-400 mb-6">Please log in on the main page to play.</p>
             <a href="index.html?login=true" class="btn-primary text-lg">Go to Login</a>
         </div>
 
-        <!-- Lobby View -->
         <div id="lobby-view" class="w-full max-w-md p-8 bg-gray-900 rounded-lg shadow-xl hidden">
             <h1 class="text-3xl md:text-5xl font-bold text-center mb-6">Game Lobby</h1>
             <div class="space-y-4">
@@ -95,7 +87,6 @@
             </div>
         </div>
 
-        <!-- Game View -->
         <div id="game-view" class="w-full hidden lg:grid lg:grid-cols-3 lg:gap-8 items-start">
             <div class="lg:col-span-2 flex flex-col items-center">
                 <div id="board" class="board"></div>
@@ -127,7 +118,6 @@
         </div>
     </div>
 
-    <!-- Message Modal -->
     <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
         <div class="bg-gray-800 p-6 rounded-lg shadow-xl text-center border border-gray-600">
             <p id="message-text" class="text-lg mb-4"></p>
@@ -135,7 +125,13 @@
         </div>
     </div>
 
-    <script>
+    <!-- FIX: Revert to the modern, modular script loading approach -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { Chess } from 'https://cdn.skypack.dev/chess.js';
+
         document.addEventListener('DOMContentLoaded', () => {
             const firebaseConfig = {
                 apiKey: "AIzaSyD02ui4dhTuGLz-Ff1af36ERdqqsn4iIeU",
@@ -147,11 +143,10 @@
                 measurementId: "G-VJ6YC0GXK5"
             };
             
-            firebase.initializeApp(firebaseConfig);
-            const auth = firebase.auth();
-            const db = firebase.firestore();
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
 
-            // DOM Elements
             const loadingView = document.getElementById('loading-view'), authView = document.getElementById('auth-view'), lobbyView = document.getElementById('lobby-view'), gameView = document.getElementById('game-view');
             const createGameBtn = document.getElementById('create-game-btn'), joinGameBtn = document.getElementById('join-game-btn'), leaveGameBtn = document.getElementById('leave-game-btn');
             const gameIdInput = document.getElementById('game-id-input'), gameIdDisplay = document.getElementById('game-id-display');
@@ -161,35 +156,28 @@
             const chatMessages = document.getElementById('chat-messages'), chatInput = document.getElementById('chat-input'), sendChatBtn = document.getElementById('send-chat-btn');
             const messageModal = document.getElementById('message-modal'), messageText = document.getElementById('message-text'), closeModalBtn = document.getElementById('close-modal-btn');
 
-            // Game State
             let currentUser = null, currentGameId = null, playerColor = null;
             let unsubscribeGame = null, unsubscribeChat = null;
             let chess = new Chess();
             let selectedSquare = null;
 
-            // --- AUTHENTICATION ---
-            auth.onAuthStateChanged(user => {
+            onAuthStateChanged(auth, user => {
                 currentUser = user;
                 loadingView.classList.add('hidden'); 
                 if (user) {
                     authView.classList.add('hidden');
-                    if (gameView.classList.contains('hidden')) {
-                        lobbyView.classList.remove('hidden');
-                    }
+                    if (gameView.classList.contains('hidden')) lobbyView.classList.remove('hidden');
                 } else {
                     lobbyView.classList.add('hidden');
                     authView.classList.remove('hidden');
-                    if (!gameView.classList.contains('hidden')) {
-                        leaveGameBtn.click();
-                    }
+                    if (!gameView.classList.contains('hidden')) leaveGameBtn.click();
                 }
             });
 
-            // --- LOBBY LOGIC ---
             createGameBtn.onclick = async () => {
                 const gameId = crypto.randomUUID().split('-')[0];
-                const gameRef = db.collection("mp-chess-games").doc(gameId);
-                await gameRef.set({
+                const gameRef = doc(db, "mp-chess-games", gameId);
+                await setDoc(gameRef, {
                     fen: new Chess().fen(),
                     players: { [currentUser.uid]: { color: 'w', name: currentUser.displayName } },
                     playerIds: [currentUser.uid],
@@ -202,15 +190,15 @@
             joinGameBtn.onclick = async () => {
                 const gameId = gameIdInput.value.trim();
                 if (!gameId) return showMessage("Please enter a Game ID.");
-                const gameRef = db.collection("mp-chess-games").doc(gameId);
-                const gameSnap = await gameRef.get();
+                const gameRef = doc(db, "mp-chess-games", gameId);
+                const gameSnap = await getDoc(gameRef);
 
-                if (gameSnap.exists) {
+                if (gameSnap.exists()) {
                     const gameData = gameSnap.data();
                     if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUser.uid)) {
-                        await gameRef.update({
+                        await updateDoc(gameRef, {
                             [`players.${currentUser.uid}`]: { color: 'b', name: currentUser.displayName },
-                            playerIds: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+                            playerIds: arrayUnion(currentUser.uid),
                             status: 'active'
                         });
                         switchToGameView(gameId, 'b');
@@ -226,14 +214,14 @@
             
             leaveGameBtn.onclick = async () => {
                 if (currentGameId) {
-                    await db.collection("mp-chess-games").doc(currentGameId).update({ status: 'abandoned' }).catch(()=>{});
+                    const gameRef = doc(db, "mp-chess-games", currentGameId);
+                    await updateDoc(gameRef, { status: 'abandoned' }).catch(()=>{});
                 }
                 if (unsubscribeGame) unsubscribeGame();
                 if (unsubscribeChat) unsubscribeChat();
                 switchToLobbyView();
             };
 
-            // --- VIEW SWITCHING ---
             function switchToGameView(gameId, color) {
                 currentGameId = gameId; 
                 playerColor = color;
@@ -242,17 +230,16 @@
                 gameView.classList.remove('hidden');
                 gameView.classList.add('lg:grid');
 
-                unsubscribeGame = db.collection("mp-chess-games").doc(gameId).onSnapshot((doc) => {
+                const gameRef = doc(db, "mp-chess-games", gameId);
+                unsubscribeGame = onSnapshot(gameRef, (doc) => {
                     const gameData = doc.data();
-                    if (gameData) {
-                        renderGameState(gameData);
-                    } else {
-                        showMessage("Game session has ended.");
-                        leaveGameBtn.click();
-                    }
+                    if (gameData) renderGameState(gameData);
+                    else { showMessage("Game session has ended."); leaveGameBtn.click(); }
                 });
 
-                unsubscribeChat = db.collection("mp-chess-games").doc(gameId).collection("messages").orderBy("timestamp").onSnapshot((snapshot) => {
+                const messagesRef = collection(db, "mp-chess-games", gameId, "messages");
+                const q = query(messagesRef, orderBy("timestamp"));
+                unsubscribeChat = onSnapshot(q, (snapshot) => {
                     chatMessages.innerHTML = '';
                     snapshot.forEach(doc => {
                         const msg = doc.data();
@@ -271,7 +258,6 @@
                 currentGameId = null; playerColor = null; selectedSquare = null; chess = new Chess();
             }
 
-            // --- GAME LOGIC & RENDERING ---
             function renderGameState(gameData) {
                 if (gameData.status === 'abandoned' && gameData.playerIds.includes(currentUser.uid)) {
                     showMessage("Your opponent has left the game.");
@@ -293,12 +279,10 @@
                     for (let j = 0; j < 8; j++) {
                         const row = isWhiteView ? i : 7 - i;
                         const col = isWhiteView ? j : 7 - j;
-                        
                         const squareEl = document.createElement('div');
                         const squareName = String.fromCharCode(97 + col) + (8 - row);
                         squareEl.dataset.square = squareName;
                         squareEl.classList.add('square', (row + col) % 2 === 0 ? 'light' : 'dark');
-                        
                         const piece = board[row][col];
                         if (piece) {
                             const pieceEl = document.createElement('span');
@@ -306,7 +290,6 @@
                             pieceEl.textContent = getPieceUnicode(piece);
                             squareEl.appendChild(pieceEl);
                         }
-                        
                         squareEl.onclick = () => onSquareClick(squareName);
                         boardElement.appendChild(squareEl);
                     }
@@ -316,19 +299,12 @@
             
             function onSquareClick(squareName) {
                 if (chess.isGameOver() || chess.turn() !== playerColor) return;
-
                 if (selectedSquare) {
-                    const move = { from: selectedSquare, to: squareName, promotion: 'q' };
                     try {
-                        const result = chess.move(move);
-                        if (result) {
-                            updateFirebaseWithMove();
-                        }
+                        const result = chess.move({ from: selectedSquare, to: squareName, promotion: 'q' });
+                        if (result) updateFirebaseWithMove();
                     } catch (e) { /* Invalid move */ } 
-                    finally {
-                        clearHighlights();
-                        selectedSquare = null;
-                    }
+                    finally { clearHighlights(); selectedSquare = null; }
                 } else {
                     const piece = chess.get(squareName);
                     if (piece && piece.color === playerColor) {
@@ -339,33 +315,26 @@
             }
             
             async function updateFirebaseWithMove() {
-                const gameRef = db.collection("mp-chess-games").doc(currentGameId);
-                let status = 'active';
-                let winner = null;
+                const gameRef = doc(db, "mp-chess-games", currentGameId);
+                let status = 'active', winner = null;
                 if (chess.isGameOver()) {
                     status = 'finished';
-                    if (chess.isCheckmate()) {
-                        winner = chess.turn() === 'w' ? 'Black' : 'White';
-                    } else {
-                        winner = 'Draw';
-                    }
+                    if (chess.isCheckmate()) winner = chess.turn() === 'w' ? 'Black' : 'White';
+                    else winner = 'Draw';
                 }
-                await gameRef.update({ fen: chess.fen(), status, winner });
+                await updateDoc(gameRef, { fen: chess.fen(), status, winner });
             }
 
             function highlightValidMoves(square) {
                 clearHighlights();
                 document.querySelector(`[data-square="${square}"]`).classList.add('selected');
-                const moves = chess.moves({ square: square, verbose: true });
-                moves.forEach(move => {
+                chess.moves({ square: square, verbose: true }).forEach(move => {
                     document.querySelector(`[data-square="${move.to}"]`).classList.add('valid-move');
                 });
             }
 
             function clearHighlights() {
-                document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
-                document.querySelectorAll('.valid-move').forEach(el => el.classList.remove('valid-move'));
-                document.querySelectorAll('.in-check').forEach(el => el.classList.remove('in-check'));
+                document.querySelectorAll('.selected, .valid-move, .in-check').forEach(el => el.classList.remove('selected', 'valid-move', 'in-check'));
             }
 
             function updatePlayerInfo(gameData) {
@@ -389,17 +358,12 @@
                     statusElement.textContent = `${turnColor}'s turn`;
                     if (chess.inCheck()) {
                         statusElement.textContent += ' (Check!)';
-                        const kingPos = findKing(chess.turn());
-                        if(kingPos) document.querySelector(`[data-square="${kingPos}"]`).classList.add('in-check');
+                        const kingSquare = chess.board().flat().find(p => p && p.type === 'k' && p.color === chess.turn())?.square;
+                        if(kingSquare) document.querySelector(`[data-square="${kingSquare}"]`).classList.add('in-check');
                     }
                     if (turnColor === 'White') playerWhiteBox.classList.add('ring-2', 'ring-yellow-400');
                     else playerBlackBox.classList.add('ring-2', 'ring-yellow-400');
                 }
-            }
-            
-            function findKing(color) {
-                const king = chess.board().flat().find(p => p && p.type === 'k' && p.color === color);
-                return king ? king.square : null;
             }
 
             function getPieceUnicode(piece) {
@@ -410,12 +374,11 @@
                 return unicodeMap[piece.color][piece.type];
             }
 
-            // --- UTILS & CHAT ---
             sendChatBtn.onclick = async () => {
                 const text = chatInput.value.trim();
                 if (text && currentUser) {
-                    const chatRef = db.collection("mp-chess-games").doc(currentGameId).collection("messages");
-                    await chatRef.add({ text, senderId: currentUser.uid, senderName: currentUser.displayName, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                    const messagesRef = collection(db, "mp-chess-games", currentGameId, "messages");
+                    await addDoc(messagesRef, { text, senderId: currentUser.uid, senderName: currentUser.displayName, timestamp: serverTimestamp() });
                     chatInput.value = '';
                 }
             };
