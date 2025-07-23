@@ -3,24 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Chess Game</title>
+    <title>Multiplayer Chess</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Libraries for Chess Logic and Firebase -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
             touch-action: manipulation;
+            background-color: #1f2937; /* bg-gray-800 */
+            color: #f9fafb; /* text-gray-50 */
         }
         .board {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             grid-template-rows: repeat(8, 1fr);
-            width: 90vw;
+            width: 95vw;
             aspect-ratio: 1 / 1;
-            max-width: 700px; 
-            border: 2px solid #374151;
+            max-width: 600px;
+            border: 4px solid #4b5563;
             border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
         }
         .square {
             display: flex;
@@ -28,20 +35,17 @@
             align-items: center;
             user-select: none;
         }
-        .light {
-            background-color: #F3F4F6;
+        .light { background-color: #F3F4F6; }
+        .dark { background-color: #60A5FA; }
+        .piece {
+            cursor: grab;
+            font-size: var(--piece-font-size, 38px);
+            line-height: 1;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        .dark {
-            background-color: #60A5FA;
-        }
-        .selected {
-            background-color: #FBBF24 !important;
-        }
-        .valid-move {
-            background-color: #A7F3D0;
-            cursor: pointer;
-            position: relative;
-        }
+        .piece-w { color: white; }
+        .piece-b { color: #111827; }
+        .selected { background-color: #FBBF24 !important; }
         .valid-move::after {
             content: '';
             position: absolute;
@@ -49,422 +53,388 @@
             height: 40%;
             border-radius: 50%;
             background-color: rgba(22, 163, 74, 0.5);
+            cursor: pointer;
         }
-        .in-check {
-            background-color: #F87171 !important;
-        }
-        .piece {
-            cursor: grab;
-            font-size: var(--piece-font-size, 32px);
-            line-height: 1;
-        }
-        .piece.grabbing {
-            cursor: grabbing;
-        }
-        .captured-pieces-container {
-            min-height: 50px;
-            background-color: #e5e7eb;
-            border-radius: 0.5rem;
-            padding: 8px;
-            margin-top: 1rem;
-            width: 100%;
-            max-width: 700px;
-        }
-        .captured-pieces-container h3 {
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: #4b5563;
-        }
-        .captured-pieces {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-            font-size: 24px;
-        }
-        .game-over {
-            background-color: #10B981 !important;
-            transition: background-color 0.5s ease;
-        }
-        .game-over p {
-            color: white !important;
-            font-weight: 700 !important;
-        }
+        .in-check { box-shadow: inset 0 0 0 4px #ef4444; }
+        .btn { @apply px-6 py-3 font-semibold rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-75; }
+        .btn-primary { @apply btn bg-sky-500 text-white hover:bg-sky-600 focus:ring-sky-400; }
+        .btn-green { @apply btn bg-green-600 text-white hover:bg-green-700 focus:ring-green-500; }
+        .btn-blue { @apply btn bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500; }
+        .btn-red { @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500; }
     </style>
 </head>
-<body class="bg-gray-200 flex flex-col items-center justify-center min-h-screen p-4">
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
 
-    <div class="w-full max-w-4xl mx-auto flex flex-col items-center">
-        <h1 class="text-3xl md:text-5xl font-bold text-center text-gray-800 mb-4">Chess Game</h1>
+    <div id="main-container" class="w-full max-w-5xl mx-auto flex flex-col items-center">
         
-        <div id="captured-by-black-container" class="captured-pieces-container">
-            <h3>Captured by Black:</h3>
-            <div id="captured-by-black" class="captured-pieces"></div>
+        <!-- Loading View -->
+        <div id="loading-view" class="text-center p-8">
+            <h1 class="text-3xl md:text-5xl font-bold text-center mb-4">Multiplayer Chess</h1>
+            <p class="text-xl text-gray-400">Checking Login Status...</p>
         </div>
 
-        <div id="status-container" class="text-center my-4 p-3 rounded-lg bg-white shadow-md w-full max-w-sm transition-colors duration-300">
-            <p id="status" class="text-lg md:text-xl font-semibold text-gray-700">White's Turn</p>
+        <!-- Auth View -->
+        <div id="auth-view" class="text-center p-8 hidden">
+            <h1 class="text-3xl md:text-5xl font-bold text-center mb-4">Welcome!</h1>
+            <p class="text-xl text-gray-400 mb-6">Please log in on the main page to play.</p>
+            <a href="index.html?login=true" class="btn-primary text-lg">Go to Login</a>
         </div>
 
-        <div class="flex justify-center">
-            <div id="board" class="board"></div>
+        <!-- Lobby View -->
+        <div id="lobby-view" class="w-full max-w-md p-8 bg-gray-900 rounded-lg shadow-xl hidden">
+            <h1 class="text-3xl md:text-5xl font-bold text-center mb-6">Game Lobby</h1>
+            <div class="space-y-4">
+                <button id="create-game-btn" class="w-full btn-green text-lg">Create New Game</button>
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-gray-600"></div>
+                    <span class="flex-shrink mx-4 text-gray-400">OR</span>
+                    <div class="flex-grow border-t border-gray-600"></div>
+                </div>
+                <input type="text" id="game-id-input" placeholder="Enter Game ID to Join" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                <button id="join-game-btn" class="w-full btn-blue text-lg">Join Game</button>
+            </div>
         </div>
 
-        <div id="captured-by-white-container" class="captured-pieces-container">
-            <h3>Captured by White:</h3>
-            <div id="captured-by-white" class="captured-pieces"></div>
-        </div>
-
-        <div class="text-center mt-4">
-            <button id="resetButton" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 transition-transform transform hover:scale-105">
-                New Game
-            </button>
+        <!-- Game View -->
+        <div id="game-view" class="w-full hidden lg:grid lg:grid-cols-3 lg:gap-8 items-start">
+            <div class="lg:col-span-2 flex flex-col items-center">
+                <div id="board" class="board"></div>
+            </div>
+            <div class="w-full mt-4 lg:mt-0 bg-gray-900 p-4 rounded-lg shadow-xl">
+                <div id="status-container" class="text-center mb-4 p-3 rounded-lg bg-gray-800 shadow-inner">
+                    <p id="status" class="text-lg md:text-xl font-semibold text-gray-200">Loading game...</p>
+                </div>
+                <div id="player-info" class="space-y-3 mb-4">
+                    <div id="player-white-box" class="p-3 bg-gray-700 rounded-lg">
+                        <p class="font-bold">White: <span id="player-white-name"></span></p>
+                    </div>
+                    <div id="player-black-box" class="p-3 bg-gray-700 rounded-lg">
+                        <p class="font-bold">Black: <span id="player-black-name"></span></p>
+                    </div>
+                </div>
+                <div id="chat-box" class="mb-4">
+                    <div id="chat-messages" class="h-40 bg-gray-800 rounded-lg p-2 overflow-y-auto border border-gray-600"></div>
+                    <div class="flex mt-2">
+                        <input type="text" id="chat-input" placeholder="Type a message..." class="flex-grow p-2 bg-gray-700 border border-gray-600 rounded-l-lg text-white focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                        <button id="send-chat-btn" class="bg-sky-500 text-white font-bold py-2 px-4 rounded-r-lg hover:bg-sky-600">Send</button>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-400 text-center mb-2">Game ID: <span id="game-id-display" class="font-mono cursor-pointer" title="Click to copy"></span></p>
+                    <button id="leave-game-btn" class="w-full btn-red">Leave Game</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Promotion Modal -->
-    <div id="promotion-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden">
-        <div class="bg-white p-6 rounded-lg shadow-xl text-center">
-            <h3 class="text-2xl font-bold mb-4">Promote Pawn to:</h3>
-            <div id="promotion-choices" class="flex justify-center space-x-4"></div>
+    <!-- Message Modal -->
+    <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-xl text-center border border-gray-600">
+            <p id="message-text" class="text-lg mb-4"></p>
+            <button id="close-modal-btn" class="btn-primary">Close</button>
         </div>
     </div>
 
     <script>
-        // --- DOM Elements ---
-        const boardElement = document.getElementById('board');
-        const statusContainer = document.getElementById('status-container');
-        const statusElement = document.getElementById('status');
-        const resetButton = document.getElementById('resetButton');
-        const promotionModal = document.getElementById('promotion-modal');
-        const promotionChoices = document.getElementById('promotion-choices');
-        const capturedByWhiteElement = document.getElementById('captured-by-white');
-        const capturedByBlackElement = document.getElementById('captured-by-black');
-
-        // --- Game State ---
-        let boardState;
-        let currentPlayer;
-        let selectedPiece = null;
-        let validMoves = [];
-        let gameEnded = false;
-        let pawnPromotionData = null;
-        let capturedByWhite = [];
-        let capturedByBlack = [];
-
-        // --- Piece Representations (Unicode) ---
-        const pieces = {
-            'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',
-            'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
-        };
-
-        // --- Game Initialization ---
-        function initializeGame() {
-            boardState = [
-                ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
-                ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
-                [null, null, null, null, null, null, null, null],
-                [null, null, null, null, null, null, null, null],
-                [null, null, null, null, null, null, null, null],
-                [null, null, null, null, null, null, null, null],
-                ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-                ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
-            ];
-            currentPlayer = 'white';
-            selectedPiece = null;
-            validMoves = [];
-            gameEnded = false;
-            capturedByWhite = [];
-            capturedByBlack = [];
+        document.addEventListener('DOMContentLoaded', () => {
+            const firebaseConfig = {
+                apiKey: "AIzaSyD02ui4dhTuGLz-Ff1af36ERdqqsn4iIeU",
+                authDomain: "falconixgaming-46210.firebaseapp.com",
+                projectId: "falconixgaming-46210",
+                storageBucket: "falconixgaming-46210.appspot.com",
+                messagingSenderId: "1096905282147",
+                appId: "1:1096905282147:web:e2faa9105d31c6ec009e56",
+                measurementId: "G-VJ6YC0GXK5"
+            };
             
-            // --- FIX: Reset status container style before setting text ---
-            statusContainer.classList.remove('game-over');
-            updateStatus("White's Turn to Move");
-            
-            renderBoard();
-            renderCapturedPieces();
-        }
+            firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
+            const db = firebase.firestore();
 
-        function adjustPieceSizes() {
-            const square = boardElement.querySelector('.square');
-            if (square) {
-                const squareWidth = square.offsetWidth;
-                const newSize = squareWidth * 0.7;
-                boardElement.style.setProperty('--piece-font-size', `${newSize}px`);
-            }
-        }
-        
-        function renderCapturedPieces() {
-            capturedByWhiteElement.innerHTML = '';
-            capturedByBlackElement.innerHTML = '';
-            
-            capturedByWhite.sort().forEach(piece => {
-                const pieceEl = document.createElement('span');
-                pieceEl.textContent = pieces[piece];
-                capturedByWhiteElement.appendChild(pieceEl);
-            });
-            
-            capturedByBlack.sort().forEach(piece => {
-                const pieceEl = document.createElement('span');
-                pieceEl.textContent = pieces[piece];
-                capturedByBlackElement.appendChild(pieceEl);
-            });
-        }
+            // DOM Elements
+            const loadingView = document.getElementById('loading-view'), authView = document.getElementById('auth-view'), lobbyView = document.getElementById('lobby-view'), gameView = document.getElementById('game-view');
+            const createGameBtn = document.getElementById('create-game-btn'), joinGameBtn = document.getElementById('join-game-btn'), leaveGameBtn = document.getElementById('leave-game-btn');
+            const gameIdInput = document.getElementById('game-id-input'), gameIdDisplay = document.getElementById('game-id-display');
+            const statusElement = document.getElementById('status'), boardElement = document.getElementById('board');
+            const playerWhiteName = document.getElementById('player-white-name'), playerBlackName = document.getElementById('player-black-name');
+            const playerWhiteBox = document.getElementById('player-white-box'), playerBlackBox = document.getElementById('player-black-box');
+            const chatMessages = document.getElementById('chat-messages'), chatInput = document.getElementById('chat-input'), sendChatBtn = document.getElementById('send-chat-btn');
+            const messageModal = document.getElementById('message-modal'), messageText = document.getElementById('message-text'), closeModalBtn = document.getElementById('close-modal-btn');
 
-        function renderBoard() {
-            boardElement.innerHTML = '';
-            removeHighlights();
+            // Game State
+            let currentUser = null, currentGameId = null, playerColor = null;
+            let unsubscribeGame = null, unsubscribeChat = null;
+            let chess = new Chess();
+            let selectedSquare = null;
 
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const square = document.createElement('div');
-                    square.dataset.row = row;
-                    square.dataset.col = col;
-                    square.classList.add('square');
-                    square.classList.add((row + col) % 2 === 0 ? 'light' : 'dark');
-
-                    const piece = boardState[row][col];
-                    if (piece) {
-                        const pieceElement = document.createElement('span');
-                        pieceElement.classList.add('piece');
-                        pieceElement.textContent = pieces[piece];
-                        pieceElement.style.color = isUpperCase(piece) ? '#374151' : '#111827';
-                        square.appendChild(pieceElement);
+            // --- AUTHENTICATION ---
+            auth.onAuthStateChanged(user => {
+                currentUser = user;
+                loadingView.classList.add('hidden'); 
+                if (user) {
+                    authView.classList.add('hidden');
+                    if (gameView.classList.contains('hidden')) {
+                        lobbyView.classList.remove('hidden');
                     }
-
-                    square.addEventListener('click', () => onSquareClick(row, col));
-                    boardElement.appendChild(square);
+                } else {
+                    lobbyView.classList.add('hidden');
+                    authView.classList.remove('hidden');
+                    if (!gameView.classList.contains('hidden')) {
+                        leaveGameBtn.click();
+                    }
                 }
-            }
-            
-            adjustPieceSizes();
-            highlightCheck();
-        }
-
-        function removeHighlights() {
-            document.querySelectorAll('.selected, .valid-move').forEach(el => {
-                el.classList.remove('selected', 'valid-move');
             });
-        }
-        
-        function highlightCheck() {
-            document.querySelectorAll('.in-check').forEach(el => el.classList.remove('in-check'));
-            if (gameEnded) return;
-            const kingPosition = findKing(currentPlayer);
-            if (kingPosition && isKingInCheck(currentPlayer, boardState)) {
-                 const kingSquare = document.querySelector(`[data-row='${kingPosition.row}'][data-col='${kingPosition.col}']`);
-                 if(kingSquare) kingSquare.classList.add('in-check');
-            }
-        }
 
-        function onSquareClick(row, col) {
-            if (gameEnded) return;
+            // --- LOBBY LOGIC ---
+            createGameBtn.onclick = async () => {
+                const gameId = crypto.randomUUID().split('-')[0];
+                const gameRef = db.collection("mp-chess-games").doc(gameId);
+                await gameRef.set({
+                    fen: new Chess().fen(),
+                    players: { [currentUser.uid]: { color: 'w', name: currentUser.displayName } },
+                    playerIds: [currentUser.uid],
+                    status: 'waiting',
+                    winner: null
+                });
+                switchToGameView(gameId, 'w');
+            };
 
-            if (validMoves.some(move => move.row === row && move.col === col)) {
-                movePiece(selectedPiece.row, selectedPiece.col, row, col);
-                return;
-            }
+            joinGameBtn.onclick = async () => {
+                const gameId = gameIdInput.value.trim();
+                if (!gameId) return showMessage("Please enter a Game ID.");
+                const gameRef = db.collection("mp-chess-games").doc(gameId);
+                const gameSnap = await gameRef.get();
 
-            removeHighlights();
-            selectedPiece = null;
-            validMoves = [];
+                if (gameSnap.exists) {
+                    const gameData = gameSnap.data();
+                    if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUser.uid)) {
+                        await gameRef.update({
+                            [`players.${currentUser.uid}`]: { color: 'b', name: currentUser.displayName },
+                            playerIds: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+                            status: 'active'
+                        });
+                        switchToGameView(gameId, 'b');
+                    } else if (gameData.playerIds.includes(currentUser.uid)) {
+                        switchToGameView(gameId, gameData.players[currentUser.uid].color);
+                    } else {
+                        showMessage("This game is full.");
+                    }
+                } else {
+                    showMessage("Game not found.");
+                }
+            };
+            
+            leaveGameBtn.onclick = async () => {
+                if (currentGameId) {
+                    await db.collection("mp-chess-games").doc(currentGameId).update({ status: 'abandoned' }).catch(()=>{});
+                }
+                if (unsubscribeGame) unsubscribeGame();
+                if (unsubscribeChat) unsubscribeChat();
+                switchToLobbyView();
+            };
 
-            const piece = boardState[row][col];
-            if (piece && getPieceColor(piece) === currentPlayer) {
-                selectedPiece = { row, col, piece };
-                const square = document.querySelector(`[data-row='${row}'][data-col='${col}']`);
-                square.classList.add('selected');
+            // --- VIEW SWITCHING ---
+            function switchToGameView(gameId, color) {
+                currentGameId = gameId; 
+                playerColor = color;
+                gameIdDisplay.textContent = gameId;
+                lobbyView.classList.add('hidden');
+                gameView.classList.remove('hidden');
+                gameView.classList.add('lg:grid');
 
-                validMoves = getValidMovesForPiece(row, col, piece, boardState);
-                validMoves.forEach(move => {
-                    const moveSquare = document.querySelector(`[data-row='${move.row}'][data-col='${move.col}']`);
-                    if (moveSquare) moveSquare.classList.add('valid-move');
+                unsubscribeGame = db.collection("mp-chess-games").doc(gameId).onSnapshot((doc) => {
+                    const gameData = doc.data();
+                    if (gameData) {
+                        renderGameState(gameData);
+                    } else {
+                        showMessage("Game session has ended.");
+                        leaveGameBtn.click();
+                    }
+                });
+
+                unsubscribeChat = db.collection("mp-chess-games").doc(gameId).collection("messages").orderBy("timestamp").onSnapshot((snapshot) => {
+                    chatMessages.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const msg = doc.data();
+                        const sender = msg.senderName ? msg.senderName.split(' ')[0] : 'User';
+                        chatMessages.innerHTML += `<div class="p-1"><strong>${sender}:</strong> ${msg.text}</div>`;
+                    });
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
                 });
             }
-        }
 
-        // --- Game Logic ---
-        function movePiece(fromRow, fromCol, toRow, toCol) {
-            const capturedPiece = boardState[toRow][toCol];
-            if (capturedPiece) {
-                if (currentPlayer === 'white') {
-                    capturedByWhite.push(capturedPiece);
-                } else {
-                    capturedByBlack.push(capturedPiece);
+            function switchToLobbyView() {
+                gameView.classList.add('hidden');
+                gameView.classList.remove('lg:grid');
+                if(currentUser) lobbyView.classList.remove('hidden');
+                else authView.classList.remove('hidden');
+                currentGameId = null; playerColor = null; selectedSquare = null; chess = new Chess();
+            }
+
+            // --- GAME LOGIC & RENDERING ---
+            function renderGameState(gameData) {
+                if (gameData.status === 'abandoned' && gameData.playerIds.includes(currentUser.uid)) {
+                    showMessage("Your opponent has left the game.");
+                    setTimeout(() => leaveGameBtn.click(), 3000);
+                    return;
                 }
-                // --- FIX: Render captured pieces immediately after capture ---
-                renderCapturedPieces();
-            }
-            
-            const piece = boardState[fromRow][fromCol];
-            if ((piece === 'P' && toRow === 0) || (piece === 'p' && toRow === 7)) {
-                pawnPromotionData = { fromRow, fromCol, toRow, toCol };
-                showPromotionDialog();
-                return;
+                chess.load(gameData.fen);
+                drawBoard();
+                updatePlayerInfo(gameData);
+                updateStatus(gameData);
             }
 
-            boardState[toRow][toCol] = boardState[fromRow][fromCol];
-            boardState[fromRow][fromCol] = null;
-            
-            selectedPiece = null;
-            validMoves = [];
-            
-            switchPlayer();
-            renderBoard();
-            checkGameState();
-        }
+            function drawBoard() {
+                boardElement.innerHTML = '';
+                const board = chess.board();
+                const isWhiteView = playerColor === 'w';
 
-        function switchPlayer() {
-            currentPlayer = (currentPlayer === 'white') ? 'black' : 'white';
-        }
-
-        function updateStatus(message, isGameOver = false) {
-            statusElement.textContent = message;
-            if (isGameOver) {
-                statusContainer.classList.add('game-over');
-            } else {
-                statusContainer.classList.remove('game-over');
-            }
-        }
-
-        function checkGameState() {
-            const kingInCheck = isKingInCheck(currentPlayer, boardState);
-            const hasLegalMoves = playerHasLegalMoves(currentPlayer, boardState);
-
-            if (kingInCheck) {
-                if (!hasLegalMoves) {
-                    gameEnded = true;
-                    const winner = currentPlayer === 'white' ? 'Black' : 'White';
-                    updateStatus(`CHECKMATE! ${winner} wins the game.`, true);
-                } else {
-                    updateStatus(`${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)} is in CHECK!`);
-                }
-            } else if (!hasLegalMoves) {
-                gameEnded = true;
-                updateStatus("STALEMATE! The game is a draw.", true);
-            } else {
-                updateStatus(`${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)}'s Turn to Move`);
-            }
-        }
-
-        function getValidMovesForPiece(row, col, piece, currentBoard) {
-            let moves = [];
-            const color = getPieceColor(piece);
-
-            switch (piece.toUpperCase()) {
-                case 'P': moves = getPawnMoves(row, col, color, currentBoard); break;
-                case 'R': moves = getRookMoves(row, col, color, currentBoard); break;
-                case 'N': moves = getKnightMoves(row, col, color, currentBoard); break;
-                case 'B': moves = getBishopMoves(row, col, color, currentBoard); break;
-                case 'Q': moves = getQueenMoves(row, col, color, currentBoard); break;
-                case 'K': moves = getKingMoves(row, col, color, currentBoard); break;
-            }
-            
-            return moves.filter(move => {
-                const tempBoard = JSON.parse(JSON.stringify(currentBoard));
-                tempBoard[move.row][move.col] = tempBoard[row][col];
-                tempBoard[row][col] = null;
-                return !isKingInCheck(color, tempBoard);
-            });
-        }
-        
-        function playerHasLegalMoves(playerColor, board) {
-            for (let r = 0; r < 8; r++) {
-                for (let c = 0; c < 8; c++) {
-                    const piece = board[r][c];
-                    if (piece && getPieceColor(piece) === playerColor) {
-                        if (getValidMovesForPiece(r, c, piece, board).length > 0) {
-                            return true;
+                for (let i = 0; i < 8; i++) {
+                    for (let j = 0; j < 8; j++) {
+                        const row = isWhiteView ? i : 7 - i;
+                        const col = isWhiteView ? j : 7 - j;
+                        
+                        const squareEl = document.createElement('div');
+                        const squareName = String.fromCharCode(97 + col) + (8 - row);
+                        squareEl.dataset.square = squareName;
+                        squareEl.classList.add('square', (row + col) % 2 === 0 ? 'light' : 'dark');
+                        
+                        const piece = board[row][col];
+                        if (piece) {
+                            const pieceEl = document.createElement('span');
+                            pieceEl.className = `piece piece-${piece.color}`;
+                            pieceEl.textContent = getPieceUnicode(piece);
+                            squareEl.appendChild(pieceEl);
                         }
+                        
+                        squareEl.onclick = () => onSquareClick(squareName);
+                        boardElement.appendChild(squareEl);
+                    }
+                }
+                adjustPieceSizes();
+            }
+            
+            function onSquareClick(squareName) {
+                if (chess.isGameOver() || chess.turn() !== playerColor) return;
+
+                if (selectedSquare) {
+                    const move = { from: selectedSquare, to: squareName, promotion: 'q' };
+                    try {
+                        const result = chess.move(move);
+                        if (result) {
+                            updateFirebaseWithMove();
+                        }
+                    } catch (e) { /* Invalid move */ } 
+                    finally {
+                        clearHighlights();
+                        selectedSquare = null;
+                    }
+                } else {
+                    const piece = chess.get(squareName);
+                    if (piece && piece.color === playerColor) {
+                        selectedSquare = squareName;
+                        highlightValidMoves(squareName);
                     }
                 }
             }
-            return false;
-        }
-
-        // --- Piece-Specific Move Logic (abbreviated for brevity) ---
-        function getPawnMoves(r,c,color,b) { const m=[],d=color==='white'?-1:1,s=color==='white'?6:1;if(isValid(r+d,c)&&!b[r+d][c]){m.push({row:r+d,col:c});if(r===s&&!b[r+2*d][c]){m.push({row:r+2*d,col:c})}}[-1,1].forEach(dc=>{if(isValid(r+d,c+dc)){const t=b[r+d][c+dc];if(t&&getPieceColor(t)!==color){m.push({row:r+d,col:c+dc})}}});return m; }
-        function getRookMoves(r,c,color,b) { return getSlidingMoves(r,c,color,b,[[-1,0],[1,0],[0,-1],[0,1]]); }
-        function getBishopMoves(r,c,color,b) { return getSlidingMoves(r,c,color,b,[[-1,-1],[-1,1],[1,-1],[1,1]]); }
-        function getQueenMoves(r,c,color,b) { return getSlidingMoves(r,c,color,b,[[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]]); }
-        function getSlidingMoves(r,c,color,b,dirs) { const m=[];dirs.forEach(([dr,dc])=>{for(let i=1;i<8;i++){const nr=r+i*dr,nc=c+i*dc;if(!isValid(nr,nc))break;const t=b[nr][nc];if(t){if(getPieceColor(t)!==color){m.push({row:nr,col:nc})}break}m.push({row:nr,col:nc})}});return m; }
-        function getKnightMoves(r,c,color,b) { const m=[],km=[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];km.forEach(([dr,dc])=>{const nr=r+dr,nc=c+dc;if(isValid(nr,nc)){const t=b[nr][nc];if(!t||getPieceColor(t)!==color){m.push({row:nr,col:nc})}}});return m; }
-        function getKingMoves(r,c,color,b) { const m=[],km=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];km.forEach(([dr,dc])=>{const nr=r+dr,nc=c+dc;if(isValid(nr,nc)){const t=b[nr][nc];if(!t||getPieceColor(t)!==color){m.push({row:nr,col:nc})}}});return m; }
-
-        function isKingInCheck(kingColor, board) {
-            const kingPos = findKing(kingColor, board);
-            if (!kingPos) return false;
-            const opponentColor = kingColor === 'white' ? 'black' : 'white';
-            for (let r = 0; r < 8; r++) {
-                for (let c = 0; c < 8; c++) {
-                    const piece = board[r][c];
-                    if (piece && getPieceColor(piece) === opponentColor) {
-                        let rawMoves;
-                        switch (piece.toUpperCase()) {
-                            case 'P': rawMoves = getPawnMoves(r, c, opponentColor, board); break;
-                            case 'R': rawMoves = getRookMoves(r, c, opponentColor, board); break;
-                            case 'N': rawMoves = getKnightMoves(r, c, opponentColor, board); break;
-                            case 'B': rawMoves = getBishopMoves(r, c, opponentColor, board); break;
-                            case 'Q': rawMoves = getQueenMoves(r, c, opponentColor, board); break;
-                            case 'K': rawMoves = getKingMoves(r, c, opponentColor, board); break;
-                            default: rawMoves = [];
-                        }
-                        if (rawMoves.some(move => move.row === kingPos.row && move.col === kingPos.col)) return true;
+            
+            async function updateFirebaseWithMove() {
+                const gameRef = db.collection("mp-chess-games").doc(currentGameId);
+                let status = 'active';
+                let winner = null;
+                if (chess.isGameOver()) {
+                    status = 'finished';
+                    if (chess.isCheckmate()) {
+                        winner = chess.turn() === 'w' ? 'Black' : 'White';
+                    } else {
+                        winner = 'Draw';
                     }
                 }
+                await gameRef.update({ fen: chess.fen(), status, winner });
             }
-            return false;
-        }
 
-        function findKing(color, board) {
-            const kingPiece = color === 'white' ? 'K' : 'k';
-            for (let r = 0; r < 8; r++) {
-                for (let c = 0; c < 8; c++) {
-                    if (board[r][c] === kingPiece) return { row: r, col: c };
+            function highlightValidMoves(square) {
+                clearHighlights();
+                document.querySelector(`[data-square="${square}"]`).classList.add('selected');
+                const moves = chess.moves({ square: square, verbose: true });
+                moves.forEach(move => {
+                    document.querySelector(`[data-square="${move.to}"]`).classList.add('valid-move');
+                });
+            }
+
+            function clearHighlights() {
+                document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+                document.querySelectorAll('.valid-move').forEach(el => el.classList.remove('valid-move'));
+                document.querySelectorAll('.in-check').forEach(el => el.classList.remove('in-check'));
+            }
+
+            function updatePlayerInfo(gameData) {
+                const whitePlayer = Object.values(gameData.players).find(p => p.color === 'w');
+                const blackPlayer = Object.values(gameData.players).find(p => p.color === 'b');
+                playerWhiteName.textContent = whitePlayer ? whitePlayer.name.split(' ')[0] : 'Waiting...';
+                playerBlackName.textContent = blackPlayer ? blackPlayer.name.split(' ')[0] : 'Waiting...';
+            }
+            
+            function updateStatus(gameData) {
+                playerWhiteBox.classList.remove('ring-2', 'ring-yellow-400');
+                playerBlackBox.classList.remove('ring-2', 'ring-yellow-400');
+                clearHighlights();
+
+                if (gameData.status === 'finished') {
+                    statusElement.textContent = gameData.winner === 'Draw' ? "Draw!" : `${gameData.winner} wins!`;
+                } else if (gameData.status === 'waiting') {
+                    statusElement.textContent = 'Waiting for opponent...';
+                } else {
+                    const turnColor = chess.turn() === 'w' ? 'White' : 'Black';
+                    statusElement.textContent = `${turnColor}'s turn`;
+                    if (chess.inCheck()) {
+                        statusElement.textContent += ' (Check!)';
+                        const kingPos = findKing(chess.turn());
+                        if(kingPos) document.querySelector(`[data-square="${kingPos}"]`).classList.add('in-check');
+                    }
+                    if (turnColor === 'White') playerWhiteBox.classList.add('ring-2', 'ring-yellow-400');
+                    else playerBlackBox.classList.add('ring-2', 'ring-yellow-400');
                 }
             }
-            return null;
-        }
-
-        function showPromotionDialog() {
-            promotionChoices.innerHTML = '';
-            const promotionPieces = currentPlayer === 'white' ? ['Q', 'R', 'B', 'N'] : ['q', 'r', 'b', 'n'];
-            promotionPieces.forEach(p => {
-                const button = document.createElement('button');
-                button.textContent = pieces[p];
-                button.classList.add('text-5xl', 'p-2', 'hover:bg-gray-200', 'rounded-md');
-                button.onclick = () => choosePromotion(p);
-                promotionChoices.appendChild(button);
-            });
-            promotionModal.classList.remove('hidden');
-        }
-
-        // --- FIX: Correctly handle captures during promotion ---
-        function choosePromotion(promotedPiece) {
-            if (!pawnPromotionData) return;
-            const { fromRow, fromCol, toRow, toCol } = pawnPromotionData;
             
-            // The piece at the destination was already captured in movePiece,
-            // so we only need to handle the promotion itself.
-            boardState[toRow][toCol] = promotedPiece;
-            boardState[fromRow][fromCol] = null;
+            function findKing(color) {
+                const king = chess.board().flat().find(p => p && p.type === 'k' && p.color === color);
+                return king ? king.square : null;
+            }
 
-            pawnPromotionData = null;
-            selectedPiece = null;
-            validMoves = [];
-            promotionModal.classList.add('hidden');
+            function getPieceUnicode(piece) {
+                const unicodeMap = {
+                    w: { p: '♙', r: '♖', n: '♘', b: '♗', q: '♕', k: '♔' },
+                    b: { p: '♟', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚' }
+                };
+                return unicodeMap[piece.color][piece.type];
+            }
+
+            // --- UTILS & CHAT ---
+            sendChatBtn.onclick = async () => {
+                const text = chatInput.value.trim();
+                if (text && currentUser) {
+                    const chatRef = db.collection("mp-chess-games").doc(currentGameId).collection("messages");
+                    await chatRef.add({ text, senderId: currentUser.uid, senderName: currentUser.displayName, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                    chatInput.value = '';
+                }
+            };
+            chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatBtn.click(); });
             
-            switchPlayer();
-            renderBoard();
-            checkGameState();
-        }
-
-        function isValid(row, col) { return row >= 0 && row < 8 && col >= 0 && col < 8; }
-        function getPieceColor(piece) { return isUpperCase(piece) ? 'white' : 'black'; }
-        function isUpperCase(char) { return char === char.toUpperCase(); }
-
-        resetButton.addEventListener('click', initializeGame);
-        window.addEventListener('resize', renderBoard);
-
-        initializeGame();
+            function showMessage(msg) { messageText.textContent = msg; messageModal.classList.remove('hidden'); }
+            closeModalBtn.onclick = () => messageModal.classList.add('hidden');
+            gameIdDisplay.onclick = () => navigator.clipboard.writeText(currentGameId).then(() => showMessage("Game ID copied!"));
+            
+            function adjustPieceSizes() {
+                const square = boardElement.querySelector('.square');
+                if (square) {
+                    const squareWidth = square.offsetWidth;
+                    const newSize = squareWidth * 0.75;
+                    boardElement.style.setProperty('--piece-font-size', `${newSize}px`);
+                }
+            }
+            window.addEventListener('resize', adjustPieceSizes);
+        });
     </script>
 </body>
 </html>
