@@ -147,9 +147,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        
-        // This is a basic chess logic library. For a full game, a more robust library like chess.js would be ideal.
-        // For this example, we'll implement simplified move validation.
         import { Chess } from 'https://cdn.jsdelivr.net/npm/chess.js@1.0.0-beta.8/dist/chess.js';
 
         const firebaseConfig = {
@@ -206,12 +203,13 @@
         createGameBtn.onclick = async () => {
             const gameId = crypto.randomUUID().split('-')[0];
             const gameRef = doc(db, "mp-chess-games", gameId);
+            const newChess = new Chess();
             await setDoc(gameRef, {
-                fen: chess.fen(),
-                pgn: chess.pgn(),
+                fen: newChess.fen(),
+                pgn: newChess.pgn(),
                 players: { [currentUser.uid]: { color: 'w', name: currentUser.displayName } },
                 playerIds: [currentUser.uid],
-                status: 'waiting', // waiting, active, finished
+                status: 'waiting',
                 winner: null
             });
             switchToGameView(gameId, 'w');
@@ -318,18 +316,16 @@
         }
         
         function onSquareClick(squareName) {
-            if (chess.turn() !== playerColor) return;
+            if (chess.turn() !== playerColor || chess.isGameOver()) return;
 
             if (selectedPiece) {
-                const move = { from: selectedPiece, to: squareName, promotion: 'q' }; // Auto-promote to Queen for simplicity
+                const move = { from: selectedPiece, to: squareName, promotion: 'q' };
                 try {
                     const result = chess.move(move);
                     if (result) {
                         updateFirebaseWithMove();
                     }
-                } catch (e) {
-                    // Invalid move
-                }
+                } catch (e) { /* Invalid move */ }
                 clearHighlights();
                 selectedPiece = null;
             } else {
