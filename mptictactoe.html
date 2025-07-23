@@ -54,15 +54,15 @@
 
             <!-- Loading View -->
             <div id="loading-view" class="text-center">
-                <h1 class="text-4xl font-bold text-gray-100 mb-4">Authenticating...</h1>
+                <h1 class="text-4xl font-bold text-gray-100 mb-4">Checking Login Status...</h1>
                 <p class="text-gray-400">Please wait.</p>
             </div>
 
             <!-- Auth View -->
             <div id="auth-view" class="text-center hidden">
                 <h1 class="text-4xl font-bold text-gray-100 mb-4">Welcome!</h1>
-                <p class="text-gray-400 mb-6">Please log in to play multiplayer.</p>
-                <button id="auth-view-login-button" class="btn-primary w-full">Login with Google</button>
+                <p class="text-gray-400 mb-6">Please log in on the main page to play multiplayer.</p>
+                <button id="auth-view-login-button" class="btn-primary w-full">Go to Login</button>
             </div>
 
             <!-- Lobby View -->
@@ -123,7 +123,7 @@
     <script type="module">
         // --- FIREBASE IMPORTS ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, browserLocalPersistence, setPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // --- YOUR FALCONIXGAMING FIREBASE CONFIGURATION ---
@@ -140,7 +140,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
 
         // --- DOM ELEMENTS ---
         const loadingView = document.getElementById('loading-view');
@@ -163,35 +162,26 @@
         let unsubscribeGame = null, unsubscribeChat = null;
         
         // --- AUTHENTICATION FLOW ---
-        const handleSignIn = () => {
-            setPersistence(auth, browserLocalPersistence)
-                .then(() => {
-                    signInWithRedirect(auth, provider);
-                })
-                .catch((error) => {
-                    console.error("Error setting persistence:", error);
-                    showMessage("Could not start login process.");
-                });
+        const redirectToLogin = () => {
+            window.location.href = 'index.html';
         };
 
-        loginButton.onclick = handleSignIn;
-        authViewLoginButton.onclick = handleSignIn;
+        loginButton.onclick = redirectToLogin;
+        authViewLoginButton.onclick = redirectToLogin;
         logoutButton.onclick = () => signOut(auth).catch(err => showMessage("Logout failed."));
 
-        // This is the main function that updates the UI based on user state
-        const updateUIForUser = (user) => {
+        onAuthStateChanged(auth, user => {
             currentUser = user;
-            loadingView.classList.add('hidden');
+            loadingView.classList.add('hidden'); 
             if (user) {
                 userDisplayName.textContent = user.displayName;
                 userIdDisplay.textContent = user.uid;
                 loginButton.classList.add('hidden');
                 userInfoHeader.classList.remove('hidden');
                 authView.classList.add('hidden');
-                if (gameView.classList.contains('hidden')) {
+                if (gameView.classList.contains('hidden')) { 
                     lobbyView.classList.remove('hidden');
                 }
-                saveUserInfo(user);
             } else {
                 userDisplayName.textContent = '';
                 loginButton.classList.remove('hidden');
@@ -202,20 +192,7 @@
                     leaveGameBtn.click();
                 }
             }
-        };
-
-        // Check for redirect result first, then set up the listener
-        getRedirectResult(auth)
-            .then((result) => {
-                // If result exists, onAuthStateChanged will handle the user.
-                // If not, we set up the listener to check for an existing session.
-                onAuthStateChanged(auth, updateUIForUser);
-            })
-            .catch(error => {
-                console.error("Redirect Error:", error);
-                showMessage(`Login failed: ${error.message}`);
-                onAuthStateChanged(auth, updateUIForUser); // Still set up listener even on error
-            });
+        });
 
         const saveUserInfo = async (user) => {
             if (!user) return;
