@@ -12,12 +12,10 @@
         /* Custom fonts and styles from the theme */
         body { font-family: 'Inter', sans-serif; }
         h1, .cell { font-family: 'Fredoka One', cursive; }
-        .font-black-ops { font-family: 'Black Ops One', cursive; }
+        .font-black-ops { font-family: 'Inter', sans-serif; font-weight: 900; }
         .btn-primary {
-            background-color: #3b82f6; color: white; padding: 0.5rem 1.5rem;
-            border-radius: 0.5rem; font-weight: bold; transition: background-color 0.2s;
+            @apply px-6 py-3 font-semibold text-white bg-sky-500 rounded-lg shadow-md hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
         }
-        .btn-primary:hover { background-color: #2563eb; }
         .cell { transition: background-color 0.2s ease-in-out; }
         .winning-cell {
             animation: celebrate 0.8s ease-in-out;
@@ -39,46 +37,37 @@
         <nav class="w-full max-w-7xl mx-auto px-4 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors">Home</a>
-                    <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors">Games</a>
-                    <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors">How to Play</a>
-                    <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors">Leaderboards</a>
+                <div id="auth-container" class="flex items-center">
+                     <button id="login-button" class="btn-primary">Login with Google</button>
+                     <div id="user-info-header" class="hidden items-center space-x-4">
+                         <span id="user-display-name" class="text-white font-semibold"></span>
+                         <button id="logout-button" class="px-4 py-2 font-semibold text-red-500 hover:bg-red-500/10 rounded-lg transition-colors duration-300">Logout</button>
+                     </div>
                 </div>
-                <button class="btn-primary hidden md:block">Login</button>
-                <!-- Mobile Menu Button -->
-                 <button id="mobile-menu-button" class="md:hidden text-gray-300 hover:text-white">
-                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                 </button>
             </div>
         </nav>
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Home</a>
-                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Games</a>
-                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">How to Play</a>
-                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Leaderboards</a>
-                <button class="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Login</button>
-            </div>
-        </div>
     </header>
 
     <!-- Main Content -->
     <main class="flex items-center justify-center flex-grow w-full px-4">
         <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-lg my-8 border border-gray-700">
 
+            <!-- Auth View -->
+            <div id="auth-view" class="text-center">
+                <h1 class="text-4xl font-bold text-gray-100 mb-4">Welcome!</h1>
+                <p class="text-gray-400 mb-6">Please log in to play multiplayer.</p>
+            </div>
+
             <!-- Lobby View -->
-            <div id="lobby-view">
+            <div id="lobby-view" class="hidden">
                 <h1 class="text-4xl text-center font-bold text-gray-100 mb-6">Multiplayer Tic-Tac-Toe</h1>
                 <div class="space-y-4">
-                    <button id="create-game-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700" disabled>Create New Game</button>
+                    <button id="create-game-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700">Create New Game</button>
                     <div class="relative flex py-2 items-center"><div class="flex-grow border-t border-gray-600"></div><span class="flex-shrink mx-4 text-gray-400">OR</span><div class="flex-grow border-t border-gray-600"></div></div>
                     <input type="text" id="game-id-input" placeholder="Enter Game ID to Join" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-400">
-                    <button id="join-game-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700" disabled>Join Game</button>
+                    <button id="join-game-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700">Join Game</button>
                 </div>
-                 <div id="user-info" class="text-center mt-6 text-xs text-gray-500"><p>Your User ID: <span id="user-id-display" class="font-mono">Connecting...</span></p></div>
+                 <div class="text-center mt-6 text-xs text-gray-500"><p>Your User ID: <span id="user-id-display" class="font-mono"></span></p></div>
             </div>
 
             <!-- Game View -->
@@ -88,8 +77,8 @@
                 </div>
                 <!-- Scoreboard -->
                 <div id="scoreboard" class="flex justify-around text-center mb-4">
-                    <div><p class="text-lg font-bold text-red-500">Player X</p><p id="score-x" class="text-3xl font-bold text-gray-100">0</p></div>
-                    <div><p class="text-lg font-bold text-blue-400">Player O</p><p id="score-o" class="text-3xl font-bold text-gray-100">0</p></div>
+                    <div><p class="text-lg font-bold text-red-500">Player X (<span id="player-x-name"></span>)</p><p id="score-x" class="text-3xl font-bold text-gray-100">0</p></div>
+                    <div><p class="text-lg font-bold text-blue-400">Player O (<span id="player-o-name"></span>)</p><p id="score-o" class="text-3xl font-bold text-gray-100">0</p></div>
                 </div>
                 <!-- Status Display -->
                 <div id="status" class="text-center text-xl font-semibold text-gray-400 mb-4 h-8 flex items-center justify-center"></div>
@@ -120,84 +109,93 @@
                 </div>
             </div>
              <!-- Message Modal -->
-            <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"><div class="bg-gray-800 p-6 rounded-lg shadow-xl text-center"><p id="message-text" class="text-lg mb-4"></p><button id="close-modal-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg">Close</button></div></div>
+            <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"><div class="bg-gray-800 p-6 rounded-lg shadow-xl text-center"><p id="message-text" class="text-lg mb-4"></p><button id="close-modal-btn" class="btn-primary">Close</button></div></div>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 border-t border-gray-700">
-        <div class="container mx-auto px-4 lg:px-8 py-8 text-center text-gray-400">
-            <p>&copy; 2025 <a href="https://chat.whatsapp.com/DUXdfaOxJoPC87KjRWbkjo" style="text-decoration:underline;">FalconixGaming</a>. All Rights Reserved.</p>
-            <div class="flex justify-center space-x-6 mt-4">
-                <a href="https://wa.me/qr/MRKTOLBP5VHRI1" class="hover:text-white">Privacy Policy</a>
-                <a href="https://wa.me/qr/MRKTOLBP5VHRI1" class="hover:text-white">Terms of Service</a>
-                <a href="https://wa.me/qr/MRKTOLBP5VHRI1" class="hover:text-white">Contact</a>
-            </div>
-        </div>
-    </footer>
-
     <script type="module">
         // --- FIREBASE IMPORTS ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, indexedDBLocalPersistence, initializeAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // --- YOUR FIREBASE CONFIGURATION ---
+        // --- YOUR FALCONIXGAMING FIREBASE CONFIGURATION ---
         const firebaseConfig = {
-            apiKey: "AIzaSyAx4XGKJKQcLANt7gHs2ILrhSefoid39vM",
-            authDomain: "my-tictactoe-game-b9cf0.firebaseapp.com",
-            projectId: "my-tictactoe-game-b9cf0",
-            storageBucket: "my-tictactoe-game-b9cf0.appspot.com",
-            messagingSenderId: "483998697565",
-            appId: "1:483998697565:web:7b441bd1810e7bba6ae5b4",
-            measurementId: "G-MH72MYGDVD"
+            apiKey: "AIzaSyD02ui4dhTuGLz-Ff1af36ERdqqsn4iIeU",
+            authDomain: "falconixgaming-46210.firebaseapp.com",
+            projectId: "falconixgaming-46210",
+            storageBucket: "falconixgaming-46210.appspot.com",
+            messagingSenderId: "1096905282147",
+            appId: "1:1096905282147:web:e2faa9105d31c6ec009e56",
+            measurementId: "G-VJ6YC0GXK5"
         };
         
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        // Use indexedDBLocalPersistence to share auth state across tabs
+        const auth = initializeAuth(app, { persistence: indexedDBLocalPersistence });
         const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
 
         // --- DOM ELEMENTS ---
-        const lobbyView = document.getElementById('lobby-view'), gameView = document.getElementById('game-view');
+        const authView = document.getElementById('auth-view'), lobbyView = document.getElementById('lobby-view'), gameView = document.getElementById('game-view');
+        const loginButton = document.getElementById('login-button'), logoutButton = document.getElementById('logout-button');
+        const userInfoHeader = document.getElementById('user-info-header'), userDisplayName = document.getElementById('user-display-name');
         const createGameBtn = document.getElementById('create-game-btn'), joinGameBtn = document.getElementById('join-game-btn');
         const leaveGameBtn = document.getElementById('leave-game-btn'), rematchBtn = document.getElementById('rematch-btn');
         const gameIdInput = document.getElementById('game-id-input'), userIdDisplay = document.getElementById('user-id-display');
         const gameIdDisplay = document.getElementById('game-id-display'), statusDisplay = document.getElementById('status');
         const scoreXDisplay = document.getElementById('score-x'), scoreODisplay = document.getElementById('score-o');
+        const playerXName = document.getElementById('player-x-name'), playerOName = document.getElementById('player-o-name');
         const cells = document.querySelectorAll('.cell');
         const chatMessages = document.getElementById('chat-messages'), chatInput = document.getElementById('chat-input'), sendChatBtn = document.getElementById('send-chat-btn');
         const messageModal = document.getElementById('message-modal'), messageText = document.getElementById('message-text'), closeModalBtn = document.getElementById('close-modal-btn');
-        const mobileMenuButton = document.getElementById('mobile-menu-button'), mobileMenu = document.getElementById('mobile-menu');
-
 
         // --- GAME STATE ---
-        let currentUserId = null, currentGameId = null, playerSymbol = null;
+        let currentUser = null, currentGameId = null, playerSymbol = null;
         let unsubscribeGame = null, unsubscribeChat = null;
-
-        // --- HEADER SCRIPT ---
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-
+        
         // --- AUTHENTICATION ---
         onAuthStateChanged(auth, user => {
+            currentUser = user;
             if (user) {
-                currentUserId = user.uid;
-                userIdDisplay.textContent = currentUserId;
-                createGameBtn.disabled = false; joinGameBtn.disabled = false;
+                // User is signed in
+                userDisplayName.textContent = user.displayName;
+                userIdDisplay.textContent = user.uid;
+                loginButton.classList.add('hidden');
+                userInfoHeader.classList.remove('hidden');
+                authView.classList.add('hidden');
+                lobbyView.classList.remove('hidden');
+                saveUserInfo(user);
             } else {
-                signInAnonymously(auth).catch(err => showMessage("Authentication failed."));
+                // User is signed out
+                userDisplayName.textContent = '';
+                loginButton.classList.remove('hidden');
+                userInfoHeader.classList.add('hidden');
+                authView.classList.remove('hidden');
+                lobbyView.classList.add('hidden');
+                if (!gameView.classList.contains('hidden')) {
+                    leaveGameBtn.click();
+                }
             }
         });
+
+        loginButton.onclick = () => signInWithPopup(auth, provider).catch(err => showMessage("Login failed."));
+        logoutButton.onclick = () => signOut(auth).catch(err => showMessage("Logout failed."));
+
+        const saveUserInfo = async (user) => {
+            if (!user) return;
+            const userRef = doc(db, "users", user.uid);
+            await setDoc(userRef, { displayName: user.displayName }, { merge: true });
+        };
         
         // --- LOBBY LOGIC ---
         createGameBtn.onclick = async () => {
             const gameId = crypto.randomUUID().split('-')[0];
-            const gameRef = doc(db, "tic-tac-toe-games", gameId);
+            const gameRef = doc(db, "mptictactoe", gameId);
             await setDoc(gameRef, {
                 board: Array(9).fill(null),
-                players: { [currentUserId]: 'X' },
-                playerIds: [currentUserId],
+                players: { [currentUser.uid]: { symbol: 'X', name: currentUser.displayName } },
+                playerIds: [currentUser.uid],
                 currentPlayer: 'X',
                 startingPlayer: 'X',
                 status: 'waiting',
@@ -211,20 +209,20 @@
         joinGameBtn.onclick = async () => {
             const gameId = gameIdInput.value.trim();
             if (!gameId) return showMessage("Please enter a Game ID.");
-            const gameRef = doc(db, "tic-tac-toe-games", gameId);
+            const gameRef = doc(db, "mptictactoe", gameId);
             const gameSnap = await getDoc(gameRef);
 
             if (gameSnap.exists()) {
                 const gameData = gameSnap.data();
-                if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUserId)) {
+                if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUser.uid)) {
                     await updateDoc(gameRef, {
-                        [`players.${currentUserId}`]: 'O',
-                        playerIds: [...gameData.playerIds, currentUserId],
+                        [`players.${currentUser.uid}`]: { symbol: 'O', name: currentUser.displayName },
+                        playerIds: [...gameData.playerIds, currentUser.uid],
                         status: 'active'
                     });
                     switchToGameView(gameId, 'O');
-                } else if (gameData.playerIds.includes(currentUserId)) {
-                    switchToGameView(gameId, gameData.players[currentUserId]);
+                } else if (gameData.playerIds.includes(currentUser.uid)) {
+                    switchToGameView(gameId, gameData.players[currentUser.uid].symbol);
                 } else {
                     showMessage("This game is full.");
                 }
@@ -235,17 +233,11 @@
         
         leaveGameBtn.onclick = async () => {
             if (currentGameId) {
-                const gameRef = doc(db, "tic-tac-toe-games", currentGameId);
-                // Set status to abandoned to notify the other player
-                await updateDoc(gameRef, { status: 'abandoned' }).catch(err => {
-                    console.error("Couldn't update game status on leave:", err);
-                });
+                const gameRef = doc(db, "mptictactoe", currentGameId);
+                await updateDoc(gameRef, { status: 'abandoned' }).catch(err => {});
             }
-            
-            // Perform local cleanup
             if (unsubscribeGame) unsubscribeGame();
             if (unsubscribeChat) unsubscribeChat();
-            unsubscribeGame = null; unsubscribeChat = null;
             currentGameId = null; playerSymbol = null;
             switchToLobbyView();
         };
@@ -257,14 +249,14 @@
             lobbyView.classList.add('hidden');
             gameView.classList.remove('hidden');
 
-            const gameRef = doc(db, "tic-tac-toe-games", gameId);
+            const gameRef = doc(db, "mptictactoe", gameId);
             unsubscribeGame = onSnapshot(gameRef, (doc) => {
                 const gameData = doc.data();
                 if (gameData) updateUI(gameData);
                 else { showMessage("The game session has ended."); leaveGameBtn.click(); }
             });
 
-            const chatRef = collection(db, "tic-tac-toe-games", gameId, "messages");
+            const chatRef = collection(db, "mptictactoe", gameId, "messages");
             const q = query(chatRef, orderBy("timestamp"));
             unsubscribeChat = onSnapshot(q, (snapshot) => {
                 chatMessages.innerHTML = '';
@@ -272,7 +264,7 @@
                     const msg = doc.data();
                     const msgDiv = document.createElement('div');
                     msgDiv.classList.add('p-2', 'rounded-lg');
-                    msgDiv.textContent = `${msg.senderSymbol}: ${msg.text}`;
+                    msgDiv.textContent = `${msg.senderName} (${msg.senderSymbol}): ${msg.text}`;
                     chatMessages.appendChild(msgDiv);
                 });
                 chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -283,34 +275,20 @@
             gameView.classList.add('hidden');
             lobbyView.classList.remove('hidden');
             gameIdInput.value = '';
-            delete document.body.dataset.abandoned; // Reset abandoned state flag
         }
 
-        function updateUI(gameData) {
-            // Handle abandoned game state first
+        async function updateUI(gameData) {
             if (gameData.status === 'abandoned') {
-                if (document.body.dataset.abandoned === 'true') return;
-                document.body.dataset.abandoned = 'true';
-
                 showMessage("Your opponent has left the game.");
-                statusDisplay.textContent = "Opponent has left.";
-                
-                const returnToLobby = () => {
-                    if (!messageModal.classList.contains('hidden')) {
-                        messageModal.classList.add('hidden');
-                    }
-                    leaveGameBtn.click();
-                };
-
-                closeModalBtn.onclick = returnToLobby;
-                setTimeout(returnToLobby, 3000);
+                setTimeout(() => leaveGameBtn.click(), 3000);
                 return;
-            } else {
-                delete document.body.dataset.abandoned;
             }
             
-            // Reset modal button to default behavior if not handled by a special case
-            closeModalBtn.onclick = () => messageModal.classList.add('hidden');
+            // Update player names
+            const playerX = Object.values(gameData.players).find(p => p.symbol === 'X');
+            const playerO = Object.values(gameData.players).find(p => p.symbol === 'O');
+            playerXName.textContent = playerX ? playerX.name.split(' ')[0] : 'Waiting...';
+            playerOName.textContent = playerO ? playerO.name.split(' ')[0] : 'Waiting...';
 
             // Update board
             gameData.board.forEach((symbol, index) => {
@@ -329,7 +307,7 @@
             if (gameData.status === 'finished') {
                 statusDisplay.textContent = gameData.winner ? `Player ${gameData.winner} wins! 🎉` : "It's a draw! 🤝";
                 rematchBtn.classList.remove('hidden');
-                if (gameData.rematch[currentUserId]) {
+                if (gameData.rematch[currentUser.uid]) {
                     rematchBtn.textContent = 'Waiting for opponent...';
                     rematchBtn.disabled = true;
                 } else {
@@ -345,7 +323,7 @@
         
         cells.forEach((cell, index) => {
             cell.onclick = async () => {
-                const gameRef = doc(db, "tic-tac-toe-games", currentGameId);
+                const gameRef = doc(db, "mptictactoe", currentGameId);
                 const gameSnap = await getDoc(gameRef);
                 const gameData = gameSnap.data();
 
@@ -372,14 +350,13 @@
         });
         
         rematchBtn.onclick = async () => {
-            const gameRef = doc(db, "tic-tac-toe-games", currentGameId);
+            const gameRef = doc(db, "mptictactoe", currentGameId);
             const gameSnap = await getDoc(gameRef);
             const gameData = gameSnap.data();
             
-            const newRematchState = { ...gameData.rematch, [currentUserId]: true };
+            const newRematchState = { ...gameData.rematch, [currentUser.uid]: true };
             
             if (Object.keys(newRematchState).length === 2) {
-                // Both players want a rematch, reset the game
                 const nextStarter = gameData.startingPlayer === 'X' ? 'O' : 'X';
                 await updateDoc(gameRef, {
                     board: Array(9).fill(null),
@@ -390,7 +367,6 @@
                     rematch: {}
                 });
             } else {
-                // Only one player wants a rematch, just record their vote
                 await updateDoc(gameRef, { rematch: newRematchState });
             }
         };
@@ -398,10 +374,11 @@
         sendChatBtn.onclick = async () => {
             const text = chatInput.value.trim();
             if (text) {
-                const chatRef = collection(db, "tic-tac-toe-games", currentGameId, "messages");
+                const chatRef = collection(db, "mptictactoe", currentGameId, "messages");
                 await addDoc(chatRef, {
                     text: text,
-                    senderId: currentUserId,
+                    senderId: currentUser.uid,
+                    senderName: currentUser.displayName,
                     senderSymbol: playerSymbol,
                     timestamp: serverTimestamp()
                 });
