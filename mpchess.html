@@ -6,6 +6,13 @@
     <title>Multiplayer Chess</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- FIX: Load libraries using deferred script tags for maximum reliability -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js" defer></script>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -64,7 +71,7 @@
         
         <div id="loading-view" class="text-center p-8">
             <h1 class="text-3xl md:text-5xl font-bold text-center mb-4">Multiplayer Chess</h1>
-            <p class="text-xl text-gray-400">Checking Login Status...</p>
+            <p class="text-xl text-gray-400">Loading Resources...</p>
         </div>
 
         <div id="auth-view" class="text-center p-8 hidden">
@@ -125,277 +132,274 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { Chess } from 'https://cdn.skypack.dev/chess.js';
-
-        // FIX: Removed the DOMContentLoaded wrapper to match the working example.
-        const firebaseConfig = {
-            apiKey: "AIzaSyD02ui4dhTuGLz-Ff1af36ERdqqsn4iIeU",
-            authDomain: "falconixgaming-46210.firebaseapp.com",
-            projectId: "falconixgaming-46210",
-            storageBucket: "falconixgaming-46210.appspot.com",
-            messagingSenderId: "1096905282147",
-            appId: "1:1096905282147:web:e2faa9105d31c6ec009e56",
-            measurementId: "G-VJ6YC0GXK5"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        const loadingView = document.getElementById('loading-view'), authView = document.getElementById('auth-view'), lobbyView = document.getElementById('lobby-view'), gameView = document.getElementById('game-view');
-        const createGameBtn = document.getElementById('create-game-btn'), joinGameBtn = document.getElementById('join-game-btn'), leaveGameBtn = document.getElementById('leave-game-btn');
-        const gameIdInput = document.getElementById('game-id-input'), gameIdDisplay = document.getElementById('game-id-display');
-        const statusElement = document.getElementById('status'), boardElement = document.getElementById('board');
-        const playerWhiteName = document.getElementById('player-white-name'), playerBlackName = document.getElementById('player-black-name');
-        const playerWhiteBox = document.getElementById('player-white-box'), playerBlackBox = document.getElementById('player-black-box');
-        const chatMessages = document.getElementById('chat-messages'), chatInput = document.getElementById('chat-input'), sendChatBtn = document.getElementById('send-chat-btn');
-        const messageModal = document.getElementById('message-modal'), messageText = document.getElementById('message-text'), closeModalBtn = document.getElementById('close-modal-btn');
-
-        let currentUser = null, currentGameId = null, playerColor = null;
-        let unsubscribeGame = null, unsubscribeChat = null;
-        let chess = new Chess();
-        let selectedSquare = null;
-
-        onAuthStateChanged(auth, user => {
-            currentUser = user;
-            loadingView.classList.add('hidden'); 
-            if (user) {
-                authView.classList.add('hidden');
-                if (gameView.classList.contains('hidden')) lobbyView.classList.remove('hidden');
-            } else {
-                lobbyView.classList.add('hidden');
-                authView.classList.remove('hidden');
-                if (!gameView.classList.contains('hidden')) leaveGameBtn.click();
-            }
-        });
-
-        createGameBtn.onclick = async () => {
-            const gameId = crypto.randomUUID().split('-')[0];
-            const gameRef = doc(db, "mp-chess-games", gameId);
-            await setDoc(gameRef, {
-                fen: new Chess().fen(),
-                players: { [currentUser.uid]: { color: 'w', name: currentUser.displayName } },
-                playerIds: [currentUser.uid],
-                status: 'waiting',
-                winner: null
-            });
-            switchToGameView(gameId, 'w');
-        };
-
-        joinGameBtn.onclick = async () => {
-            const gameId = gameIdInput.value.trim();
-            if (!gameId) return showMessage("Please enter a Game ID.");
-            const gameRef = doc(db, "mp-chess-games", gameId);
-            const gameSnap = await getDoc(gameRef);
-
-            if (gameSnap.exists()) {
-                const gameData = gameSnap.data();
-                if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUser.uid)) {
-                    await updateDoc(gameRef, {
-                        [`players.${currentUser.uid}`]: { color: 'b', name: currentUser.displayName },
-                        playerIds: arrayUnion(currentUser.uid),
-                        status: 'active'
-                    });
-                    switchToGameView(gameId, 'b');
-                } else if (gameData.playerIds.includes(currentUser.uid)) {
-                    switchToGameView(gameId, gameData.players[currentUser.uid].color);
-                } else {
-                    showMessage("This game is full.");
-                }
-            } else {
-                showMessage("Game not found.");
-            }
-        };
-        
-        leaveGameBtn.onclick = async () => {
-            if (currentGameId) {
-                const gameRef = doc(db, "mp-chess-games", currentGameId);
-                await updateDoc(gameRef, { status: 'abandoned' }).catch(()=>{});
-            }
-            if (unsubscribeGame) unsubscribeGame();
-            if (unsubscribeChat) unsubscribeChat();
-            switchToLobbyView();
-        };
-
-        function switchToGameView(gameId, color) {
-            currentGameId = gameId; 
-            playerColor = color;
-            gameIdDisplay.textContent = gameId;
-            lobbyView.classList.add('hidden');
-            gameView.classList.remove('hidden');
-            gameView.classList.add('lg:grid');
-
-            const gameRef = doc(db, "mp-chess-games", gameId);
-            unsubscribeGame = onSnapshot(gameRef, (doc) => {
-                const gameData = doc.data();
-                if (gameData) renderGameState(gameData);
-                else { showMessage("Game session has ended."); leaveGameBtn.click(); }
-            });
-
-            const messagesRef = collection(db, "mp-chess-games", gameId, "messages");
-            const q = query(messagesRef, orderBy("timestamp"));
-            unsubscribeChat = onSnapshot(q, (snapshot) => {
-                chatMessages.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const msg = doc.data();
-                    const sender = msg.senderName ? msg.senderName.split(' ')[0] : 'User';
-                    chatMessages.innerHTML += `<div class="p-1"><strong>${sender}:</strong> ${msg.text}</div>`;
-                });
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            });
-        }
-
-        function switchToLobbyView() {
-            gameView.classList.add('hidden');
-            gameView.classList.remove('lg:grid');
-            if(currentUser) lobbyView.classList.remove('hidden');
-            else authView.classList.remove('hidden');
-            currentGameId = null; playerColor = null; selectedSquare = null; chess = new Chess();
-        }
-
-        function renderGameState(gameData) {
-            if (gameData.status === 'abandoned' && gameData.playerIds.includes(currentUser.uid)) {
-                showMessage("Your opponent has left the game.");
-                setTimeout(() => leaveGameBtn.click(), 3000);
-                return;
-            }
-            chess.load(gameData.fen);
-            drawBoard();
-            updatePlayerInfo(gameData);
-            updateStatus(gameData);
-        }
-
-        function drawBoard() {
-            boardElement.innerHTML = '';
-            const board = chess.board();
-            const isWhiteView = playerColor === 'w';
-
-            for (let i = 0; i < 8; i++) {
-                for (let j = 0; j < 8; j++) {
-                    const row = isWhiteView ? i : 7 - i;
-                    const col = isWhiteView ? j : 7 - j;
-                    const squareEl = document.createElement('div');
-                    const squareName = String.fromCharCode(97 + col) + (8 - row);
-                    squareEl.dataset.square = squareName;
-                    squareEl.classList.add('square', (row + col) % 2 === 0 ? 'light' : 'dark');
-                    const piece = board[row][col];
-                    if (piece) {
-                        const pieceEl = document.createElement('span');
-                        pieceEl.className = `piece piece-${piece.color}`;
-                        pieceEl.textContent = getPieceUnicode(piece);
-                        squareEl.appendChild(pieceEl);
-                    }
-                    squareEl.onclick = () => onSquareClick(squareName);
-                    boardElement.appendChild(squareEl);
-                }
-            }
-            adjustPieceSizes();
-        }
-        
-        function onSquareClick(squareName) {
-            if (chess.isGameOver() || chess.turn() !== playerColor) return;
-            if (selectedSquare) {
-                try {
-                    const result = chess.move({ from: selectedSquare, to: squareName, promotion: 'q' });
-                    if (result) updateFirebaseWithMove();
-                } catch (e) { /* Invalid move */ } 
-                finally { clearHighlights(); selectedSquare = null; }
-            } else {
-                const piece = chess.get(squareName);
-                if (piece && piece.color === playerColor) {
-                    selectedSquare = squareName;
-                    highlightValidMoves(squareName);
-                }
-            }
-        }
-        
-        async function updateFirebaseWithMove() {
-            const gameRef = doc(db, "mp-chess-games", currentGameId);
-            let status = 'active', winner = null;
-            if (chess.isGameOver()) {
-                status = 'finished';
-                if (chess.isCheckmate()) winner = chess.turn() === 'w' ? 'Black' : 'White';
-                else winner = 'Draw';
-            }
-            await updateDoc(gameRef, { fen: chess.fen(), status, winner });
-        }
-
-        function highlightValidMoves(square) {
-            clearHighlights();
-            document.querySelector(`[data-square="${square}"]`).classList.add('selected');
-            chess.moves({ square: square, verbose: true }).forEach(move => {
-                document.querySelector(`[data-square="${move.to}"]`).classList.add('valid-move');
-            });
-        }
-
-        function clearHighlights() {
-            document.querySelectorAll('.selected, .valid-move, .in-check').forEach(el => el.classList.remove('selected', 'valid-move', 'in-check'));
-        }
-
-        function updatePlayerInfo(gameData) {
-            const whitePlayer = Object.values(gameData.players).find(p => p.color === 'w');
-            const blackPlayer = Object.values(gameData.players).find(p => p.color === 'b');
-            playerWhiteName.textContent = whitePlayer ? whitePlayer.name.split(' ')[0] : 'Waiting...';
-            playerBlackName.textContent = blackPlayer ? blackPlayer.name.split(' ')[0] : 'Waiting...';
-        }
-        
-        function updateStatus(gameData) {
-            playerWhiteBox.classList.remove('ring-2', 'ring-yellow-400');
-            playerBlackBox.classList.remove('ring-2', 'ring-yellow-400');
-            clearHighlights();
-
-            if (gameData.status === 'finished') {
-                statusElement.textContent = gameData.winner === 'Draw' ? "Draw!" : `${gameData.winner} wins!`;
-            } else if (gameData.status === 'waiting') {
-                statusElement.textContent = 'Waiting for opponent...';
-            } else {
-                const turnColor = chess.turn() === 'w' ? 'White' : 'Black';
-                statusElement.textContent = `${turnColor}'s turn`;
-                if (chess.inCheck()) {
-                    statusElement.textContent += ' (Check!)';
-                    const kingSquare = chess.board().flat().find(p => p && p.type === 'k' && p.color === chess.turn())?.square;
-                    if(kingSquare) document.querySelector(`[data-square="${kingSquare}"]`).classList.add('in-check');
-                }
-                if (turnColor === 'White') playerWhiteBox.classList.add('ring-2', 'ring-yellow-400');
-                else playerBlackBox.classList.add('ring-2', 'ring-yellow-400');
-            }
-        }
-
-        function getPieceUnicode(piece) {
-            const unicodeMap = {
-                w: { p: '♙', r: '♖', n: '♘', b: '♗', q: '♕', k: '♔' },
-                b: { p: '♟', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚' }
+    <script defer>
+        // This script will run after the HTML is parsed and the libraries are loaded.
+        document.addEventListener('DOMContentLoaded', () => {
+            const firebaseConfig = {
+                apiKey: "AIzaSyD02ui4dhTuGLz-Ff1af36ERdqqsn4iIeU",
+                authDomain: "falconixgaming-46210.firebaseapp.com",
+                projectId: "falconixgaming-46210",
+                storageBucket: "falconixgaming-46210.appspot.com",
+                messagingSenderId: "1096905282147",
+                appId: "1:1096905282147:web:e2faa9105d31c6ec009e56",
+                measurementId: "G-VJ6YC0GXK5"
             };
-            return unicodeMap[piece.color][piece.type];
-        }
+            
+            // Initialize Firebase from the global object
+            firebase.initializeApp(firebaseConfig);
+            const auth = firebase.auth();
+            const db = firebase.firestore();
 
-        sendChatBtn.onclick = async () => {
-            const text = chatInput.value.trim();
-            if (text && currentUser) {
-                const messagesRef = collection(db, "mp-chess-games", currentGameId, "messages");
-                await addDoc(messagesRef, { text, senderId: currentUser.uid, senderName: currentUser.displayName, timestamp: serverTimestamp() });
-                chatInput.value = '';
+            const loadingView = document.getElementById('loading-view'), authView = document.getElementById('auth-view'), lobbyView = document.getElementById('lobby-view'), gameView = document.getElementById('game-view');
+            const createGameBtn = document.getElementById('create-game-btn'), joinGameBtn = document.getElementById('join-game-btn'), leaveGameBtn = document.getElementById('leave-game-btn');
+            const gameIdInput = document.getElementById('game-id-input'), gameIdDisplay = document.getElementById('game-id-display');
+            const statusElement = document.getElementById('status'), boardElement = document.getElementById('board');
+            const playerWhiteName = document.getElementById('player-white-name'), playerBlackName = document.getElementById('player-black-name');
+            const playerWhiteBox = document.getElementById('player-white-box'), playerBlackBox = document.getElementById('player-black-box');
+            const chatMessages = document.getElementById('chat-messages'), chatInput = document.getElementById('chat-input'), sendChatBtn = document.getElementById('send-chat-btn');
+            const messageModal = document.getElementById('message-modal'), messageText = document.getElementById('message-text'), closeModalBtn = document.getElementById('close-modal-btn');
+
+            let currentUser = null, currentGameId = null, playerColor = null;
+            let unsubscribeGame = null, unsubscribeChat = null;
+            let chess = new Chess();
+            let selectedSquare = null;
+
+            onAuthStateChanged(auth, user => {
+                currentUser = user;
+                loadingView.classList.add('hidden'); 
+                if (user) {
+                    authView.classList.add('hidden');
+                    if (gameView.classList.contains('hidden')) lobbyView.classList.remove('hidden');
+                } else {
+                    lobbyView.classList.add('hidden');
+                    authView.classList.remove('hidden');
+                    if (!gameView.classList.contains('hidden')) leaveGameBtn.click();
+                }
+            });
+
+            createGameBtn.onclick = async () => {
+                const gameId = crypto.randomUUID().split('-')[0];
+                const gameRef = db.collection("mp-chess-games").doc(gameId);
+                await gameRef.set({
+                    fen: new Chess().fen(),
+                    players: { [currentUser.uid]: { color: 'w', name: currentUser.displayName } },
+                    playerIds: [currentUser.uid],
+                    status: 'waiting',
+                    winner: null
+                });
+                switchToGameView(gameId, 'w');
+            };
+
+            joinGameBtn.onclick = async () => {
+                const gameId = gameIdInput.value.trim();
+                if (!gameId) return showMessage("Please enter a Game ID.");
+                const gameRef = db.collection("mp-chess-games").doc(gameId);
+                const gameSnap = await gameRef.get();
+
+                if (gameSnap.exists) {
+                    const gameData = gameSnap.data();
+                    if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUser.uid)) {
+                        await gameRef.update({
+                            [`players.${currentUser.uid}`]: { color: 'b', name: currentUser.displayName },
+                            playerIds: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+                            status: 'active'
+                        });
+                        switchToGameView(gameId, 'b');
+                    } else if (gameData.playerIds.includes(currentUser.uid)) {
+                        switchToGameView(gameId, gameData.players[currentUser.uid].color);
+                    } else {
+                        showMessage("This game is full.");
+                    }
+                } else {
+                    showMessage("Game not found.");
+                }
+            };
+            
+            leaveGameBtn.onclick = async () => {
+                if (currentGameId) {
+                    const gameRef = db.collection("mp-chess-games").doc(currentGameId);
+                    await gameRef.update({ status: 'abandoned' }).catch(()=>{});
+                }
+                if (unsubscribeGame) unsubscribeGame();
+                if (unsubscribeChat) unsubscribeChat();
+                switchToLobbyView();
+            };
+
+            function switchToGameView(gameId, color) {
+                currentGameId = gameId; 
+                playerColor = color;
+                gameIdDisplay.textContent = gameId;
+                lobbyView.classList.add('hidden');
+                gameView.classList.remove('hidden');
+                gameView.classList.add('lg:grid');
+
+                const gameRef = db.collection("mp-chess-games").doc(gameId);
+                unsubscribeGame = gameRef.onSnapshot((doc) => {
+                    const gameData = doc.data();
+                    if (gameData) renderGameState(gameData);
+                    else { showMessage("Game session has ended."); leaveGameBtn.click(); }
+                });
+
+                const messagesRef = db.collection("mp-chess-games").doc(gameId).collection("messages");
+                unsubscribeChat = messagesRef.orderBy("timestamp").onSnapshot((snapshot) => {
+                    chatMessages.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const msg = doc.data();
+                        const sender = msg.senderName ? msg.senderName.split(' ')[0] : 'User';
+                        chatMessages.innerHTML += `<div class="p-1"><strong>${sender}:</strong> ${msg.text}</div>`;
+                    });
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                });
             }
-        };
-        chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatBtn.click(); });
-        
-        function showMessage(msg) { messageText.textContent = msg; messageModal.classList.remove('hidden'); }
-        closeModalBtn.onclick = () => messageModal.classList.add('hidden');
-        gameIdDisplay.onclick = () => navigator.clipboard.writeText(currentGameId).then(() => showMessage("Game ID copied!"));
-        
-        function adjustPieceSizes() {
-            const square = boardElement.querySelector('.square');
-            if (square) {
-                const squareWidth = square.offsetWidth;
-                const newSize = squareWidth * 0.75;
-                boardElement.style.setProperty('--piece-font-size', `${newSize}px`);
+
+            function switchToLobbyView() {
+                gameView.classList.add('hidden');
+                gameView.classList.remove('lg:grid');
+                if(currentUser) lobbyView.classList.remove('hidden');
+                else authView.classList.remove('hidden');
+                currentGameId = null; playerColor = null; selectedSquare = null; chess = new Chess();
             }
-        }
-        window.addEventListener('resize', adjustPieceSizes);
+
+            function renderGameState(gameData) {
+                if (gameData.status === 'abandoned' && gameData.playerIds.includes(currentUser.uid)) {
+                    showMessage("Your opponent has left the game.");
+                    setTimeout(() => leaveGameBtn.click(), 3000);
+                    return;
+                }
+                chess.load(gameData.fen);
+                drawBoard();
+                updatePlayerInfo(gameData);
+                updateStatus(gameData);
+            }
+
+            function drawBoard() {
+                boardElement.innerHTML = '';
+                const board = chess.board();
+                const isWhiteView = playerColor === 'w';
+
+                for (let i = 0; i < 8; i++) {
+                    for (let j = 0; j < 8; j++) {
+                        const row = isWhiteView ? i : 7 - i;
+                        const col = isWhiteView ? j : 7 - j;
+                        const squareEl = document.createElement('div');
+                        const squareName = String.fromCharCode(97 + col) + (8 - row);
+                        squareEl.dataset.square = squareName;
+                        squareEl.classList.add('square', (row + col) % 2 === 0 ? 'light' : 'dark');
+                        const piece = board[row][col];
+                        if (piece) {
+                            const pieceEl = document.createElement('span');
+                            pieceEl.className = `piece piece-${piece.color}`;
+                            pieceEl.textContent = getPieceUnicode(piece);
+                            squareEl.appendChild(pieceEl);
+                        }
+                        squareEl.onclick = () => onSquareClick(squareName);
+                        boardElement.appendChild(squareEl);
+                    }
+                }
+                adjustPieceSizes();
+            }
+            
+            function onSquareClick(squareName) {
+                if (chess.isGameOver() || chess.turn() !== playerColor) return;
+                if (selectedSquare) {
+                    try {
+                        const result = chess.move({ from: selectedSquare, to: squareName, promotion: 'q' });
+                        if (result) updateFirebaseWithMove();
+                    } catch (e) { /* Invalid move */ } 
+                    finally { clearHighlights(); selectedSquare = null; }
+                } else {
+                    const piece = chess.get(squareName);
+                    if (piece && piece.color === playerColor) {
+                        selectedSquare = squareName;
+                        highlightValidMoves(squareName);
+                    }
+                }
+            }
+            
+            async function updateFirebaseWithMove() {
+                const gameRef = db.collection("mp-chess-games").doc(currentGameId);
+                let status = 'active', winner = null;
+                if (chess.isGameOver()) {
+                    status = 'finished';
+                    if (chess.isCheckmate()) winner = chess.turn() === 'w' ? 'Black' : 'White';
+                    else winner = 'Draw';
+                }
+                await gameRef.update({ fen: chess.fen(), status, winner });
+            }
+
+            function highlightValidMoves(square) {
+                clearHighlights();
+                document.querySelector(`[data-square="${square}"]`).classList.add('selected');
+                chess.moves({ square: square, verbose: true }).forEach(move => {
+                    document.querySelector(`[data-square="${move.to}"]`).classList.add('valid-move');
+                });
+            }
+
+            function clearHighlights() {
+                document.querySelectorAll('.selected, .valid-move, .in-check').forEach(el => el.classList.remove('selected', 'valid-move', 'in-check'));
+            }
+
+            function updatePlayerInfo(gameData) {
+                const whitePlayer = Object.values(gameData.players).find(p => p.color === 'w');
+                const blackPlayer = Object.values(gameData.players).find(p => p.color === 'b');
+                playerWhiteName.textContent = whitePlayer ? whitePlayer.name.split(' ')[0] : 'Waiting...';
+                playerBlackName.textContent = blackPlayer ? blackPlayer.name.split(' ')[0] : 'Waiting...';
+            }
+            
+            function updateStatus(gameData) {
+                playerWhiteBox.classList.remove('ring-2', 'ring-yellow-400');
+                playerBlackBox.classList.remove('ring-2', 'ring-yellow-400');
+                clearHighlights();
+
+                if (gameData.status === 'finished') {
+                    statusElement.textContent = gameData.winner === 'Draw' ? "Draw!" : `${gameData.winner} wins!`;
+                } else if (gameData.status === 'waiting') {
+                    statusElement.textContent = 'Waiting for opponent...';
+                } else {
+                    const turnColor = chess.turn() === 'w' ? 'White' : 'Black';
+                    statusElement.textContent = `${turnColor}'s turn`;
+                    if (chess.inCheck()) {
+                        statusElement.textContent += ' (Check!)';
+                        const kingSquare = chess.board().flat().find(p => p && p.type === 'k' && p.color === chess.turn())?.square;
+                        if(kingSquare) document.querySelector(`[data-square="${kingSquare}"]`).classList.add('in-check');
+                    }
+                    if (turnColor === 'White') playerWhiteBox.classList.add('ring-2', 'ring-yellow-400');
+                    else playerBlackBox.classList.add('ring-2', 'ring-yellow-400');
+                }
+            }
+
+            function getPieceUnicode(piece) {
+                const unicodeMap = {
+                    w: { p: '♙', r: '♖', n: '♘', b: '♗', q: '♕', k: '♔' },
+                    b: { p: '♟', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚' }
+                };
+                return unicodeMap[piece.color][piece.type];
+            }
+
+            sendChatBtn.onclick = async () => {
+                const text = chatInput.value.trim();
+                if (text && currentUser) {
+                    const messagesRef = db.collection("mp-chess-games").doc(currentGameId).collection("messages");
+                    await messagesRef.add({ text, senderId: currentUser.uid, senderName: currentUser.displayName, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                    chatInput.value = '';
+                }
+            };
+            chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatBtn.click(); });
+            
+            function showMessage(msg) { messageText.textContent = msg; messageModal.classList.remove('hidden'); }
+            closeModalBtn.onclick = () => messageModal.classList.add('hidden');
+            gameIdDisplay.onclick = () => navigator.clipboard.writeText(currentGameId).then(() => showMessage("Game ID copied!"));
+            
+            function adjustPieceSizes() {
+                const square = boardElement.querySelector('.square');
+                if (square) {
+                    const squareWidth = square.offsetWidth;
+                    const newSize = squareWidth * 0.75;
+                    boardElement.style.setProperty('--piece-font-size', `${newSize}px`);
+                }
+            }
+            window.addEventListener('resize', adjustPieceSizes);
+        });
     </script>
 </body>
 </html>
