@@ -711,7 +711,14 @@
                 }
                 displayUserHighScores(user);
             });
-
+            // --- Handle Login Redirect ---
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('login') === 'true') {
+                // Check if a user is already signed in
+                if (!auth.currentUser) {
+                    signInWithGoogle();
+                }
+            }
             
             // #############################################
             // ### MOBILE MENU TOGGLE                    ###
