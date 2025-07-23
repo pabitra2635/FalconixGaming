@@ -166,8 +166,8 @@
                 </div>
                 <!-- Mobile Menu Button -->
                  <button id="mobile-menu-button" class="md:hidden text-gray-300 hover:text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                </button>
+                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                 </button>
             </div>
         </nav>
         <!-- Mobile Menu -->
@@ -236,9 +236,9 @@
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-end">
                              <div class="flex items-center gap-3">
-                                <svg class="w-8 h-8 text-pink-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <h3 class="text-2xl font-bold text-white">Pixel Racer</h3>
-                            </div>
+                                 <svg class="w-8 h-8 text-pink-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                 <h3 class="text-2xl font-bold text-white">Pixel Racer</h3>
+                             </div>
                             <p class="text-pink-400 mt-1">2D Arcade Racer</p>
                         </div>
                          <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
@@ -313,21 +313,21 @@
                     <span class="btn-warning pointer-events-none">Play Now</span>
                 </div>
             </a>
-            <!-- Coming Soon Card 2 -->
-            <div class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
-                <img src="https://placehold.co/600x400/ef4444/white?text=Starship+Defender" alt="Starship Defender" class="w-full h-full object-cover">
-                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+            <!-- Game Card 2: Memory Match -->
+            <a href="mpmemory.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+                <img src="https://img.gamedistribution.com/854fd8048c814acaa86b0faffe364290-1280x720.jpeg" alt="Memory Match" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                 <div class="absolute inset-0 p-6 flex flex-col justify-end">
                     <div class="flex items-center gap-3">
-                        <svg class="w-8 h-8 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <h3 class="text-2xl font-bold text-white">Starship Defender</h3>
+                        <svg class="w-8 h-8 text-yellow-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <h3 class="text-2xl font-bold text-white">Memory Match</h3>
                     </div>
-                    <p class="text-red-400 mt-1">Coming Soon</p>
+                    <p class="text-yellow-400 mt-1">Puzzle</p>
                 </div>
-                 <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
-                    <span class="text-xl font-semibold text-white">Coming Soon!</span>
+                <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
+                    <span class="btn-warning pointer-events-none">Play Now</span>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
 </section>
@@ -551,7 +551,7 @@
         document.addEventListener('DOMContentLoaded', () => {
 
             // #############################################
-            // ### FIREBASE SETUP                        ###
+            // ### FIREBASE SETUP                         ###
             // #############################################
             
             const firebaseConfig = {
@@ -721,7 +721,7 @@
             }
             
             // #############################################
-            // ### MOBILE MENU TOGGLE                    ###
+            // ### MOBILE MENU TOGGLE                     ###
             // #############################################
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
@@ -731,7 +731,7 @@
             });
 
             // #############################################
-            // ### HOW TO PLAY SECTION                   ###
+            // ### HOW TO PLAY SECTION                     ###
             // #############################################
             const gameInfoButtons = document.querySelectorAll('.game-info-btn');
             const gameExplanationResultEl = document.getElementById('gameExplanationResult');
