@@ -23,6 +23,7 @@
             grid-template-columns: repeat(8, 1fr);
             aspect-ratio: 1 / 1;
             border: 4px solid #4b5563; /* bg-gray-600 */
+            border-radius: 8px;
         }
         .chess-square {
             position: relative;
@@ -33,10 +34,10 @@
             justify-content: center;
             font-size: clamp(20px, 8vmin, 50px);
         }
-        .light-square { background-color: #f3f4f6; } /* gray-100 */
-        .dark-square { background-color: #374151; } /* gray-700 */
+        .light-square { background-color: #f9fafb; } /* gray-50 */
+        .dark-square { background-color: #4b5563; } /* gray-600 */
         .chess-piece { cursor: grab; }
-        .selected-piece { background-color: rgba(250, 204, 21, 0.5) !important; } /* yellow-400 with opacity */
+        .selected-piece { background-color: rgba(59, 130, 246, 0.5) !important; } /* blue-500 with opacity */
         .valid-move::after {
             content: '';
             position: absolute;
@@ -45,12 +46,12 @@
             transform: translate(-50%, -50%);
             width: 35%;
             height: 35%;
-            background-color: rgba(34, 197, 94, 0.5); /* green-500 with opacity */
+            background-color: rgba(34, 197, 94, 0.6); /* green-500 with opacity */
             border-radius: 50%;
         }
-        .player-white { color: #e5e7eb; } /* gray-200 */
-        .player-black { color: #111827; } /* gray-900 */
-        .turn-indicator { border: 2px solid #facc15; } /* yellow-400 */
+        .player-white { color: #111827; } /* gray-900 on light squares */
+        .player-black { color: #f9fafb; } /* gray-50 on dark squares */
+        .turn-indicator { box-shadow: 0 0 12px #facc15; border: 2px solid #facc15; } /* yellow-400 */
 
         /* Chat Box Styles */
         #chat-messages { height: 150px; }
@@ -63,11 +64,11 @@
     <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
         <nav class="w-full max-w-7xl mx-auto px-4 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
+                <a href="#" class="text-3xl font-black-ops text-white">MULTIPLAYER<span class="text-sky-400">CHESS</span></a>
                 <div id="auth-container" class="flex items-center">
-                     <div id="user-info-header" class="hidden items-center space-x-4">
-                         <span id="user-display-name" class="text-white font-semibold"></span>
-                     </div>
+                    <div id="user-info-header" class="hidden items-center space-x-4">
+                        <span id="user-display-name" class="text-white font-semibold"></span>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -75,7 +76,7 @@
 
     <!-- Main Content -->
     <main class="flex items-center justify-center flex-grow w-full px-4">
-        <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-4xl my-8 border border-gray-700">
+        <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-5xl my-8 border border-gray-700">
             
             <!-- Loading View -->
             <div id="loading-view" class="text-center">
@@ -85,19 +86,18 @@
 
             <!-- Auth View -->
             <div id="auth-view" class="text-center hidden">
-                <h1 class="text-4xl font-bold text-gray-100 mb-4">Login Required</h1>
-                <p class="text-gray-400 mb-6">Please log in on the main website to play multiplayer games.</p>
-                <a href="index.html?login=true" class="btn-primary w-full inline-block">Go to Main Page to Login</a>
+                <h1 class="text-4xl font-bold text-gray-100 mb-4">Welcome!</h1>
+                <p class="text-gray-400 mb-6">Authentication is required to play multiplayer chess. Please refresh the page or contact support if this issue persists.</p>
             </div>
 
             <!-- Lobby View -->
             <div id="lobby-view" class="hidden">
-                <h1 class="text-4xl text-center font-bold text-gray-100 mb-6">Multiplayer Chess</h1>
-                <div class="space-y-4">
-                    <button id="create-game-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700">Create New Game</button>
+                <h1 class="text-4xl text-center font-bold text-gray-100 mb-6">Game Lobby</h1>
+                <div class="space-y-4 max-w-md mx-auto">
+                    <button id="create-game-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors">Create New Game</button>
                     <div class="relative flex py-2 items-center"><div class="flex-grow border-t border-gray-600"></div><span class="flex-shrink mx-4 text-gray-400">OR</span><div class="flex-grow border-t border-gray-600"></div></div>
-                    <input type="text" id="game-id-input" placeholder="Enter Game ID to Join" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400">
-                    <button id="join-game-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700">Join Game</button>
+                    <input type="text" id="game-id-input" placeholder="Enter Game ID to Join" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-sky-500">
+                    <button id="join-game-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">Join Game</button>
                 </div>
                  <div class="text-center mt-6 text-xs text-gray-500"><p>Your User ID: <span id="user-id-display" class="font-mono"></span></p></div>
             </div>
@@ -107,73 +107,64 @@
                 <div class="lg:col-span-2">
                     <div id="chess-board" class="chess-board"></div>
                 </div>
-                <div class="flex flex-col justify-between">
+                <div class="flex flex-col justify-between bg-gray-900/50 p-4 rounded-lg">
                     <div>
-                        <div id="player2-box" class="p-4 rounded-lg mb-4 bg-gray-900">
-                            <p class="text-lg font-bold text-gray-400">Black (<span id="player-black-name"></span>)</p>
+                        <div id="player2-box" class="p-4 rounded-lg mb-4 bg-gray-700 transition-all duration-300">
+                            <p class="text-lg font-bold text-gray-300">Black: <span id="player-black-name" class="font-normal"></span></p>
                         </div>
-                        <div id="status" class="text-center text-xl font-semibold text-gray-400 my-4 h-8 flex items-center justify-center"></div>
-                        <div id="player1-box" class="p-4 rounded-lg mt-4 bg-gray-900">
-                            <p class="text-lg font-bold text-gray-200">White (<span id="player-white-name"></span>)</p>
+                        <div id="status" class="text-center text-xl font-semibold text-yellow-400 my-4 h-8 flex items-center justify-center"></div>
+                        <div id="player1-box" class="p-4 rounded-lg mt-4 bg-gray-700 transition-all duration-300">
+                            <p class="text-lg font-bold text-gray-300">White: <span id="player-white-name" class="font-normal"></span></p>
                         </div>
                     </div>
-                    <div id="chat-box" class="mb-4">
+                    <div id="chat-box" class="my-4">
                         <div id="chat-messages" class="bg-gray-900 rounded-lg p-2 overflow-y-auto border border-gray-600"></div>
                         <div class="flex mt-2">
-                            <input type="text" id="chat-input" placeholder="Type a message..." class="flex-grow p-2 bg-gray-700 border border-gray-600 rounded-l-lg text-white">
-                            <button id="send-chat-btn" class="bg-sky-500 text-white font-bold py-2 px-4 rounded-r-lg hover:bg-sky-600">Send</button>
+                            <input type="text" id="chat-input" placeholder="Type a message..." class="flex-grow p-2 bg-gray-700 border border-gray-600 rounded-l-lg text-white focus:ring-1 focus:ring-sky-500 focus:outline-none">
+                            <button id="send-chat-btn" class="bg-sky-500 text-white font-bold py-2 px-4 rounded-r-lg hover:bg-sky-600 transition-colors">Send</button>
                         </div>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-400 text-center mb-2">Game ID: <span id="game-id-display" class="font-mono cursor-pointer" title="Click to copy"></span></p>
-                        <button id="leave-game-btn" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700">Leave Game</button>
+                        <p class="text-sm text-gray-400 text-center mb-2">Game ID: <span id="game-id-display" class="font-mono cursor-pointer bg-gray-700 px-2 py-1 rounded" title="Click to copy"></span></p>
+                        <button id="leave-game-btn" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700 transition-colors">Leave Game</button>
                     </div>
                 </div>
             </div>
 
              <!-- Message Modal -->
-            <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"><div class="bg-gray-800 p-6 rounded-lg shadow-xl text-center"><p id="message-text" class="text-lg mb-4"></p><button id="close-modal-btn" class="btn-primary">Close</button></div></div>
+            <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 transition-opacity duration-300">
+                <div class="bg-gray-800 p-8 rounded-lg shadow-xl text-center border border-gray-700 transform transition-transform duration-300 scale-95">
+                    <p id="message-text" class="text-lg mb-6"></p>
+                    <button id="close-modal-btn" class="btn-primary">Close</button>
+                </div>
+            </div>
         </div>
     </main>
     
-    <!-- Footer -->
-    <footer class="bg-gray-900 border-t border-gray-700">
-        <div class="container mx-auto px-4 lg:px-8 py-8 text-center text-gray-400">
-            <p>&copy; 2025 <a href="https://chat.whatsapp.com/DUXdfaOxJoPC87KjRWbkjo" style="text-decoration:underline;">FalconixGaming</a>. All Rights Reserved.</p>
-        </div>
-    </footer>
-
-    <script type="importmap">
-    {
-        "imports": {
-            "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
-            "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
-            "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js",
-            "chess.js": "https://cdn.jsdelivr.net/npm/chess.js@1.0.0-beta.8/dist/chess.mjs"
-        }
-    }
-    </script>
     <script type="module">
-        import { initializeApp } from 'firebase/app';
-        import { getAuth, onAuthStateChanged } from 'firebase/auth';
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
-        import { Chess } from 'chess.js';
+        // Firebase and Chess.js imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { Chess } from 'https://cdn.jsdelivr.net/npm/chess.js@1.0.0-beta.8/dist/chess.js';
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyD02ui4dhTuGLz-Ff1af36ERdqqsn4iIeU",
-            authDomain: "falconixgaming-46210.firebaseapp.com",
-            projectId: "falconixgaming-46210",
-            storageBucket: "falconixgaming-46210.appspot.com",
-            messagingSenderId: "1096905282147",
-            appId: "1:1096905282147:web:e2faa9105d31c6ec009e56",
-            measurementId: "G-VJ6YC0GXK5"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        // --- CONFIG & INITIALIZATION ---
+        // Use environment variables provided by the platform for configuration and security
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-chess-app';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // DOM Elements
+        let app, auth, db;
+        if (Object.keys(firebaseConfig).length > 0) {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } else {
+            console.error("Firebase config is missing!");
+            document.getElementById('loading-view').innerHTML = '<h1 class="text-4xl font-bold text-red-500 mb-4">Configuration Error</h1><p class="text-gray-400">Cannot connect to services. Please contact support.</p>';
+        }
+
+        // --- DOM Elements ---
         const loadingView = document.getElementById('loading-view'), authView = document.getElementById('auth-view'), lobbyView = document.getElementById('lobby-view'), gameView = document.getElementById('game-view');
         const userInfoHeader = document.getElementById('user-info-header'), userDisplayName = document.getElementById('user-display-name');
         const createGameBtn = document.getElementById('create-game-btn'), joinGameBtn = document.getElementById('join-game-btn'), leaveGameBtn = document.getElementById('leave-game-btn');
@@ -184,18 +175,22 @@
         const chatMessages = document.getElementById('chat-messages'), chatInput = document.getElementById('chat-input'), sendChatBtn = document.getElementById('send-chat-btn');
         const messageModal = document.getElementById('message-modal'), messageText = document.getElementById('message-text'), closeModalBtn = document.getElementById('close-modal-btn');
 
-        // Game State
+        // --- Game State ---
         let currentUser = null, currentGameId = null, playerColor = null;
         let unsubscribeGame = null, unsubscribeChat = null;
         let chess = new Chess();
         let selectedPiece = null;
 
-        // --- AUTH ---
+        // --- AUTHENTICATION ---
+        /**
+         * Listens for changes in the user's authentication state and updates the UI accordingly.
+         */
         onAuthStateChanged(auth, user => {
             currentUser = user;
             loadingView.classList.add('hidden'); 
             if (user) {
-                userDisplayName.textContent = user.displayName;
+                const displayName = user.displayName || (user.isAnonymous ? 'Anonymous' : 'User');
+                userDisplayName.textContent = displayName;
                 userIdDisplay.textContent = user.uid;
                 userInfoHeader.classList.remove('hidden');
                 authView.classList.add('hidden');
@@ -209,95 +204,161 @@
             }
         });
 
-        // --- LOBBY ---
+        /**
+         * Signs the user in, either with a custom token or anonymously.
+         * This is the key function that triggers the onAuthStateChanged listener.
+         */
+        const initializeAuth = async () => {
+            if (!auth) return;
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Authentication failed:", error);
+                loadingView.classList.add('hidden');
+                authView.classList.remove('hidden');
+                showMessage("Could not log you in. Please refresh and try again.");
+            }
+        };
+
+        // --- LOBBY LOGIC ---
+        /**
+         * Creates a new game in Firestore and transitions the user to the game view.
+         */
         createGameBtn.onclick = async () => {
+            if (!currentUser) return showMessage("You must be logged in to create a game.");
             const gameId = crypto.randomUUID().split('-')[0];
-            const gameRef = doc(db, "mp-chess-games", gameId);
-            const newChess = new Chess();
+            const gameRef = doc(db, `artifacts/${appId}/public/data/mp-chess-games`, gameId);
             await setDoc(gameRef, {
-                fen: newChess.fen(),
-                pgn: newChess.pgn(),
-                players: { [currentUser.uid]: { color: 'w', name: currentUser.displayName } },
+                fen: new Chess().fen(),
+                pgn: new Chess().pgn(),
+                players: { [currentUser.uid]: { color: 'w', name: currentUser.displayName || 'Anonymous' } },
                 playerIds: [currentUser.uid],
-                status: 'waiting',
-                winner: null
+                status: 'waiting', // waiting, active, finished, abandoned
+                winner: null,
+                createdAt: serverTimestamp()
             });
             switchToGameView(gameId, 'w');
         };
 
+        /**
+         * Joins an existing game or reconnects to a game in progress.
+         */
         joinGameBtn.onclick = async () => {
+            if (!currentUser) return showMessage("You must be logged in to join a game.");
             const gameId = gameIdInput.value.trim();
             if (!gameId) return showMessage("Please enter a Game ID.");
-            const gameRef = doc(db, "mp-chess-games", gameId);
+            const gameRef = doc(db, `artifacts/${appId}/public/data/mp-chess-games`, gameId);
             const gameSnap = await getDoc(gameRef);
 
             if (gameSnap.exists()) {
                 const gameData = gameSnap.data();
+                // Join as player 2 if the game is waiting
                 if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUser.uid)) {
                     await updateDoc(gameRef, {
-                        [`players.${currentUser.uid}`]: { color: 'b', name: currentUser.displayName },
+                        [`players.${currentUser.uid}`]: { color: 'b', name: currentUser.displayName || 'Anonymous' },
                         playerIds: [...gameData.playerIds, currentUser.uid],
                         status: 'active'
                     });
                     switchToGameView(gameId, 'b');
+                // Reconnect to a game you're already in
                 } else if (gameData.playerIds.includes(currentUser.uid)) {
                     switchToGameView(gameId, gameData.players[currentUser.uid].color);
                 } else {
-                    showMessage("This game is full.");
+                    showMessage("This game is full or you are not part of it.");
                 }
             } else {
                 showMessage("Game not found.");
             }
         };
         
+        /**
+         * Leaves the current game, unsubscribes from listeners, and returns to the lobby.
+         */
         leaveGameBtn.onclick = async () => {
             if (currentGameId) {
-                await updateDoc(doc(db, "mp-chess-games", currentGameId), { status: 'abandoned' }).catch(()=>{});
+                const gameRef = doc(db, `artifacts/${appId}/public/data/mp-chess-games`, currentGameId);
+                const gameSnap = await getDoc(gameRef);
+                if(gameSnap.exists() && gameSnap.data().status !== 'finished') {
+                    await updateDoc(gameRef, { status: 'abandoned' }).catch(console.error);
+                }
             }
             if (unsubscribeGame) unsubscribeGame();
             if (unsubscribeChat) unsubscribeChat();
+            unsubscribeGame = null;
+            unsubscribeChat = null;
+            currentGameId = null;
+            playerColor = null;
             switchToLobbyView();
         };
 
-        // --- GAME VIEW & LOGIC ---
+        // --- VIEW MANAGEMENT ---
+        /**
+         * Switches the UI to the game view and sets up real-time listeners.
+         */
         function switchToGameView(gameId, color) {
-            currentGameId = gameId; playerColor = color;
+            currentGameId = gameId; 
+            playerColor = color;
             gameIdDisplay.textContent = gameId;
             lobbyView.classList.add('hidden');
             gameView.classList.remove('hidden');
 
-            unsubscribeGame = onSnapshot(doc(db, "mp-chess-games", gameId), (doc) => {
-                const gameData = doc.data();
-                if (gameData) renderGameState(gameData);
-                else { showMessage("Game session ended."); leaveGameBtn.click(); }
+            // Listen for game state changes
+            const gameDocRef = doc(db, `artifacts/${appId}/public/data/mp-chess-games`, gameId);
+            unsubscribeGame = onSnapshot(gameDocRef, (doc) => {
+                if (doc.exists()) {
+                    renderGameState(doc.data());
+                } else {
+                    showMessage("Game session has been deleted.");
+                    switchToLobbyView();
+                }
             });
 
-            const q = query(collection(db, "mp-chess-games", gameId, "messages"), orderBy("timestamp"));
+            // Listen for chat messages
+            const chatCollRef = collection(db, `artifacts/${appId}/public/data/mp-chess-games`, gameId, "messages");
+            const q = query(chatCollRef, orderBy("timestamp", "asc"));
             unsubscribeChat = onSnapshot(q, (snapshot) => {
                 chatMessages.innerHTML = '';
                 snapshot.forEach(doc => {
                     const msg = doc.data();
-                    chatMessages.innerHTML += `<div class="p-2 rounded-lg">${msg.senderName}: ${msg.text}</div>`;
+                    const senderName = msg.senderName ? msg.senderName.split(' ')[0] : 'User';
+                    const messageDiv = document.createElement('div');
+                    messageDiv.classList.add('p-2', 'rounded-lg');
+                    messageDiv.textContent = `${senderName}: ${msg.text}`;
+                    chatMessages.appendChild(messageDiv);
                 });
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             });
         }
 
+        /**
+         * Switches the UI back to the lobby view.
+         */
         function switchToLobbyView() {
             gameView.classList.add('hidden');
             if(currentUser) lobbyView.classList.remove('hidden');
             else authView.classList.remove('hidden');
         }
 
+        // --- GAME RENDER & LOGIC ---
+        /**
+         * Main function to update the UI based on the latest game data from Firestore.
+         */
         function renderGameState(gameData) {
-            if (handleAbandoned(gameData)) return;
+            if (handleGameEnd(gameData)) return;
 
             chess.load(gameData.fen);
             drawBoard();
             updatePlayerInfo(gameData);
             updateStatus(gameData);
         }
-
+        
+        /**
+         * Redraws the entire chessboard based on the current game state.
+         */
         function drawBoard() {
             chessBoardEl.innerHTML = '';
             const board = chess.board();
@@ -308,37 +369,56 @@
                     const row = isWhiteView ? i : 7 - i;
                     const col = isWhiteView ? j : 7 - j;
                     
-                    const square = document.createElement('div');
+                    const squareEl = document.createElement('div');
                     const squareName = String.fromCharCode(97 + col) + (8 - row);
-                    square.dataset.square = squareName;
-                    square.classList.add('chess-square', (row + col) % 2 === 0 ? 'light-square' : 'dark-square');
+                    squareEl.dataset.square = squareName;
+                    squareEl.classList.add('chess-square', (row + col) % 2 === 0 ? 'light-square' : 'dark-square');
                     
                     const piece = board[row][col];
                     if (piece) {
-                        square.innerHTML = getPieceUnicode(piece);
-                        square.classList.add('chess-piece', piece.color === 'w' ? 'player-white' : 'player-black');
+                        squareEl.innerHTML = getPieceUnicode(piece);
+                        squareEl.classList.add('chess-piece', piece.color === 'w' ? 'player-white' : 'player-black');
                     }
                     
-                    square.onclick = () => onSquareClick(squareName);
-                    chessBoardEl.appendChild(square);
+                    squareEl.onclick = () => onSquareClick(squareName);
+                    chessBoardEl.appendChild(squareEl);
                 }
             }
         }
         
+        /**
+         * Handles a click on a square, either selecting a piece or making a move.
+         */
         function onSquareClick(squareName) {
+            // Return if it's not the player's turn or game is over
             if (chess.turn() !== playerColor || chess.isGameOver()) return;
 
+            // If a piece is already selected, try to move it
             if (selectedPiece) {
-                const move = { from: selectedPiece, to: squareName, promotion: 'q' };
+                const move = { from: selectedPiece, to: squareName, promotion: 'q' }; // Auto-promote to Queen
+                
                 try {
                     const result = chess.move(move);
                     if (result) {
-                        updateFirebaseWithMove();
+                        updateFirebaseWithMove(); // Success, update Firestore
                     }
-                } catch (e) { /* Invalid move */ }
+                } catch (e) {
+                    // This catch block handles illegal moves. We can just ignore them.
+                    // If the user clicks another of their own pieces, switch selection.
+                    const piece = chess.get(squareName);
+                    if (piece && piece.color === playerColor) {
+                        selectedPiece = squareName;
+                        highlightValidMoves(squareName);
+                        return; // Exit to prevent clearing highlights
+                    }
+                }
+                
+                // Clear selection after a move attempt
                 clearHighlights();
                 selectedPiece = null;
+
             } else {
+                // If no piece is selected, select the one clicked (if it's theirs)
                 const piece = chess.get(squareName);
                 if (piece && piece.color === playerColor) {
                     selectedPiece = squareName;
@@ -347,8 +427,11 @@
             }
         }
         
+        /**
+         * Updates the game document in Firestore with the new FEN string and status.
+         */
         async function updateFirebaseWithMove() {
-            const gameRef = doc(db, "mp-chess-games", currentGameId);
+            const gameRef = doc(db, `artifacts/${appId}/public/data/mp-chess-games`, currentGameId);
             let status = 'active';
             let winner = null;
             if (chess.isGameOver()) {
@@ -362,6 +445,7 @@
             await updateDoc(gameRef, { fen: chess.fen(), pgn: chess.pgn(), status, winner });
         }
 
+        // --- UI & UX HELPERS ---
         function highlightValidMoves(square) {
             clearHighlights();
             document.querySelector(`[data-square="${square}"]`).classList.add('selected-piece');
@@ -388,10 +472,10 @@
             player2Box.classList.remove('turn-indicator');
 
             if (gameData.status === 'finished') {
-                statusDisplay.textContent = gameData.winner === 'Draw' ? "Draw!" : `${gameData.winner} wins!`;
+                statusDisplay.textContent = gameData.winner === 'Draw' ? "It's a Draw!" : `${gameData.winner} wins!`;
             } else if (gameData.status === 'waiting') {
                 statusDisplay.textContent = 'Waiting for opponent...';
-            } else {
+            } else if (gameData.status === 'active') {
                 const turnColor = chess.turn() === 'w' ? 'White' : 'Black';
                 statusDisplay.textContent = `${turnColor}'s turn`;
                 if (chess.isCheck()) {
@@ -402,37 +486,71 @@
             }
         }
         
-        function getPieceUnicode(piece) {
-            const unicodeMap = {
-                p: '♙', r: '♖', n: '♘', b: '♗', q: '♕', k: '♔',
-                P: '♟', R: '♜', N: '♞', B: '♝', Q: '♛', K: '♚'
-            };
-            return unicodeMap[piece.type === 'p' ? (piece.color === 'w' ? 'p' : 'P') : (piece.color === 'w' ? piece.type : piece.type.toUpperCase())];
-        }
-
-        // --- UTILS & CHAT ---
-        function handleAbandoned(gameData) {
+        /**
+         * Checks if the game has ended (abandoned or finished) and shows a message.
+         * @returns {boolean} - True if the game has ended, false otherwise.
+         */
+        function handleGameEnd(gameData) {
             if (gameData.status === 'abandoned') {
-                showMessage("Your opponent has left.");
+                showMessage("Your opponent has left the game.");
                 setTimeout(() => leaveGameBtn.click(), 3000);
                 return true;
             }
+            if (gameData.status === 'finished') {
+                 const message = gameData.winner === 'Draw' ? "The game ended in a draw." : `${gameData.winner} has won the game!`;
+                 showMessage(message);
+                 return false; // Allow board to render the final state
+            }
             return false;
         }
+        
+        /**
+         * Gets the correct unicode character for a chess piece.
+         */
+        function getPieceUnicode(piece) {
+            const unicodeMap = {
+                p: '♙', r: '♖', n: '♘', b: '♗', q: '♕', k: '♔', // White
+                P: '♟', R: '♜', N: '♞', B: '♝', Q: '♛', K: '♚'  // Black
+            };
+            // chess.js piece.type is always lowercase. We use uppercase for black piece keys.
+            const key = piece.color === 'b' ? piece.type.toUpperCase() : piece.type;
+            return unicodeMap[key];
+        }
 
+        // --- CHAT & MODAL ---
         sendChatBtn.onclick = async () => {
             const text = chatInput.value.trim();
-            if (text && currentUser) {
-                const chatRef = collection(db, "mp-chess-games", currentGameId, "messages");
-                await addDoc(chatRef, { text, senderId: currentUser.uid, senderName: currentUser.displayName, timestamp: serverTimestamp() });
+            if (text && currentUser && currentGameId) {
+                const chatRef = collection(db, `artifacts/${appId}/public/data/mp-chess-games`, currentGameId, "messages");
+                await addDoc(chatRef, { 
+                    text, 
+                    senderId: currentUser.uid, 
+                    senderName: currentUser.displayName || 'Anonymous', 
+                    timestamp: serverTimestamp() 
+                });
                 chatInput.value = '';
             }
         };
         chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatBtn.click(); });
         
-        function showMessage(msg) { messageText.textContent = msg; messageModal.classList.remove('hidden'); }
-        closeModalBtn.onclick = () => messageModal.classList.add('hidden');
-        gameIdDisplay.onclick = () => navigator.clipboard.writeText(currentGameId).then(() => showMessage("Game ID copied!"));
+        function showMessage(msg) { 
+            messageText.textContent = msg; 
+            messageModal.classList.remove('hidden');
+            setTimeout(() => messageModal.querySelector('div').classList.remove('scale-95'), 10); // Animate in
+        }
+        closeModalBtn.onclick = () => {
+            messageModal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => messageModal.classList.add('hidden'), 300); // Animate out
+        };
+        
+        gameIdDisplay.onclick = () => {
+            if (navigator.clipboard && currentGameId) {
+                navigator.clipboard.writeText(currentGameId).then(() => showMessage("Game ID copied to clipboard!"));
+            }
+        };
+
+        // --- START THE APP ---
+        initializeAuth();
 
     </script>
 </body>
