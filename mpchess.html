@@ -81,9 +81,8 @@
             gap: 4px;
             font-size: 24px;
         }
-        /* --- NEW: Style for Game Over status --- */
         .game-over {
-            background-color: #10B981 !important; /* A nice green for wins/draws */
+            background-color: #10B981 !important;
             transition: background-color 0.5s ease;
         }
         .game-over p {
@@ -133,7 +132,7 @@
     <script>
         // --- DOM Elements ---
         const boardElement = document.getElementById('board');
-        const statusContainer = document.getElementById('status-container'); // Get container for styling
+        const statusContainer = document.getElementById('status-container');
         const statusElement = document.getElementById('status');
         const resetButton = document.getElementById('resetButton');
         const promotionModal = document.getElementById('promotion-modal');
@@ -175,7 +174,11 @@
             gameEnded = false;
             capturedByWhite = [];
             capturedByBlack = [];
-            updateStatus("White's Turn to Move"); // Updated initial message
+            
+            // --- FIX: Reset status container style before setting text ---
+            statusContainer.classList.remove('game-over');
+            updateStatus("White's Turn to Move");
+            
             renderBoard();
             renderCapturedPieces();
         }
@@ -193,20 +196,19 @@
             capturedByWhiteElement.innerHTML = '';
             capturedByBlackElement.innerHTML = '';
             
-            capturedByWhite.forEach(piece => {
+            capturedByWhite.sort().forEach(piece => {
                 const pieceEl = document.createElement('span');
                 pieceEl.textContent = pieces[piece];
                 capturedByWhiteElement.appendChild(pieceEl);
             });
             
-            capturedByBlack.forEach(piece => {
+            capturedByBlack.sort().forEach(piece => {
                 const pieceEl = document.createElement('span');
                 pieceEl.textContent = pieces[piece];
                 capturedByBlackElement.appendChild(pieceEl);
             });
         }
 
-        // --- Rendering ---
         function renderBoard() {
             boardElement.innerHTML = '';
             removeHighlights();
@@ -253,7 +255,6 @@
             }
         }
 
-        // --- Event Handling ---
         function onSquareClick(row, col) {
             if (gameEnded) return;
 
@@ -289,6 +290,8 @@
                 } else {
                     capturedByBlack.push(capturedPiece);
                 }
+                // --- FIX: Render captured pieces immediately after capture ---
+                renderCapturedPieces();
             }
             
             const piece = boardState[fromRow][fromCol];
@@ -306,16 +309,13 @@
             
             switchPlayer();
             renderBoard();
-            renderCapturedPieces();
             checkGameState();
         }
 
         function switchPlayer() {
             currentPlayer = (currentPlayer === 'white') ? 'black' : 'white';
-            // The status will be updated by checkGameState after the move.
         }
 
-        // --- MODIFIED: Status Update Function ---
         function updateStatus(message, isGameOver = false) {
             statusElement.textContent = message;
             if (isGameOver) {
@@ -325,7 +325,6 @@
             }
         }
 
-        // --- MODIFIED: Game State Checking ---
         function checkGameState() {
             const kingInCheck = isKingInCheck(currentPlayer, boardState);
             const hasLegalMoves = playerHasLegalMoves(currentPlayer, boardState);
@@ -336,18 +335,16 @@
                     const winner = currentPlayer === 'white' ? 'Black' : 'White';
                     updateStatus(`CHECKMATE! ${winner} wins the game.`, true);
                 } else {
-                    updateStatus(`${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)}'s Turn - You are in CHECK!`);
+                    updateStatus(`${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)} is in CHECK!`);
                 }
             } else if (!hasLegalMoves) {
                 gameEnded = true;
                 updateStatus("STALEMATE! The game is a draw.", true);
             } else {
-                // If not in check and has moves, show the normal turn message.
                 updateStatus(`${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)}'s Turn to Move`);
             }
         }
 
-        // --- Move Validation ---
         function getValidMovesForPiece(row, col, piece, currentBoard) {
             let moves = [];
             const color = getPieceColor(piece);
@@ -392,7 +389,6 @@
         function getKnightMoves(r,c,color,b) { const m=[],km=[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];km.forEach(([dr,dc])=>{const nr=r+dr,nc=c+dc;if(isValid(nr,nc)){const t=b[nr][nc];if(!t||getPieceColor(t)!==color){m.push({row:nr,col:nc})}}});return m; }
         function getKingMoves(r,c,color,b) { const m=[],km=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];km.forEach(([dr,dc])=>{const nr=r+dr,nc=c+dc;if(isValid(nr,nc)){const t=b[nr][nc];if(!t||getPieceColor(t)!==color){m.push({row:nr,col:nc})}}});return m; }
 
-        // --- Check/Checkmate Logic ---
         function isKingInCheck(kingColor, board) {
             const kingPos = findKing(kingColor, board);
             if (!kingPos) return false;
@@ -428,7 +424,6 @@
             return null;
         }
 
-        // --- Pawn Promotion ---
         function showPromotionDialog() {
             promotionChoices.innerHTML = '';
             const promotionPieces = currentPlayer === 'white' ? ['Q', 'R', 'B', 'N'] : ['q', 'r', 'b', 'n'];
@@ -442,31 +437,33 @@
             promotionModal.classList.remove('hidden');
         }
 
+        // --- FIX: Correctly handle captures during promotion ---
         function choosePromotion(promotedPiece) {
             if (!pawnPromotionData) return;
             const { fromRow, fromCol, toRow, toCol } = pawnPromotionData;
+            
+            // The piece at the destination was already captured in movePiece,
+            // so we only need to handle the promotion itself.
             boardState[toRow][toCol] = promotedPiece;
             boardState[fromRow][fromCol] = null;
+
             pawnPromotionData = null;
             selectedPiece = null;
             validMoves = [];
             promotionModal.classList.add('hidden');
+            
             switchPlayer();
             renderBoard();
-            renderCapturedPieces();
             checkGameState();
         }
 
-        // --- Utility Functions ---
         function isValid(row, col) { return row >= 0 && row < 8 && col >= 0 && col < 8; }
         function getPieceColor(piece) { return isUpperCase(piece) ? 'white' : 'black'; }
         function isUpperCase(char) { return char === char.toUpperCase(); }
 
-        // --- Event Listeners ---
         resetButton.addEventListener('click', initializeGame);
         window.addEventListener('resize', renderBoard);
 
-        // --- Start the game ---
         initializeGame();
     </script>
 </body>
