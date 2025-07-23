@@ -41,7 +41,6 @@
                      <button id="login-button" class="btn-primary">Login with Google</button>
                      <div id="user-info-header" class="hidden items-center space-x-4">
                          <span id="user-display-name" class="text-white font-semibold"></span>
-                         <button id="logout-button" class="px-4 py-2 font-semibold text-red-500 hover:bg-red-500/10 rounded-lg transition-colors duration-300">Logout</button>
                      </div>
                 </div>
             </div>
@@ -123,7 +122,7 @@
     <script type="module">
         // --- FIREBASE IMPORTS ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // --- YOUR FALCONIXGAMING FIREBASE CONFIGURATION ---
@@ -144,7 +143,7 @@
         // --- DOM ELEMENTS ---
         const loadingView = document.getElementById('loading-view');
         const authView = document.getElementById('auth-view'), lobbyView = document.getElementById('lobby-view'), gameView = document.getElementById('game-view');
-        const loginButton = document.getElementById('login-button'), logoutButton = document.getElementById('logout-button');
+        const loginButton = document.getElementById('login-button');
         const authViewLoginButton = document.getElementById('auth-view-login-button');
         const userInfoHeader = document.getElementById('user-info-header'), userDisplayName = document.getElementById('user-display-name');
         const createGameBtn = document.getElementById('create-game-btn'), joinGameBtn = document.getElementById('join-game-btn');
@@ -168,7 +167,6 @@
 
         loginButton.onclick = redirectToLogin;
         authViewLoginButton.onclick = redirectToLogin;
-        logoutButton.onclick = () => signOut(auth).catch(err => showMessage("Logout failed."));
 
         onAuthStateChanged(auth, user => {
             currentUser = user;
@@ -193,12 +191,6 @@
                 }
             }
         });
-
-        const saveUserInfo = async (user) => {
-            if (!user) return;
-            const userRef = doc(db, "users", user.uid);
-            await setDoc(userRef, { displayName: user.displayName }, { merge: true });
-        };
         
         // --- LOBBY LOGIC ---
         createGameBtn.onclick = async () => {
