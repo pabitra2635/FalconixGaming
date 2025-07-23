@@ -65,8 +65,10 @@
             <div class="flex items-center justify-between h-16">
                 <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
                 <div id="auth-container" class="flex items-center">
+                     <button id="login-button" class="btn-primary">Login with Google</button>
                      <div id="user-info-header" class="hidden items-center space-x-4">
                          <span id="user-display-name" class="text-white font-semibold"></span>
+                         <button id="logout-button" class="px-4 py-2 font-semibold text-red-500 hover:bg-red-500/10 rounded-lg transition-colors duration-300">Logout</button>
                      </div>
                 </div>
             </div>
@@ -87,7 +89,7 @@
             <div id="auth-view" class="text-center hidden">
                 <h1 class="text-4xl font-bold text-gray-100 mb-4">Welcome!</h1>
                 <p class="text-gray-400 mb-6">Please log in on the main page to play multiplayer chess.</p>
-                <a href="index.html?login=true" id="auth-view-login-button" class="btn-primary w-full inline-block">Go to Login</a>
+                <button id="auth-view-login-button" class="btn-primary w-full">Go to Login</button>
             </div>
 
             <!-- Lobby View -->
@@ -145,7 +147,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { Chess } from 'https://cdn.jsdelivr.net/npm/chess.js@1.0.0-beta.8/dist/chess.js';
 
@@ -165,6 +167,8 @@
 
         // DOM Elements
         const loadingView = document.getElementById('loading-view'), authView = document.getElementById('auth-view'), lobbyView = document.getElementById('lobby-view'), gameView = document.getElementById('game-view');
+        const loginButton = document.getElementById('login-button'), logoutButton = document.getElementById('logout-button');
+        const authViewLoginButton = document.getElementById('auth-view-login-button');
         const userInfoHeader = document.getElementById('user-info-header'), userDisplayName = document.getElementById('user-display-name');
         const createGameBtn = document.getElementById('create-game-btn'), joinGameBtn = document.getElementById('join-game-btn'), leaveGameBtn = document.getElementById('leave-game-btn');
         const gameIdInput = document.getElementById('game-id-input'), userIdDisplay = document.getElementById('user-id-display'), gameIdDisplay = document.getElementById('game-id-display');
@@ -180,25 +184,36 @@
         let chess = new Chess();
         let selectedPiece = null;
 
-        // --- AUTH ---
+        // --- AUTHENTICATION FLOW ---
+        const redirectToLogin = () => { window.location.href = 'index.html?login=true'; };
+        if (loginButton) loginButton.onclick = redirectToLogin;
+        if (authViewLoginButton) authViewLoginButton.onclick = redirectToLogin;
+        if (logoutButton) logoutButton.onclick = () => signOut(auth).catch(err => showMessage("Logout failed."));
+
         onAuthStateChanged(auth, user => {
             currentUser = user;
             loadingView.classList.add('hidden'); 
             if (user) {
                 userDisplayName.textContent = user.displayName;
                 userIdDisplay.textContent = user.uid;
+                if (loginButton) loginButton.classList.add('hidden');
                 userInfoHeader.classList.remove('hidden');
                 authView.classList.add('hidden');
-                if (gameView.classList.contains('hidden')) lobbyView.classList.remove('hidden');
+                if (gameView.classList.contains('hidden')) { 
+                    lobbyView.classList.remove('hidden');
+                }
             } else {
                 userDisplayName.textContent = '';
+                if (loginButton) loginButton.classList.remove('hidden');
                 userInfoHeader.classList.add('hidden');
                 authView.classList.remove('hidden');
                 lobbyView.classList.add('hidden');
-                if (!gameView.classList.contains('hidden')) leaveGameBtn.click();
+                if (!gameView.classList.contains('hidden')) {
+                    leaveGameBtn.click();
+                }
             }
         });
-
+        
         // --- LOBBY ---
         createGameBtn.onclick = async () => {
             const gameId = crypto.randomUUID().split('-')[0];
