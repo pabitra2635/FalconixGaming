@@ -181,7 +181,7 @@
             }
         });
 
-        const handleSignIn = () => signInWithPopup(auth, provider).catch(err => showMessage("Login failed."));
+        const handleSignIn = () => signInWithPopup(auth, provider).catch(err => showMessage("Login failed. Please check browser pop-up settings."));
         loginButton.onclick = handleSignIn;
         authViewLoginButton.onclick = handleSignIn;
         logoutButton.onclick = () => signOut(auth).catch(err => showMessage("Logout failed."));
@@ -309,7 +309,7 @@
             // Update status & buttons
             rematchBtn.classList.add('hidden');
             if (gameData.status === 'finished') {
-                statusDisplay.textContent = gameData.winner ? `Player ${gameData.winner} wins! 🎉` : "It's a draw! 🤝";
+                statusDisplay.textContent = gameData.winner ? `Player ${gameData.winner} wins! 🎉` : "It's a draw! �";
                 rematchBtn.classList.remove('hidden');
                 if (gameData.rematch[currentUser.uid]) {
                     rematchBtn.textContent = 'Waiting for opponent...';
@@ -407,3 +407,4 @@
     </script>
 </body>
 </html>
+�
