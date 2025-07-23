@@ -117,7 +117,7 @@
     <script type="module">
         // --- FIREBASE IMPORTS ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, indexedDBLocalPersistence, initializeAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, indexedDBLocalPersistence, initializeAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // --- YOUR FALCONIXGAMING FIREBASE CONFIGURATION ---
@@ -180,8 +180,15 @@
                 }
             }
         });
+        
+        // Handle the redirect result when the page loads
+        getRedirectResult(auth).catch(error => {
+            console.error("Redirect Error:", error);
+            showMessage(`Login failed: ${error.message}`);
+        });
 
-        const handleSignIn = () => signInWithPopup(auth, provider).catch(err => showMessage("Login failed. Please check browser pop-up settings."));
+        const handleSignIn = () => signInWithRedirect(auth, provider);
+        
         loginButton.onclick = handleSignIn;
         authViewLoginButton.onclick = handleSignIn;
         logoutButton.onclick = () => signOut(auth).catch(err => showMessage("Logout failed."));
@@ -309,7 +316,7 @@
             // Update status & buttons
             rematchBtn.classList.add('hidden');
             if (gameData.status === 'finished') {
-                statusDisplay.textContent = gameData.winner ? `Player ${gameData.winner} wins! 🎉` : "It's a draw! �";
+                statusDisplay.textContent = gameData.winner ? `Player ${gameData.winner} wins! 🎉` : "It's a draw! 🤝";
                 rematchBtn.classList.remove('hidden');
                 if (gameData.rematch[currentUser.uid]) {
                     rematchBtn.textContent = 'Waiting for opponent...';
@@ -407,4 +414,3 @@
     </script>
 </body>
 </html>
-�
