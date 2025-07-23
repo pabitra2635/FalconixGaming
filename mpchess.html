@@ -48,8 +48,9 @@
             background-color: rgba(34, 197, 94, 0.5); /* green-500 with opacity */
             border-radius: 50%;
         }
-        .player-white { color: #e5e7eb; } /* gray-200 */
-        .player-black { color: #111827; } /* gray-900 */
+        /* The color of the pieces themselves */
+        .piece-w { color: #e5e7eb; } /* gray-200 */
+        .piece-b { color: #111827; } /* gray-900 */
         .turn-indicator { border: 2px solid #facc15; } /* yellow-400 */
 
         /* Chat Box Styles */
@@ -138,7 +139,7 @@
     
     <!-- Footer -->
     <footer class="bg-gray-900 border-t border-gray-700">
-        <div class="container mx-auto px-4 lg:px-8 py-8 text-center text-gray-400">
+        <div class="w-full max-w-7xl mx-auto px-4 lg:px-8 py-8 text-center text-gray-400">
             <p>&copy; 2025 <a href="https://chat.whatsapp.com/DUXdfaOxJoPC87KjRWbkjo" style="text-decoration:underline;">FalconixGaming</a>. All Rights Reserved.</p>
         </div>
     </footer>
@@ -148,9 +149,8 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
-        // This is a basic chess logic library. For a full game, a more robust library like chess.js would be ideal.
-        // For this example, we'll implement simplified move validation.
-        import { Chess } from 'https://cdn.jsdelivr.net/npm/chess.js@1.0.0-beta.8/dist/chess.js';
+        // FIX: Use a reliable CDN for chess.js that supports ES Modules correctly.
+        import { Chess } from 'https://cdn.skypack.dev/chess.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyD02ui4dhTuGLz-Ff1af36ERdqqsn4iIeU",
@@ -181,7 +181,7 @@
         let currentUser = null, currentGameId = null, playerColor = null;
         let unsubscribeGame = null, unsubscribeChat = null;
         let chess = new Chess();
-        let selectedPiece = null;
+        let selectedPiece = null; // This will store the square name, e.g., 'e2'
 
         // --- AUTH ---
         onAuthStateChanged(auth, user => {
@@ -211,7 +211,7 @@
                 pgn: chess.pgn(),
                 players: { [currentUser.uid]: { color: 'w', name: currentUser.displayName } },
                 playerIds: [currentUser.uid],
-                status: 'waiting', // waiting, active, finished
+                status: 'waiting', // waiting, active, finished, abandoned
                 winner: null
             });
             switchToGameView(gameId, 'w');
@@ -233,6 +233,7 @@
                     });
                     switchToGameView(gameId, 'b');
                 } else if (gameData.playerIds.includes(currentUser.uid)) {
+                    // Rejoin the game
                     switchToGameView(gameId, gameData.players[currentUser.uid].color);
                 } else {
                     showMessage("This game is full.");
@@ -244,6 +245,7 @@
         
         leaveGameBtn.onclick = async () => {
             if (currentGameId) {
+                // Set status to abandoned so the other player is notified
                 await updateDoc(doc(db, "mp-chess-games", currentGameId), { status: 'abandoned' }).catch(()=>{});
             }
             if (unsubscribeGame) unsubscribeGame();
@@ -260,8 +262,12 @@
 
             unsubscribeGame = onSnapshot(doc(db, "mp-chess-games", gameId), (doc) => {
                 const gameData = doc.data();
-                if (gameData) renderGameState(gameData);
-                else { showMessage("Game session ended."); leaveGameBtn.click(); }
+                if (gameData) {
+                    renderGameState(gameData);
+                } else {
+                    showMessage("Game session has been deleted.");
+                    leaveGameBtn.click();
+                }
             });
 
             const q = query(collection(db, "mp-chess-games", gameId, "messages"), orderBy("timestamp"));
@@ -269,7 +275,8 @@
                 chatMessages.innerHTML = '';
                 snapshot.forEach(doc => {
                     const msg = doc.data();
-                    chatMessages.innerHTML += `<div class="p-2 rounded-lg">${msg.senderName}: ${msg.text}</div>`;
+                    const sender = msg.senderName ? msg.senderName.split(' ')[0] : 'User';
+                    chatMessages.innerHTML += `<div class="p-2 rounded-lg"><strong>${sender}:</strong> ${msg.text}</div>`;
                 });
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             });
@@ -279,6 +286,8 @@
             gameView.classList.add('hidden');
             if(currentUser) lobbyView.classList.remove('hidden');
             else authView.classList.remove('hidden');
+            // Reset game state variables
+            currentGameId = null; playerColor = null; selectedPiece = null; chess = new Chess();
         }
 
         function renderGameState(gameData) {
@@ -295,44 +304,51 @@
             const board = chess.board();
             const isWhiteView = playerColor === 'w';
 
+            // Iterate through the board based on player's perspective
             for (let i = 0; i < 8; i++) {
                 for (let j = 0; j < 8; j++) {
                     const row = isWhiteView ? i : 7 - i;
                     const col = isWhiteView ? j : 7 - j;
                     
-                    const square = document.createElement('div');
+                    const squareEl = document.createElement('div');
                     const squareName = String.fromCharCode(97 + col) + (8 - row);
-                    square.dataset.square = squareName;
-                    square.classList.add('chess-square', (row + col) % 2 === 0 ? 'light-square' : 'dark-square');
+                    squareEl.dataset.square = squareName;
+                    squareEl.classList.add('chess-square', (row + col) % 2 === 0 ? 'light-square' : 'dark-square');
                     
                     const piece = board[row][col];
                     if (piece) {
-                        square.innerHTML = getPieceUnicode(piece);
-                        square.classList.add('chess-piece', piece.color === 'w' ? 'player-white' : 'player-black');
+                        squareEl.innerHTML = getPieceUnicode(piece);
+                        squareEl.classList.add('chess-piece', `piece-${piece.color}`);
                     }
                     
-                    square.onclick = () => onSquareClick(squareName);
-                    chessBoardEl.appendChild(square);
+                    squareEl.onclick = () => onSquareClick(squareName);
+                    chessBoardEl.appendChild(squareEl);
                 }
             }
         }
         
         function onSquareClick(squareName) {
-            if (chess.turn() !== playerColor) return;
+            if (chess.isGameOver() || chess.turn() !== playerColor) return;
 
             if (selectedPiece) {
+                // Attempt to move the selected piece
                 const move = { from: selectedPiece, to: squareName, promotion: 'q' }; // Auto-promote to Queen for simplicity
+                
                 try {
                     const result = chess.move(move);
                     if (result) {
                         updateFirebaseWithMove();
                     }
                 } catch (e) {
-                    // Invalid move
+                    // This catch block handles invalid moves. We can just ignore them.
+                    // The user might have clicked on a non-valid square.
+                } finally {
+                    // Always clear selection after a click, whether the move was valid or not
+                    clearHighlights();
+                    selectedPiece = null;
                 }
-                clearHighlights();
-                selectedPiece = null;
             } else {
+                // No piece is selected, so select one if it's the player's piece
                 const piece = chess.get(squareName);
                 if (piece && piece.color === playerColor) {
                     selectedPiece = squareName;
@@ -397,17 +413,18 @@
         }
         
         function getPieceUnicode(piece) {
+            // FIX: Use a cleaner map and directly access based on piece color and type
             const unicodeMap = {
-                p: '♙', r: '♖', n: '♘', b: '♗', q: '♕', k: '♔',
-                P: '♟', R: '♜', N: '♞', B: '♝', Q: '♛', K: '♚'
+                w: { p: '♙', r: '♖', n: '♘', b: '♗', q: '♕', k: '♔' },
+                b: { p: '♟', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚' }
             };
-            return unicodeMap[piece.type === 'p' ? (piece.color === 'w' ? 'p' : 'P') : (piece.color === 'w' ? piece.type : piece.type.toUpperCase())];
+            return unicodeMap[piece.color][piece.type];
         }
 
         // --- UTILS & CHAT ---
         function handleAbandoned(gameData) {
             if (gameData.status === 'abandoned') {
-                showMessage("Your opponent has left.");
+                showMessage("Your opponent has left the game.");
                 setTimeout(() => leaveGameBtn.click(), 3000);
                 return true;
             }
