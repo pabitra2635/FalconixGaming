@@ -46,6 +46,22 @@
         .btn-orange {
             @apply px-6 py-3 font-semibold text-white bg-orange-500 rounded-lg shadow-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
         }
+        /* New Outline Button Styles */
+        .btn-primary-outline {
+            @apply px-6 py-3 font-semibold text-sky-400 bg-transparent border-2 border-sky-500 rounded-lg shadow-md hover:bg-sky-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
+        }
+        .btn-secondary-outline {
+            @apply px-6 py-3 font-semibold text-indigo-400 bg-transparent border-2 border-indigo-500 rounded-lg shadow-md hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
+        }
+        .btn-danger-outline {
+            @apply px-6 py-3 font-semibold text-pink-500 bg-transparent border-2 border-pink-600 rounded-lg shadow-md hover:bg-pink-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
+        }
+        .btn-success-outline {
+            @apply px-6 py-3 font-semibold text-green-500 bg-transparent border-2 border-green-600 rounded-lg shadow-md hover:bg-green-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
+        }
+        .btn-warning-outline {
+            @apply px-6 py-3 font-semibold text-yellow-500 bg-transparent border-2 border-yellow-500 rounded-lg shadow-md hover:bg-yellow-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
+        }
         .game-card:hover .game-card-overlay {
             opacity: 1;
         }
@@ -206,8 +222,8 @@
                     <h2 class="text-5xl font-black-ops text-white">GAME OVER</h2>
                     <p class="mt-4 text-2xl text-gray-200">Final Score: <span id="finalScore" class="font-bold text-sky-400">0</span></p>
                     <div class="mt-6 flex flex-col sm:flex-row gap-4">
-                        <button id="restartButton" class="btn-primary text-xl">Play Again</button>
-                        <button id="shareAstroJumperScore" class="btn-secondary text-xl">Share Score</button>
+                        <button id="restartButton" class="btn-primary-outline text-xl">Play Again</button>
+                        <button id="shareAstroJumperScore" class="btn-secondary-outline text-xl">Share Score</button>
                     </div>
                 </div>
             </div>
@@ -455,8 +471,8 @@
                         <h2 class="text-5xl font-black-ops text-white">CRASHED!</h2>
                         <p class="mt-4 text-2xl text-gray-200">Final Score: <span id="racerFinalScore" class="font-bold text-pink-400">0</span></p>
                         <div class="mt-6 flex flex-col sm:flex-row gap-4">
-                            <button id="racerRestartButton" class="btn-danger text-xl">Try Again</button>
-                            <button id="shareRacerScore" class="btn-secondary text-xl">Share Score</button>
+                            <button id="racerRestartButton" class="btn-danger-outline text-xl">Try Again</button>
+                            <button id="shareRacerScore" class="btn-secondary-outline text-xl">Share Score</button>
                         </div>
                     </div>
                 </div>
@@ -496,8 +512,8 @@
                         <h2 id="tdEndTitle" class="text-5xl font-black-ops text-white"></h2>
                         <p class="mt-4 text-2xl text-gray-200">You survived <span id="tdFinalWave" class="font-bold text-green-400">0</span> waves.</p>
                         <div class="mt-8 flex flex-col sm:flex-row gap-4">
-                            <button id="tdRestartButton" class="btn-success text-xl">Play Again</button>
-                            <button id="shareTDScore" class="btn-secondary text-xl">Share Score</button>
+                            <button id="tdRestartButton" class="btn-success-outline text-xl">Play Again</button>
+                            <button id="shareTDScore" class="btn-secondary-outline text-xl">Share Score</button>
                         </div>
                     </div>
                 </div>
@@ -575,8 +591,8 @@
             <h2 class="text-5xl font-black-ops text-white">You Won!</h2>
             <p class="mt-4 text-2xl text-gray-200">Finished in <span id="memoryFinalMoves" class="font-bold text-yellow-400">0</span> moves!</p>
             <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                 <button id="memoryRestartButtonWin" class="btn-warning text-xl">Play Again</button>
-                 <button id="shareMemoryScore" class="btn-secondary text-xl">Share Score</button>
+                 <button id="memoryRestartButtonWin" class="btn-warning-outline text-xl">Play Again</button>
+                 <button id="shareMemoryScore" class="btn-secondary-outline text-xl">Share Score</button>
             </div>
         </div>
     </div>
