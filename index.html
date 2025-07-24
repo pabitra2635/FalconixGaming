@@ -205,7 +205,10 @@
                 <div id="gameOverScreen" data-game-name="Astro Jumper" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
                     <h2 class="text-5xl font-black-ops text-white">GAME OVER</h2>
                     <p class="mt-4 text-2xl text-gray-200">Final Score: <span id="finalScore" class="font-bold text-sky-400">0</span></p>
-                    <button id="restartButton" class="btn-primary mt-6 text-xl">Play Again</button>
+                    <div class="mt-6 flex flex-col sm:flex-row gap-4">
+                        <button id="restartButton" class="btn-primary text-xl">Play Again</button>
+                        <button id="shareAstroJumperScore" class="btn-secondary text-xl">Share Score</button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -406,6 +409,8 @@
         </div>
     </footer>
 
+    <!-- MODALS -->
+
     <!-- Logout Confirmation Modal -->
     <div id="logout-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
         <div class="glassmorphism p-8 rounded-2xl text-center max-w-sm w-full">
@@ -449,7 +454,10 @@
                     <div id="racerGameOverScreen" data-game-name="Pixel Racer" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
                         <h2 class="text-5xl font-black-ops text-white">CRASHED!</h2>
                         <p class="mt-4 text-2xl text-gray-200">Final Score: <span id="racerFinalScore" class="font-bold text-pink-400">0</span></p>
-                        <button id="racerRestartButton" class="btn-danger mt-6 text-xl">Try Again</button>
+                        <div class="mt-6 flex flex-col sm:flex-row gap-4">
+                            <button id="racerRestartButton" class="btn-danger text-xl">Try Again</button>
+                            <button id="shareRacerScore" class="btn-secondary text-xl">Share Score</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -487,7 +495,10 @@
                     <div id="tdGameOverScreen" data-game-name="Tower Defense" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
                         <h2 id="tdEndTitle" class="text-5xl font-black-ops text-white"></h2>
                         <p class="mt-4 text-2xl text-gray-200">You survived <span id="tdFinalWave" class="font-bold text-green-400">0</span> waves.</p>
-                        <button id="tdRestartButton" class="btn-success mt-8 text-xl">Play Again</button>
+                        <div class="mt-8 flex flex-col sm:flex-row gap-4">
+                            <button id="tdRestartButton" class="btn-success text-xl">Play Again</button>
+                            <button id="shareTDScore" class="btn-secondary text-xl">Share Score</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -555,6 +566,35 @@
             <button id="closeMemoryMatchModal" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-gray-800 hover:bg-gray-200">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
             </button>
+        </div>
+    </div>
+
+    <!-- Memory Match Win Modal -->
+    <div id="memoryMatchWinModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
+        <div class="glassmorphism p-8 rounded-2xl text-center max-w-sm w-full">
+            <h2 class="text-5xl font-black-ops text-white">You Won!</h2>
+            <p class="mt-4 text-2xl text-gray-200">Finished in <span id="memoryFinalMoves" class="font-bold text-yellow-400">0</span> moves!</p>
+            <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                 <button id="memoryRestartButtonWin" class="btn-warning text-xl">Play Again</button>
+                 <button id="shareMemoryScore" class="btn-secondary text-xl">Share Score</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fallback Share Modal -->
+    <div id="shareModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
+        <div class="glassmorphism p-8 rounded-2xl text-center max-w-md w-full relative">
+            <button id="closeShareModal" class="absolute top-2 right-2 text-gray-400 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 class="text-2xl font-bold text-white">Share Your Score!</h3>
+            <p class="mt-2 text-gray-300">Share your achievement with your friends.</p>
+            <textarea id="shareText" class="w-full bg-gray-900 text-white rounded-lg p-2 mt-4 h-24 resize-none" readonly></textarea>
+            <button id="copyShareText" class="btn-primary w-full mt-4">Copy Text</button>
+            <div class="mt-4 flex justify-center gap-4">
+                <a id="whatsappShareLink" href="#" target="_blank" class="btn-success">WhatsApp</a>
+                <a id="twitterShareLink" href="#" target="_blank" class="btn-primary">Twitter</a>
+            </div>
         </div>
     </div>
     
@@ -824,6 +864,49 @@
             }
 
             // #############################################
+            // ### SHARE SCORE FUNCTIONALITY             ###
+            // #############################################
+            const shareModal = document.getElementById('shareModal');
+            const closeShareModalBtn = document.getElementById('closeShareModal');
+            const copyShareTextBtn = document.getElementById('copyShareText');
+            
+            function shareScore(gameName, score, scoreType = 'points') {
+                const url = window.location.origin + window.location.pathname;
+                let text = `I just scored ${score} ${scoreType} in ${gameName} on FalconixGaming! Can you beat my score?`;
+
+                if (navigator.share) {
+                    navigator.share({
+                        title: `My ${gameName} Score!`,
+                        text: `${text}\n\nPlay now!`,
+                        url: url,
+                    })
+                    .then(() => console.log('Successful share'))
+                    .catch((error) => console.log('Error sharing', error));
+                } else {
+                    const shareTextEl = document.getElementById('shareText');
+                    const whatsappLink = document.getElementById('whatsappShareLink');
+                    const twitterLink = document.getElementById('twitterShareLink');
+
+                    const fullShareText = `${text}\n\nPlay now: ${url}`;
+                    shareTextEl.value = fullShareText;
+                    whatsappLink.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(fullShareText)}`;
+                    twitterLink.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullShareText)}`;
+                    
+                    shareModal.classList.remove('hidden');
+                }
+            }
+
+            closeShareModalBtn.addEventListener('click', () => shareModal.classList.add('hidden'));
+            copyShareTextBtn.addEventListener('click', () => {
+                const shareTextEl = document.getElementById('shareText');
+                shareTextEl.select();
+                shareTextEl.setSelectionRange(0, 99999); // For mobile devices
+                document.execCommand('copy');
+                copyShareTextBtn.textContent = 'Copied!';
+                setTimeout(() => { copyShareTextBtn.textContent = 'Copy Text'; }, 2000);
+            });
+
+            // #############################################
             // ### ASTRO JUMPER (3D GAME) CODE           ###
             // #############################################
             const gameContainer = document.getElementById('gameContainer');
@@ -833,9 +916,9 @@
             const restartButton = document.getElementById('restartButton');
             const scoreElement = document.getElementById('score');
             const finalScoreElement = document.getElementById('finalScore');
+            const shareAstroJumperScoreBtn = document.getElementById('shareAstroJumperScore');
             let isGameRunning = false;
             let score = 0;
-            let scoreInterval;
             let player, playerBody;
             const platforms = [];
             const platformBodies = [];
@@ -844,6 +927,7 @@
             const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
             const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -20, 0) });
+            
             function initAstroJumper() {
                 renderer.setSize(gameContainer.clientWidth, gameContainer.clientHeight);
                 renderer.setPixelRatio(window.devicePixelRatio);
@@ -976,6 +1060,9 @@
             playButton.addEventListener('click', startAstroJumper);
             restartButton.addEventListener('click', startAstroJumper);
             gameContainer.addEventListener('click', playerJump);
+            shareAstroJumperScoreBtn.addEventListener('click', () => {
+                shareScore('Astro Jumper', score, 'points');
+            });
             document.getElementById('astro-jumper-card').addEventListener('click', () => {
                 document.getElementById('featured-game').scrollIntoView({ behavior: 'smooth' });
             });
@@ -996,6 +1083,7 @@
             const racerRestartButton = document.getElementById('racerRestartButton');
             const racerScoreEl = document.getElementById('racerScore');
             const racerFinalScoreEl = document.getElementById('racerFinalScore');
+            const shareRacerScoreBtn = document.getElementById('shareRacerScore');
             let racerRunning = false;
             let racerScore = 0;
             let animationFrameId;
@@ -1114,6 +1202,9 @@
             closeRacerBtn.addEventListener('click', closeRacerModal);
             racerStartButton.addEventListener('click', startRacerGame);
             racerRestartButton.addEventListener('click', startRacerGame);
+            shareRacerScoreBtn.addEventListener('click', () => {
+                shareScore('Pixel Racer', Math.floor(racerScore), 'points');
+            });
             window.addEventListener('keydown', (e) => {
                 if (racerModal.classList.contains('invisible')) return;
                 if (e.key in keys) { e.preventDefault(); keys[e.key] = true; }
@@ -1154,6 +1245,7 @@
             const tdWaveEl = document.getElementById('tdWave');
             const tdEndTitleEl = document.getElementById('tdEndTitle');
             const tdFinalWaveEl = document.getElementById('tdFinalWave');
+            const shareTDScoreBtn = document.getElementById('shareTDScore');
             const buyTurretButton = document.getElementById('buyTurretButton');
             const nextWaveButton = document.getElementById('nextWaveButton');
             let tdRunning = false;
@@ -1420,6 +1512,9 @@
             closeTDButton.addEventListener('click', closeTDModal);
             tdStartButton.addEventListener('click', startTDGame);
             tdRestartButton.addEventListener('click', startTDGame);
+            shareTDScoreBtn.addEventListener('click', () => {
+                shareScore('Tower Defense', wave, 'waves');
+            });
             nextWaveButton.addEventListener('click', startNextWave);
             buyTurretButton.addEventListener('click', () => { if (gold >= 100) selectedTower = 'turret'; });
             tdCanvas.addEventListener('mousemove', e => { mousePos = getMousePos(tdCanvas, e); });
@@ -1567,8 +1662,10 @@
             // ### MEMORY MATCH (2D GAME) CODE           ###
             // #############################################
             const memoryMatchModal = document.getElementById('memoryMatchModal');
+            const memoryMatchWinModal = document.getElementById('memoryMatchWinModal');
             const playMemoryMatchBtn = document.getElementById('memory-match-card');
             const closeMemoryMatchBtn = document.getElementById('closeMemoryMatchModal');
+            const shareMemoryScoreBtn = document.getElementById('shareMemoryScore');
             let memoryMatchInitialized = false;
 
             function openMemoryMatchModal() {
@@ -1590,6 +1687,8 @@
                 const gameBoard = document.getElementById('memory-game-board');
                 const movesCountSpan = document.getElementById('moves-count');
                 const restartButton = document.getElementById('memory-restart-button');
+                const restartButtonWin = document.getElementById('memoryRestartButtonWin');
+                const memoryFinalMovesEl = document.getElementById('memoryFinalMoves');
                 const cardSymbols = ['🚀', '🔥', '⭐', '🎉', '💎', '💯', '👾', '🏆'];
                 let cards = [...cardSymbols, ...cardSymbols];
 
@@ -1672,9 +1771,9 @@
 
                     if (matchedPairs === cardSymbols.length) {
                        await saveHighScore('Memory Match', moves, 'asc');
+                       memoryFinalMovesEl.textContent = moves;
                        setTimeout(() => {
-                           // A simple alert for now, can be replaced with a custom modal
-                           alert(`You won in ${moves} moves! Your score has been saved.`);
+                           memoryMatchWinModal.classList.remove('hidden');
                        }, 500);
                     }
                 }
@@ -1695,9 +1794,14 @@
                     movesCountSpan.textContent = '0';
                     resetFlippedCards();
                     createBoard();
+                    memoryMatchWinModal.classList.add('hidden');
                 }
 
                 restartButton.addEventListener('click', restartGame);
+                restartButtonWin.addEventListener('click', restartGame);
+                shareMemoryScoreBtn.addEventListener('click', () => {
+                    shareScore('Memory Match', moves, 'moves');
+                });
                 createBoard();
             }
 
