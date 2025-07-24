@@ -200,42 +200,66 @@
 
         // --- LOBBY ---
         createGameBtn.onclick = async () => {
-            const gameId = crypto.randomUUID().split('-')[0];
-            const gameRef = doc(db, "mp-battleship", gameId);
-            await setDoc(gameRef, {
-                playerIds: [currentUser.uid],
-                players: { [currentUser.uid]: { role: 'P1', name: currentUser.displayName, ready: false } },
-                status: 'waiting',
-                grids: { P1: Array(GRID_SIZE*GRID_SIZE).fill(null), P2: Array(GRID_SIZE*GRID_SIZE).fill(null) },
-                shots: { P1: {}, P2: {} },
-                currentPlayerId: null,
-                winner: null,
-            });
-            switchToGameView(gameId, 'P1');
+            // ***MODIFIED: Added loading state and error handling***
+            createGameBtn.disabled = true;
+            createGameBtn.textContent = 'Creating Game...';
+            try {
+                const gameId = crypto.randomUUID().split('-')[0];
+                const gameRef = doc(db, "mp-battleship", gameId);
+                await setDoc(gameRef, {
+                    playerIds: [currentUser.uid],
+                    players: { [currentUser.uid]: { role: 'P1', name: currentUser.displayName, ready: false } },
+                    status: 'waiting',
+                    grids: { P1: Array(GRID_SIZE*GRID_SIZE).fill(null), P2: Array(GRID_SIZE*GRID_SIZE).fill(null) },
+                    shots: { P1: {}, P2: {} },
+                    currentPlayerId: null,
+                    winner: null,
+                    rematch: {} // Added for consistency
+                });
+                switchToGameView(gameId, 'P1');
+            } catch (error) {
+                console.error("Error creating game:", error);
+                showMessage("Failed to create game. Please check your connection or try again.");
+            } finally {
+                createGameBtn.disabled = false;
+                createGameBtn.textContent = 'Create New Game';
+            }
         };
 
         joinGameBtn.onclick = async () => {
             const gameId = gameIdInput.value.trim();
             if (!gameId) return showMessage("Please enter a Game ID.");
-            const gameRef = doc(db, "mp-battleship", gameId);
-            const gameSnap = await getDoc(gameRef);
+            
+            // ***MODIFIED: Added loading state and error handling***
+            joinGameBtn.disabled = true;
+            joinGameBtn.textContent = 'Joining...';
+            try {
+                const gameRef = doc(db, "mp-battleship", gameId);
+                const gameSnap = await getDoc(gameRef);
 
-            if (gameSnap.exists()) {
-                const gameData = gameSnap.data();
-                if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUser.uid)) {
-                    await updateDoc(gameRef, {
-                        playerIds: [...gameData.playerIds, currentUser.uid],
-                        [`players.${currentUser.uid}`]: { role: 'P2', name: currentUser.displayName, ready: false },
-                        status: 'placing'
-                    });
-                    switchToGameView(gameId, 'P2');
-                } else if (gameData.playerIds.includes(currentUser.uid)) {
-                    switchToGameView(gameId, gameData.players[currentUser.uid].role);
+                if (gameSnap.exists()) {
+                    const gameData = gameSnap.data();
+                    if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUser.uid)) {
+                        await updateDoc(gameRef, {
+                            playerIds: [...gameData.playerIds, currentUser.uid],
+                            [`players.${currentUser.uid}`]: { role: 'P2', name: currentUser.displayName, ready: false },
+                            status: 'placing'
+                        });
+                        switchToGameView(gameId, 'P2');
+                    } else if (gameData.playerIds.includes(currentUser.uid)) {
+                        switchToGameView(gameId, gameData.players[currentUser.uid].role);
+                    } else {
+                        showMessage("This game is full.");
+                    }
                 } else {
-                    showMessage("This game is full.");
+                    showMessage("Game not found.");
                 }
-            } else {
-                showMessage("Game not found.");
+            } catch (error) {
+                console.error("Error joining game:", error);
+                showMessage("Failed to join game. Please check the ID and your connection.");
+            } finally {
+                joinGameBtn.disabled = false;
+                joinGameBtn.textContent = 'Join Game';
             }
         };
 
