@@ -200,12 +200,12 @@
 
         // --- LOBBY ---
         createGameBtn.onclick = async () => {
-            // ***MODIFIED: Added loading state and error handling***
             createGameBtn.disabled = true;
             createGameBtn.textContent = 'Creating Game...';
             try {
                 const gameId = crypto.randomUUID().split('-')[0];
-                const gameRef = doc(db, "mp-battleship", gameId);
+                // ***MODIFIED: Changed collection name***
+                const gameRef = doc(db, "mpbattleship", gameId);
                 await setDoc(gameRef, {
                     playerIds: [currentUser.uid],
                     players: { [currentUser.uid]: { role: 'P1', name: currentUser.displayName, ready: false } },
@@ -214,7 +214,7 @@
                     shots: { P1: {}, P2: {} },
                     currentPlayerId: null,
                     winner: null,
-                    rematch: {} // Added for consistency
+                    rematch: {}
                 });
                 switchToGameView(gameId, 'P1');
             } catch (error) {
@@ -230,11 +230,11 @@
             const gameId = gameIdInput.value.trim();
             if (!gameId) return showMessage("Please enter a Game ID.");
             
-            // ***MODIFIED: Added loading state and error handling***
             joinGameBtn.disabled = true;
             joinGameBtn.textContent = 'Joining...';
             try {
-                const gameRef = doc(db, "mp-battleship", gameId);
+                // ***MODIFIED: Changed collection name***
+                const gameRef = doc(db, "mpbattleship", gameId);
                 const gameSnap = await getDoc(gameRef);
 
                 if (gameSnap.exists()) {
@@ -274,7 +274,8 @@
             initializeGrids();
             initializeShipDock();
 
-            const gameRef = doc(db, "mp-battleship", currentGameId);
+            // ***MODIFIED: Changed collection name***
+            const gameRef = doc(db, "mpbattleship", currentGameId);
             unsubscribeGame = onSnapshot(gameRef, (doc) => {
                 if (doc.exists()) {
                     renderGameState(doc.data());
@@ -294,21 +295,17 @@
 
             statusDisplay.textContent = getStatusMessage(gameData);
             
-            // Show/hide placement vs battle UI
             const isPlacing = gameData.status === 'placing' || gameData.status === 'waiting';
             placementContainer.style.display = isPlacing ? 'block' : 'none';
             opponentArea.style.visibility = isPlacing ? 'hidden' : 'visible';
 
-            // Render player's grid based on their confirmed placement
             const playerGridData = gameData.grids[playerRole];
             renderGrid(playerGrid, playerGridData, gameData.shots[getOpponentRole()]);
 
-            // Render opponent's grid based on player's shots
             if (!isPlacing) {
                 renderOpponentGrid(gameData);
             }
 
-            // Highlight current player's board
             playerArea.classList.toggle('turn-indicator', gameData.currentPlayerId === currentUser.uid);
             opponentArea.classList.toggle('turn-indicator', gameData.currentPlayerId !== currentUser.uid && gameData.currentPlayerId !== null);
         }
@@ -347,12 +344,12 @@
         function renderGrid(gridElement, gridData, shots) {
             const cells = gridElement.children;
             for (let i = 0; i < cells.length; i++) {
-                cells[i].className = 'grid-cell'; // Reset classes
+                cells[i].className = 'grid-cell';
                 if (gridData[i]) {
                     cells[i].classList.add('ship');
                 }
                 if (shots[i]) {
-                    cells[i].classList.add(shots[i]); // 'hit' or 'miss'
+                    cells[i].classList.add(shots[i]);
                     cells[i].textContent = shots[i] === 'hit' ? '🔥' : '💧';
                 } else {
                     cells[i].textContent = '';
@@ -362,7 +359,6 @@
 
         function renderOpponentGrid(gameData) {
             const opponentRole = getOpponentRole();
-            const opponentGridData = gameData.grids[opponentRole];
             const myShots = gameData.shots[playerRole];
             const cells = opponentGrid.children;
 
@@ -377,7 +373,6 @@
             }
         }
         
-        // --- SHIP PLACEMENT (DRAG & DROP) ---
         function initializeShipDock() {
             shipDock.innerHTML = '';
             SHIPS_CONFIG.forEach(ship => {
@@ -461,32 +456,33 @@
         readyBtn.onclick = async () => {
             readyBtn.disabled = true;
             readyBtn.textContent = 'Waiting for opponent...';
-            const gameRef = doc(db, "mp-battleship", currentGameId);
+            // ***MODIFIED: Changed collection name***
+            const gameRef = doc(db, "mpbattleship", currentGameId);
             await updateDoc(gameRef, {
                 [`grids.${playerRole}`]: localPlayerGrid,
                 [`players.${currentUser.uid}.ready`]: true
             });
 
-            // Check if both players are ready
             const gameSnap = await getDoc(gameRef);
             const gameData = gameSnap.data();
             const opponent = Object.values(gameData.players).find(p => p.role !== playerRole);
             if (opponent && opponent.ready) {
                 await updateDoc(gameRef, {
                     status: 'active',
-                    currentPlayerId: gameData.playerIds[0] // P1 starts
+                    currentPlayerId: gameData.playerIds[0]
                 });
             }
         };
 
         // --- BATTLE PHASE ---
         async function handleShot(index) {
-            const gameRef = doc(db, "mp-battleship", currentGameId);
+            // ***MODIFIED: Changed collection name***
+            const gameRef = doc(db, "mpbattleship", currentGameId);
             const gameSnap = await getDoc(gameRef);
             const gameData = gameSnap.data();
 
             if (gameData.status !== 'active' || gameData.currentPlayerId !== currentUser.uid || gameData.shots[playerRole][index]) {
-                return; // Not your turn, game not active, or cell already shot
+                return;
             }
             
             const opponentRole = getOpponentRole();
@@ -500,7 +496,6 @@
             
             await updateDoc(gameRef, updates);
 
-            // Check for win condition after the update
             if (result === 'hit') {
                 const newShots = { ...gameData.shots[playerRole], [index]: result };
                 checkWinCondition(opponentGridData, newShots);
@@ -512,8 +507,8 @@
             const allHitsOnShips = Object.keys(myShots).filter(shotIndex => myShots[shotIndex] === 'hit' && opponentGridData[shotIndex] !== null);
 
             if (allHitsOnShips.length === allShips.length) {
-                // All ship parts have been hit
-                const gameRef = doc(db, "mp-battleship", currentGameId);
+                // ***MODIFIED: Changed collection name***
+                const gameRef = doc(db, "mpbattleship", currentGameId);
                 await updateDoc(gameRef, {
                     status: 'finished',
                     winner: currentUser.uid,
@@ -544,7 +539,8 @@
 
         leaveGameBtn.onclick = async () => {
             if (currentGameId) {
-                const gameRef = doc(db, "mp-battleship", currentGameId);
+                // ***MODIFIED: Changed collection name***
+                const gameRef = doc(db, "mpbattleship", currentGameId);
                 await updateDoc(gameRef, { status: 'abandoned' }).catch(()=>{});
             }
             leaveGame();
