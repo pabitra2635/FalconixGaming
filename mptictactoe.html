@@ -39,7 +39,6 @@
                 <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
                 <div id="auth-container" class="flex items-center">
                      <button id="login-button" class="btn-primary">Login with Google</button>
-                     <!-- ***MODIFIED: User info now only shows the name, logout button is removed*** -->
                      <div id="user-info-header" class="hidden items-center space-x-4">
                          <span id="user-display-name" class="text-white font-semibold"></span>
                      </div>
@@ -183,7 +182,6 @@
 
         loginButton.onclick = redirectToLogin;
         authViewLoginButton.onclick = redirectToLogin;
-        // ***MODIFIED: Removed the logoutButton.onclick handler***
 
         onAuthStateChanged(auth, user => {
             currentUser = user;
@@ -330,7 +328,7 @@
 
             rematchBtn.classList.add('hidden');
             if (gameData.status === 'finished') {
-                statusDisplay.textContent = gameData.winner ? `Player ${gameData.winner} wins! 🎉` : "It's a draw! �";
+                statusDisplay.textContent = gameData.winner ? `Player ${gameData.winner} wins! 🎉` : "It's a draw! 🤝";
                 rematchBtn.classList.remove('hidden');
                 if (gameData.rematch[currentUser.uid]) {
                     rematchBtn.textContent = 'Waiting for opponent...';
@@ -425,12 +423,13 @@
         closeModalBtn.onclick = () => messageModal.classList.add('hidden');
         gameIdDisplay.onclick = () => navigator.clipboard.writeText(currentGameId).then(() => showMessage("Game ID copied!"));
 
+        // ***MODIFIED: Reverted the share message and fallback logic***
         shareGameBtn.onclick = async () => {
             if (!currentGameId) return;
 
             const shareUrl = `${window.location.origin}${window.location.pathname}?gameId=${currentGameId}`;
             
-            const shareText = `The gauntlet has been thrown! ⚔️ I challenge you to a game of Tic-Tac-Toe on FalconixGaming. Think you can win?\n\nYour game code is: ${currentGameId}`;
+            const shareText = `I challenge you to a game of Tic-Tac-Toe! 🎮\n\nJoin my game with this code: ${currentGameId}\n\nOr click the link to join directly:`;
 
             if (navigator.share) {
                 try {
@@ -444,8 +443,8 @@
                     showMessage('Sharing was cancelled or failed.');
                 }
             } else {
-                navigator.clipboard.writeText(`${shareText}\n\nJoin here: ${shareUrl}`).then(() => {
-                     showMessage('Share feature not supported. Game invite copied to clipboard!');
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                     showMessage('Share feature not supported on your browser. Game link copied to clipboard!');
                 });
             }
         };
