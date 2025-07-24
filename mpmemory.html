@@ -44,9 +44,9 @@
             <div class="flex items-center justify-between h-16">
                 <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
                 <div id="auth-container" class="flex items-center">
-                     <div id="user-info-header" class="hidden items-center space-x-4">
-                         <span id="user-display-name" class="text-white font-semibold"></span>
-                     </div>
+                      <div id="user-info-header" class="hidden items-center space-x-4">
+                          <span id="user-display-name" class="text-white font-semibold"></span>
+                      </div>
                 </div>
             </div>
         </nav>
@@ -83,8 +83,13 @@
 
             <!-- Game View -->
             <div id="game-view" class="hidden">
-                <div class="text-center mb-4">
+                <!-- ***MODIFIED: Added flex container and Share Button*** -->
+                <div class="text-center mb-4 flex justify-center items-center gap-4">
                     <p class="text-sm text-gray-400">Game ID: <span id="game-id-display" class="font-mono cursor-pointer" title="Click to copy"></span></p>
+                    <button id="share-game-btn" class="bg-indigo-500 text-white text-xs font-bold py-1 px-3 rounded-lg hover:bg-indigo-600 transition-all hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" /></svg>
+                        Share
+                    </button>
                 </div>
                 <!-- Scoreboard -->
                 <div id="scoreboard" class="flex justify-around text-center mb-4">
@@ -148,11 +153,24 @@
         const gameBoard = document.getElementById('game-board');
         const chatMessages = document.getElementById('chat-messages'), chatInput = document.getElementById('chat-input'), sendChatBtn = document.getElementById('send-chat-btn');
         const messageModal = document.getElementById('message-modal'), messageText = document.getElementById('message-text'), closeModalBtn = document.getElementById('close-modal-btn');
+        // ***NEW: Get share button element***
+        const shareGameBtn = document.getElementById('share-game-btn');
+
 
         // --- GAME STATE & CONSTANTS ---
         let currentUser = null, currentGameId = null, playerRole = null;
         let unsubscribeGame = null, unsubscribeChat = null;
-        const cardSymbols = ['🚀', '🔥', '⭐', '🎉', '💎', '💯', '💡', '🏆'];
+        const cardSymbols = ['🚀', '�', '⭐', '🎉', '💎', '💯', '💡', '🏆'];
+
+        // ***NEW: Handle game ID from URL on page load***
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameIdFromUrl = urlParams.get('gameId');
+            if (gameIdFromUrl) {
+                gameIdInput.value = gameIdFromUrl;
+                showMessage(`Ready to join game ${gameIdFromUrl}. Click "Join Game" when you're logged in!`);
+            }
+        });
 
         // --- AUTHENTICATION FLOW ---
         onAuthStateChanged(auth, user => {
@@ -266,6 +284,8 @@
             gameIdDisplay.textContent = gameId;
             lobbyView.classList.add('hidden');
             gameView.classList.remove('hidden');
+            // ***NEW: Show the share button***
+            shareGameBtn.classList.remove('hidden');
 
             const gameRef = doc(db, "mp-memory-match", gameId);
             unsubscribeGame = onSnapshot(gameRef, (doc) => {
@@ -291,6 +311,8 @@
             if(currentUser) lobbyView.classList.remove('hidden');
             else authView.classList.remove('hidden');
             gameIdInput.value = '';
+            // ***NEW: Hide the share button***
+            shareGameBtn.classList.add('hidden');
         }
 
         function renderGameState(gameData) {
@@ -414,6 +436,32 @@
         function showMessage(msg) { messageText.textContent = msg; messageModal.classList.remove('hidden'); }
         closeModalBtn.onclick = () => messageModal.classList.add('hidden');
         gameIdDisplay.onclick = () => navigator.clipboard.writeText(currentGameId).then(() => showMessage("Game ID copied!"));
+
+        // ***NEW: Share button functionality***
+        shareGameBtn.onclick = async () => {
+            if (!currentGameId) return;
+
+            const shareUrl = `${window.location.origin}${window.location.pathname}?gameId=${currentGameId}`;
+            
+            const shareText = `I challenge you to a Memory Match game! 🧠✨\n\nJoin my game with this code: ${currentGameId}\n\nOr click the link to join directly:`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'FalconixGaming Memory Match Challenge',
+                        text: shareText,
+                        url: shareUrl,
+                    });
+                } catch (error) {
+                    console.error('Error sharing:', error);
+                    showMessage('Sharing was cancelled or failed.');
+                }
+            } else {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                     showMessage('Share feature not supported on your browser. Game link copied to clipboard!');
+                });
+            }
+        };
 
     </script>
 </body>
