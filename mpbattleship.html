@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Battleship</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #111827; color: #F9FAFB; }
+        h1 { font-family: 'Fredoka One', cursive; }
+        .font-black-ops { font-family: 'Inter', sans-serif; font-weight: 900; }
+        .btn-primary {
+            @apply px-6 py-3 font-semibold text-white bg-sky-500 rounded-lg shadow-md hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
+        }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Battleship Specific Styles */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(10, minmax(0, 1fr));
+            gap: 2px;
+        }
+        .grid-cell {
+            @apply bg-gray-700 aspect-square rounded-sm flex items-center justify-center text-xl;
+            transition: background-color 0.2s;
+        }
+        #opponent-grid .grid-cell {
+            cursor: pointer;
+        }
+        #opponent-grid .grid-cell:hover {
+            @apply bg-gray-600;
+        }
+        .grid-cell.ship { @apply bg-gray-500; }
+        .grid-cell.hit { @apply bg-red-600; }
+        .grid-cell.miss { @apply bg-blue-800; }
+        .grid-cell.sunk { @apply bg-red-900; }
+        .ship-dock {
+            @apply flex flex-wrap gap-4 p-4 bg-gray-900 rounded-lg justify-center;
+        }
+        .ship-piece {
+            @apply flex bg-gray-500 rounded-md cursor-grab;
+        }
+        .ship-part {
+            @apply w-6 h-6 border-2 border-gray-900;
+        }
+        .dragging {
+            opacity: 0.5;
+        }
+        .turn-indicator { 
+            border: 2px solid #facc15; /* yellow-400 */
+            box-shadow: 0 0 10px #facc15;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-50 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
+        <nav class="w-full max-w-7xl mx-auto px-4 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
+                <div id="auth-container" class="flex items-center">
+                    <div id="user-info-header" class="hidden items-center space-x-4">
+                        <span id="user-display-name" class="text-white font-semibold"></span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex items-center justify-center flex-grow w-full px-4">
+        <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-5xl my-8 border border-gray-700">
+
+            <!-- Loading View -->
+            <div id="loading-view" class="text-center">
+                <h1 class="text-4xl font-bold text-gray-100 mb-4">Loading Battleship...</h1>
+            </div>
+
+            <!-- Auth View -->
+            <div id="auth-view" class="text-center hidden">
+                <h1 class="text-4xl font-bold text-gray-100 mb-4">Welcome!</h1>
+                <p class="text-gray-400 mb-6">Please log in to play multiplayer Battleship.</p>
+                <a href="index.html?login=true" class="btn-primary w-full inline-block">Go to Login</a>
+            </div>
+
+            <!-- Lobby View -->
+            <div id="lobby-view" class="hidden">
+                <h1 class="text-4xl text-center font-bold text-gray-100 mb-6">Multiplayer Battleship</h1>
+                <div class="space-y-4 max-w-md mx-auto">
+                    <button id="create-game-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700">Create New Game</button>
+                    <div class="relative flex py-2 items-center"><div class="flex-grow border-t border-gray-600"></div><span class="flex-shrink mx-4 text-gray-400">OR</span><div class="flex-grow border-t border-gray-600"></div></div>
+                    <input type="text" id="game-id-input" placeholder="Enter Game ID to Join" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-400">
+                    <button id="join-game-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700">Join Game</button>
+                </div>
+            </div>
+
+            <!-- Game View -->
+            <div id="game-view" class="hidden">
+                <div class="text-center mb-4">
+                    <p class="text-sm text-gray-400">Game ID: <span id="game-id-display" class="font-mono cursor-pointer" title="Click to copy"></span></p>
+                </div>
+                <div id="status" class="text-center text-2xl font-semibold text-yellow-400 mb-4 h-8"></div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div id="player-area" class="p-2 rounded-lg">
+                        <h2 class="text-xl font-bold text-center mb-2">Your Fleet</h2>
+                        <div id="player-grid" class="grid-container"></div>
+                    </div>
+                    <div id="opponent-area" class="p-2 rounded-lg">
+                        <h2 class="text-xl font-bold text-center mb-2">Enemy Waters</h2>
+                        <div id="opponent-grid" class="grid-container"></div>
+                    </div>
+                </div>
+
+                <!-- Ship Placement Dock -->
+                <div id="placement-container" class="mt-6">
+                    <h3 class="text-lg text-center font-bold mb-2">Place Your Fleet (Right-click to rotate)</h3>
+                    <div id="ship-dock" class="ship-dock"></div>
+                    <button id="ready-btn" class="w-full mt-4 bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700" disabled>Ready to Battle</button>
+                </div>
+                
+                <div class="mt-6 space-y-2">
+                     <button id="leave-game-btn" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700">Leave Game</button>
+                </div>
+            </div>
+
+            <!-- Message Modal -->
+            <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"><div class="bg-gray-800 p-8 rounded-lg shadow-xl text-center"><p id="message-text" class="text-xl mb-6"></p><button id="close-modal-btn" class="btn-primary">Close</button></div></div>
+        </div>
+    </main>
+
+    <script type="module">
+        // --- FIREBASE IMPORTS ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // --- FIREBASE CONFIG ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyD02ui4dhTuGLz-Ff1af36ERdqqsn4iIeU",
+            authDomain: "falconixgaming-46210.firebaseapp.com",
+            projectId: "falconixgaming-46210",
+            storageBucket: "falconixgaming-46210.appspot.com",
+            messagingSenderId: "1096905282147",
+            appId: "1:1096905282147:web:e2faa9105d31c6ec009e56",
+            measurementId: "G-VJ6YC0GXK5"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- DOM ELEMENTS ---
+        const loadingView = document.getElementById('loading-view');
+        const authView = document.getElementById('auth-view'), lobbyView = document.getElementById('lobby-view'), gameView = document.getElementById('game-view');
+        const userDisplayName = document.getElementById('user-display-name'), userInfoHeader = document.getElementById('user-info-header');
+        const createGameBtn = document.getElementById('create-game-btn'), joinGameBtn = document.getElementById('join-game-btn');
+        const gameIdInput = document.getElementById('game-id-input');
+        const gameIdDisplay = document.getElementById('game-id-display'), statusDisplay = document.getElementById('status');
+        const playerGrid = document.getElementById('player-grid'), opponentGrid = document.getElementById('opponent-grid');
+        const playerArea = document.getElementById('player-area'), opponentArea = document.getElementById('opponent-area');
+        const placementContainer = document.getElementById('placement-container'), shipDock = document.getElementById('ship-dock'), readyBtn = document.getElementById('ready-btn');
+        const leaveGameBtn = document.getElementById('leave-game-btn');
+        const messageModal = document.getElementById('message-modal'), messageText = document.getElementById('message-text'), closeModalBtn = document.getElementById('close-modal-btn');
+
+        // --- GAME STATE & CONSTANTS ---
+        let currentUser = null, currentGameId = null, playerRole = null;
+        let unsubscribeGame = null;
+        const GRID_SIZE = 10;
+        const SHIPS_CONFIG = [
+            { name: 'carrier', size: 5 },
+            { name: 'battleship', size: 4 },
+            { name: 'cruiser', size: 3 },
+            { name: 'submarine', size: 3 },
+            { name: 'destroyer', size: 2 }
+        ];
+        let localPlayerGrid = Array(GRID_SIZE * GRID_SIZE).fill(null);
+        let placedShips = new Set();
+
+        // --- AUTH ---
+        onAuthStateChanged(auth, user => {
+            currentUser = user;
+            loadingView.classList.add('hidden');
+            if (user) {
+                userDisplayName.textContent = user.displayName;
+                userInfoHeader.classList.remove('hidden');
+                authView.classList.add('hidden');
+                if (gameView.classList.contains('hidden')) lobbyView.classList.remove('hidden');
+            } else {
+                userInfoHeader.classList.add('hidden');
+                lobbyView.classList.add('hidden');
+                authView.classList.remove('hidden');
+                if (!gameView.classList.contains('hidden')) leaveGameBtn.click();
+            }
+        });
+
+        // --- LOBBY ---
+        createGameBtn.onclick = async () => {
+            const gameId = crypto.randomUUID().split('-')[0];
+            const gameRef = doc(db, "mp-battleship", gameId);
+            await setDoc(gameRef, {
+                playerIds: [currentUser.uid],
+                players: { [currentUser.uid]: { role: 'P1', name: currentUser.displayName, ready: false } },
+                status: 'waiting',
+                grids: { P1: Array(GRID_SIZE*GRID_SIZE).fill(null), P2: Array(GRID_SIZE*GRID_SIZE).fill(null) },
+                shots: { P1: {}, P2: {} },
+                currentPlayerId: null,
+                winner: null,
+            });
+            switchToGameView(gameId, 'P1');
+        };
+
+        joinGameBtn.onclick = async () => {
+            const gameId = gameIdInput.value.trim();
+            if (!gameId) return showMessage("Please enter a Game ID.");
+            const gameRef = doc(db, "mp-battleship", gameId);
+            const gameSnap = await getDoc(gameRef);
+
+            if (gameSnap.exists()) {
+                const gameData = gameSnap.data();
+                if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUser.uid)) {
+                    await updateDoc(gameRef, {
+                        playerIds: [...gameData.playerIds, currentUser.uid],
+                        [`players.${currentUser.uid}`]: { role: 'P2', name: currentUser.displayName, ready: false },
+                        status: 'placing'
+                    });
+                    switchToGameView(gameId, 'P2');
+                } else if (gameData.playerIds.includes(currentUser.uid)) {
+                    switchToGameView(gameId, gameData.players[currentUser.uid].role);
+                } else {
+                    showMessage("This game is full.");
+                }
+            } else {
+                showMessage("Game not found.");
+            }
+        };
+
+        // --- GAME VIEW & STATE MANAGEMENT ---
+        function switchToGameView(gameId, role) {
+            currentGameId = gameId;
+            playerRole = role;
+            gameIdDisplay.textContent = gameId;
+            lobbyView.classList.add('hidden');
+            gameView.classList.remove('hidden');
+
+            initializeGrids();
+            initializeShipDock();
+
+            const gameRef = doc(db, "mp-battleship", currentGameId);
+            unsubscribeGame = onSnapshot(gameRef, (doc) => {
+                if (doc.exists()) {
+                    renderGameState(doc.data());
+                } else {
+                    showMessage("Game session has ended.");
+                    leaveGame();
+                }
+            });
+        }
+
+        function renderGameState(gameData) {
+            if (gameData.status === 'abandoned' && !gameData.winner) {
+                showMessage("Opponent has left the game.");
+                leaveGame();
+                return;
+            }
+
+            statusDisplay.textContent = getStatusMessage(gameData);
+            
+            // Show/hide placement vs battle UI
+            const isPlacing = gameData.status === 'placing' || gameData.status === 'waiting';
+            placementContainer.style.display = isPlacing ? 'block' : 'none';
+            opponentArea.style.visibility = isPlacing ? 'hidden' : 'visible';
+
+            // Render player's grid based on their confirmed placement
+            const playerGridData = gameData.grids[playerRole];
+            renderGrid(playerGrid, playerGridData, gameData.shots[getOpponentRole()]);
+
+            // Render opponent's grid based on player's shots
+            if (!isPlacing) {
+                renderOpponentGrid(gameData);
+            }
+
+            // Highlight current player's board
+            playerArea.classList.toggle('turn-indicator', gameData.currentPlayerId === currentUser.uid);
+            opponentArea.classList.toggle('turn-indicator', gameData.currentPlayerId !== currentUser.uid && gameData.currentPlayerId !== null);
+        }
+        
+        function getStatusMessage(gameData) {
+            if (gameData.winner) {
+                return gameData.winner === currentUser.uid ? "You won! 🎉" : "You lost. Better luck next time!";
+            }
+            switch (gameData.status) {
+                case 'waiting': return 'Waiting for opponent to join...';
+                case 'placing':
+                    const playerReady = gameData.players[currentUser.uid].ready;
+                    return playerReady ? 'Waiting for opponent to place ships...' : 'Place your ships and press Ready.';
+                case 'active':
+                    return gameData.currentPlayerId === currentUser.uid ? 'Your turn to fire!' : "Opponent's turn.";
+                default: return '';
+            }
+        }
+
+        // --- GRID & SHIP LOGIC ---
+        function initializeGrids() {
+            playerGrid.innerHTML = '';
+            opponentGrid.innerHTML = '';
+            for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('grid-cell');
+                cell.dataset.index = i;
+                playerGrid.appendChild(cell.cloneNode());
+                
+                const opponentCell = cell.cloneNode();
+                opponentCell.onclick = () => handleShot(i);
+                opponentGrid.appendChild(opponentCell);
+            }
+        }
+
+        function renderGrid(gridElement, gridData, shots) {
+            const cells = gridElement.children;
+            for (let i = 0; i < cells.length; i++) {
+                cells[i].className = 'grid-cell'; // Reset classes
+                if (gridData[i]) {
+                    cells[i].classList.add('ship');
+                }
+                if (shots[i]) {
+                    cells[i].classList.add(shots[i]); // 'hit' or 'miss'
+                    cells[i].textContent = shots[i] === 'hit' ? '🔥' : '💧';
+                } else {
+                    cells[i].textContent = '';
+                }
+            }
+        }
+
+        function renderOpponentGrid(gameData) {
+            const opponentRole = getOpponentRole();
+            const opponentGridData = gameData.grids[opponentRole];
+            const myShots = gameData.shots[playerRole];
+            const cells = opponentGrid.children;
+
+            for (let i = 0; i < cells.length; i++) {
+                cells[i].className = 'grid-cell';
+                if (myShots[i]) {
+                    cells[i].classList.add(myShots[i]);
+                    cells[i].textContent = myShots[i] === 'hit' ? '🔥' : '💧';
+                } else {
+                    cells[i].textContent = '';
+                }
+            }
+        }
+        
+        // --- SHIP PLACEMENT (DRAG & DROP) ---
+        function initializeShipDock() {
+            shipDock.innerHTML = '';
+            SHIPS_CONFIG.forEach(ship => {
+                const shipEl = document.createElement('div');
+                shipEl.id = ship.name;
+                shipEl.className = 'ship-piece';
+                shipEl.draggable = true;
+                shipEl.dataset.size = ship.size;
+                shipEl.dataset.name = ship.name;
+                shipEl.dataset.orientation = 'horizontal';
+                for (let i = 0; i < ship.size; i++) {
+                    const part = document.createElement('div');
+                    part.className = 'ship-part';
+                    shipEl.appendChild(part);
+                }
+                shipDock.appendChild(shipEl);
+                shipEl.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', e.target.id));
+                shipEl.addEventListener('contextmenu', e => {
+                    e.preventDefault();
+                    rotateShip(e.currentTarget);
+                });
+            });
+
+            playerGrid.addEventListener('dragover', e => e.preventDefault());
+            playerGrid.addEventListener('drop', handleDrop);
+        }
+
+        function rotateShip(shipEl) {
+            const isHorizontal = shipEl.dataset.orientation === 'horizontal';
+            shipEl.dataset.orientation = isHorizontal ? 'vertical' : 'horizontal';
+            shipEl.style.flexDirection = isHorizontal ? 'column' : 'row';
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const shipId = e.dataTransfer.getData('text/plain');
+            const shipEl = document.getElementById(shipId);
+            if (!shipEl) return;
+
+            const targetCell = e.target.closest('.grid-cell');
+            if (!targetCell) return;
+
+            const index = parseInt(targetCell.dataset.index);
+            const size = parseInt(shipEl.dataset.size);
+            const isHorizontal = shipEl.dataset.orientation === 'horizontal';
+
+            if (canPlaceShip(index, size, isHorizontal)) {
+                placeShip(shipEl, index, size, isHorizontal);
+                shipEl.draggable = false;
+                shipEl.style.opacity = '0.5';
+                placedShips.add(shipId);
+                if (placedShips.size === SHIPS_CONFIG.length) {
+                    readyBtn.disabled = false;
+                }
+            } else {
+                showMessage("Cannot place ship here. It's overlapping or out of bounds.");
+            }
+        }
+
+        function canPlaceShip(start, size, isHorizontal) {
+            const x = start % GRID_SIZE;
+            const y = Math.floor(start / GRID_SIZE);
+            for (let i = 0; i < size; i++) {
+                if (isHorizontal) {
+                    if (x + i >= GRID_SIZE || localPlayerGrid[start + i]) return false;
+                } else {
+                    if (y + i >= GRID_SIZE || localPlayerGrid[start + (i * GRID_SIZE)]) return false;
+                }
+            }
+            return true;
+        }
+
+        function placeShip(shipEl, start, size, isHorizontal) {
+            for (let i = 0; i < size; i++) {
+                const index = isHorizontal ? start + i : start + (i * GRID_SIZE);
+                localPlayerGrid[index] = shipEl.dataset.name;
+                playerGrid.children[index].classList.add('ship');
+            }
+        }
+        
+        readyBtn.onclick = async () => {
+            readyBtn.disabled = true;
+            readyBtn.textContent = 'Waiting for opponent...';
+            const gameRef = doc(db, "mp-battleship", currentGameId);
+            await updateDoc(gameRef, {
+                [`grids.${playerRole}`]: localPlayerGrid,
+                [`players.${currentUser.uid}.ready`]: true
+            });
+
+            // Check if both players are ready
+            const gameSnap = await getDoc(gameRef);
+            const gameData = gameSnap.data();
+            const opponent = Object.values(gameData.players).find(p => p.role !== playerRole);
+            if (opponent && opponent.ready) {
+                await updateDoc(gameRef, {
+                    status: 'active',
+                    currentPlayerId: gameData.playerIds[0] // P1 starts
+                });
+            }
+        };
+
+        // --- BATTLE PHASE ---
+        async function handleShot(index) {
+            const gameRef = doc(db, "mp-battleship", currentGameId);
+            const gameSnap = await getDoc(gameRef);
+            const gameData = gameSnap.data();
+
+            if (gameData.status !== 'active' || gameData.currentPlayerId !== currentUser.uid || gameData.shots[playerRole][index]) {
+                return; // Not your turn, game not active, or cell already shot
+            }
+            
+            const opponentRole = getOpponentRole();
+            const opponentGridData = gameData.grids[opponentRole];
+            const result = opponentGridData[index] ? 'hit' : 'miss';
+
+            const updates = {
+                [`shots.${playerRole}.${index}`]: result,
+                currentPlayerId: gameData.playerIds.find(id => id !== currentUser.uid)
+            };
+            
+            await updateDoc(gameRef, updates);
+
+            // Check for win condition after the update
+            if (result === 'hit') {
+                const newShots = { ...gameData.shots[playerRole], [index]: result };
+                checkWinCondition(opponentGridData, newShots);
+            }
+        }
+        
+        async function checkWinCondition(opponentGridData, myShots) {
+            const allShips = opponentGridData.filter(cell => cell !== null);
+            const allHitsOnShips = Object.keys(myShots).filter(shotIndex => myShots[shotIndex] === 'hit' && opponentGridData[shotIndex] !== null);
+
+            if (allHitsOnShips.length === allShips.length) {
+                // All ship parts have been hit
+                const gameRef = doc(db, "mp-battleship", currentGameId);
+                await updateDoc(gameRef, {
+                    status: 'finished',
+                    winner: currentUser.uid,
+                    currentPlayerId: null
+                });
+            }
+        }
+
+        // --- UTILITY ---
+        function getOpponentRole() {
+            return playerRole === 'P1' ? 'P2' : 'P1';
+        }
+
+        function leaveGame() {
+            if (unsubscribeGame) unsubscribeGame();
+            currentGameId = null;
+            playerRole = null;
+            localPlayerGrid = Array(GRID_SIZE * GRID_SIZE).fill(null);
+            placedShips.clear();
+            
+            gameView.classList.add('hidden');
+            if (currentUser) {
+                lobbyView.classList.remove('hidden');
+            } else {
+                authView.classList.remove('hidden');
+            }
+        }
+
+        leaveGameBtn.onclick = async () => {
+            if (currentGameId) {
+                const gameRef = doc(db, "mp-battleship", currentGameId);
+                await updateDoc(gameRef, { status: 'abandoned' }).catch(()=>{});
+            }
+            leaveGame();
+        };
+        
+        function showMessage(msg) { messageText.textContent = msg; messageModal.classList.remove('hidden'); }
+        closeModalBtn.onclick = () => messageModal.classList.add('hidden');
+        gameIdDisplay.onclick = () => navigator.clipboard.writeText(currentGameId).then(() => showMessage("Game ID copied!"));
+
+    </script>
+</body>
+</html>
