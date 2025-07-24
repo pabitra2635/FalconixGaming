@@ -17,40 +17,39 @@
         }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* Memory Game Specific Styles */
+        /* ***MODIFIED: Restored 3D Card Flip Animation*** */
+        .game-board { 
+            perspective: 1000px; 
+        }
         .card { 
             position: relative; 
+            transition: transform 0.6s; 
+            transform-style: preserve-3d; 
             cursor: pointer; 
-            transition: transform 0.2s;
         }
-        .card:hover {
-            transform: scale(1.05);
+        .card.is-flipped { 
+            transform: rotateY(180deg); 
         }
         .card-face {
-            width: 100%; height: 100%;
+            position: absolute; 
+            width: 100%; 
+            height: 100%;
+            backface-visibility: hidden; 
             display: flex;
-            align-items: center; justify-content: center; border-radius: 0.5rem;
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 0.5rem;
         }
-        .card-front { background-color: #4b5563; } /* bg-gray-600 */
-        .card-back { background-color: #3b82f6; font-size: 2.5rem; }
-        
-        /* Hide the back face by default */
-        .card .card-back { display: none; }
-        .card.is-flipped .card-front { display: none; }
-        .card.is-flipped .card-back { display: flex; }
-        
-        /* ***MODIFIED: Use the celebrate animation for the flip action*** */
-        .card.is-flipped {
-            animation: celebrate 0.6s ease-in-out;
+        .card-front { 
+            background-color: #4b5563; 
+        }
+        .card-back { 
+            background-color: #3b82f6; 
+            transform: rotateY(180deg); 
+            font-size: 2.5rem; 
         }
         .card.matched .card-back { 
             background-color: #16a34a; /* Green for matched cards */
-        }
-
-        @keyframes celebrate {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-            100% { transform: scale(1); }
         }
 
         .turn-indicator { border: 2px solid #facc15; } /* yellow-400 */
@@ -341,17 +340,8 @@
             gameData.cards.forEach((card, index) => {
                 const cardEl = document.createElement('div');
                 cardEl.classList.add('card', 'h-24');
-                
-                // Create front and back faces
-                const frontFace = document.createElement('div');
-                frontFace.classList.add('card-face', 'card-front');
-                
-                const backFace = document.createElement('div');
-                backFace.classList.add('card-face', 'card-back');
-                backFace.textContent = card.symbol;
-
-                cardEl.appendChild(frontFace);
-                cardEl.appendChild(backFace);
+                // ***MODIFIED: Simplified card creation for 3D flip***
+                cardEl.innerHTML = `<div class="card-face card-front"></div><div class="card-face card-back">${card.symbol}</div>`;
                 
                 if (card.isFlipped) {
                     cardEl.classList.add('is-flipped');
