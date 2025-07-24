@@ -18,17 +18,41 @@
         button:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* Memory Game Specific Styles */
-        .game-board { perspective: 1000px; }
-        .card { position: relative; transition: transform 0.6s; transform-style: preserve-3d; cursor: pointer; }
-        .card.is-flipped { transform: rotateY(180deg); }
+        .card { 
+            position: relative; 
+            cursor: pointer; 
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
         .card-face {
-            position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden; display: flex;
+            width: 100%; height: 100%;
+            display: flex;
             align-items: center; justify-content: center; border-radius: 0.5rem;
         }
         .card-front { background-color: #4b5563; } /* bg-gray-600 */
-        .card-back { background-color: #3b82f6; transform: rotateY(180deg); font-size: 2.5rem; }
-        .card.matched .card-back { background-color: #16a34a; }
+        .card-back { background-color: #3b82f6; font-size: 2.5rem; }
+        
+        /* Hide the back face by default */
+        .card .card-back { display: none; }
+        .card.is-flipped .card-front { display: none; }
+        .card.is-flipped .card-back { display: flex; }
+        
+        /* ***MODIFIED: Use the celebrate animation for the flip action*** */
+        .card.is-flipped {
+            animation: celebrate 0.6s ease-in-out;
+        }
+        .card.matched .card-back { 
+            background-color: #16a34a; /* Green for matched cards */
+        }
+
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+
         .turn-indicator { border: 2px solid #facc15; } /* yellow-400 */
 
         /* Chat Box Styles */
@@ -83,7 +107,6 @@
 
             <!-- Game View -->
             <div id="game-view" class="hidden">
-                <!-- ***MODIFIED: Added flex container and Share Button*** -->
                 <div class="text-center mb-4 flex justify-center items-center gap-4">
                     <p class="text-sm text-gray-400">Game ID: <span id="game-id-display" class="font-mono cursor-pointer" title="Click to copy"></span></p>
                     <button id="share-game-btn" class="bg-indigo-500 text-white text-xs font-bold py-1 px-3 rounded-lg hover:bg-indigo-600 transition-all hidden">
@@ -153,16 +176,14 @@
         const gameBoard = document.getElementById('game-board');
         const chatMessages = document.getElementById('chat-messages'), chatInput = document.getElementById('chat-input'), sendChatBtn = document.getElementById('send-chat-btn');
         const messageModal = document.getElementById('message-modal'), messageText = document.getElementById('message-text'), closeModalBtn = document.getElementById('close-modal-btn');
-        // ***NEW: Get share button element***
         const shareGameBtn = document.getElementById('share-game-btn');
 
 
         // --- GAME STATE & CONSTANTS ---
         let currentUser = null, currentGameId = null, playerRole = null;
         let unsubscribeGame = null, unsubscribeChat = null;
-        const cardSymbols = ['🚀', '�', '⭐', '🎉', '💎', '💯', '💡', '🏆'];
+        const cardSymbols = ['🚀', '🔥', '⭐', '🎉', '💎', '💯', '💡', '🏆'];
 
-        // ***NEW: Handle game ID from URL on page load***
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const gameIdFromUrl = urlParams.get('gameId');
@@ -284,7 +305,6 @@
             gameIdDisplay.textContent = gameId;
             lobbyView.classList.add('hidden');
             gameView.classList.remove('hidden');
-            // ***NEW: Show the share button***
             shareGameBtn.classList.remove('hidden');
 
             const gameRef = doc(db, "mp-memory-match", gameId);
@@ -311,7 +331,6 @@
             if(currentUser) lobbyView.classList.remove('hidden');
             else authView.classList.remove('hidden');
             gameIdInput.value = '';
-            // ***NEW: Hide the share button***
             shareGameBtn.classList.add('hidden');
         }
 
@@ -322,10 +341,26 @@
             gameData.cards.forEach((card, index) => {
                 const cardEl = document.createElement('div');
                 cardEl.classList.add('card', 'h-24');
-                if (card.isFlipped) cardEl.classList.add('is-flipped');
-                if (card.isMatched) cardEl.classList.add('matched');
+                
+                // Create front and back faces
+                const frontFace = document.createElement('div');
+                frontFace.classList.add('card-face', 'card-front');
+                
+                const backFace = document.createElement('div');
+                backFace.classList.add('card-face', 'card-back');
+                backFace.textContent = card.symbol;
+
+                cardEl.appendChild(frontFace);
+                cardEl.appendChild(backFace);
+                
+                if (card.isFlipped) {
+                    cardEl.classList.add('is-flipped');
+                }
+                if (card.isMatched) {
+                    cardEl.classList.add('matched');
+                }
+
                 cardEl.dataset.index = index;
-                cardEl.innerHTML = `<div class="card-face card-front"></div><div class="card-face card-back">${card.symbol}</div>`;
                 cardEl.onclick = handleCardClick;
                 gameBoard.appendChild(cardEl);
             });
@@ -437,7 +472,6 @@
         closeModalBtn.onclick = () => messageModal.classList.add('hidden');
         gameIdDisplay.onclick = () => navigator.clipboard.writeText(currentGameId).then(() => showMessage("Game ID copied!"));
 
-        // ***NEW: Share button functionality***
         shareGameBtn.onclick = async () => {
             if (!currentGameId) return;
 
