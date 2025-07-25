@@ -2023,6 +2023,11 @@
                 snakeCtx.fillStyle = '#1f2937';
                 snakeCtx.fillRect(0, 0, snakeCanvas.width, snakeCanvas.height);
 
+                // Draw border
+                snakeCtx.strokeStyle = '#f97316'; // Orange border
+                snakeCtx.lineWidth = 4;
+                snakeCtx.strokeRect(0, 0, snakeCanvas.width, snakeCanvas.height);
+
                 // Draw snake
                 snakeCtx.fillStyle = '#22c55e'; // Snake body
                 snakeCtx.strokeStyle = '#16a34a'; // Snake outline
