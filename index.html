@@ -257,7 +257,7 @@
                              <div class="flex items-center gap-3">
                                  <svg class="w-8 h-8 text-pink-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                  <h3 class="text-2xl font-bold text-white">Car Racer</h3>
-                               </div>
+                             </div>
                             <p class="text-pink-400 mt-1">2D Arcade Racer</p>
                         </div>
                          <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
@@ -294,7 +294,7 @@
                             <span class="btn-secondary pointer-events-none">Play Now</span>
                         </div>
                     </div>
-                      <!-- Game Card 5 -->
+                     <!-- Game Card 5 -->
                     <div id="memory-match-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
                         <img src="https://img.gamedistribution.com/854fd8048c814acaa86b0faffe364290-1280x720.jpeg" alt="Memory Match" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -332,7 +332,7 @@
     <div class="container mx-auto px-4 lg:px-8">
         <h2 class="text-4xl font-black-ops text-center mb-12">Multiplayer Games</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <!-- Game Card 1 -->
+            <!-- Game Card 1: Tic-Tac-Toe -->
             <a href="mptictactoe.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
                 <img src="https://www.rd.com/wp-content/uploads/2019/10/tic-tac-toe-scaled.jpg" alt="Tic-Tac-Toe" class="w-full h-full object-cover">
                  <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -360,6 +360,21 @@
                 </div>
                 <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
                     <span class="btn-warning pointer-events-none">Play Now</span>
+                </div>
+            </a>
+             <!-- NEW Game Card 3: Car Racer MP -->
+            <a href="mpcarrace.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+                <img src="https://as2.ftcdn.net/v2/jpg/04/81/59/51/1000_F_481595196_xeOLb1vk53gjYT1o2cz8hvfN4hkg83PB.jpg" alt="Car Racer MP" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                <div class="absolute inset-0 p-6 flex flex-col justify-end">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-8 h-8 text-pink-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <h3 class="text-2xl font-bold text-white">Car Racer MP</h3>
+                    </div>
+                    <p class="text-pink-400 mt-1">2D Arcade Racer</p>
+                </div>
+                <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
+                    <span class="btn-danger pointer-events-none">Play Now</span>
                 </div>
             </a>
             <!-- Coming Soon Card -->
@@ -405,6 +420,8 @@
                     <button class="btn-success game-info-btn" data-game="Tower Defense">Tower Defense</button>
                     <button class="btn-secondary game-info-btn" data-game="Tic-Tac-Toe">Tic-Tac-Toe</button>
                     <button class="btn-warning game-info-btn" data-game="Memory Match">Memory Match</button>
+                     <!-- NEW: Button for Multiplayer Racer -->
+                    <button class="btn-danger game-info-btn" data-game="Car Racer MP">Car Racer MP</button>
                 </div>
                 <div id="gameExplanationResult" class="mt-12 min-h-[200px] flex items-center justify-center">
                     <p class="text-gray-500">Select a game to see instructions.</p>
@@ -637,7 +654,7 @@
         document.addEventListener('DOMContentLoaded', () => {
 
             // #############################################
-            // ### FIREBASE SETUP                      ###
+            // ### FIREBASE SETUP                         ###
             // #############################################
             
             const firebaseConfig = {
@@ -807,7 +824,7 @@
             }
             
             // #############################################
-            // ### MOBILE MENU TOGGLE                  ###
+            // ### MOBILE MENU TOGGLE                     ###
             // #############################################
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
@@ -817,7 +834,7 @@
             });
 
             // #############################################
-            // ### HOW TO PLAY SECTION                 ###
+            // ### HOW TO PLAY SECTION                    ###
             // #############################################
             const gameInfoButtons = document.querySelectorAll('.game-info-btn');
             const gameExplanationResultEl = document.getElementById('gameExplanationResult');
@@ -832,6 +849,12 @@
                 "Car Racer": {
                     objective: "Dodge the oncoming traffic for as long as you can to get the highest possible score.",
                     gameplay: "You control a car at the bottom of the screen. Other cars will drive down towards you, and you must move left and right to avoid crashing.",
+                    desktop_controls: "Use the Left and Right Arrow Keys to move your car.",
+                    mobile_controls: "Touch and drag your finger left or right on the screen to move the car."
+                },
+                "Car Racer MP": {
+                    objective: "Race against another player and be the last one driving! The first player to crash loses.",
+                    gameplay: "Create a game to get a Game ID, or join a friend's game using their ID. Both players will face the exact same obstacle course. Dodge the traffic and outlast your opponent!",
                     desktop_controls: "Use the Left and Right Arrow Keys to move your car.",
                     mobile_controls: "Touch and drag your finger left or right on the screen to move the car."
                 },
@@ -880,7 +903,7 @@
             }
 
             // #############################################
-            // ### SHARE SCORE FUNCTIONALITY           ###
+            // ### SHARE SCORE FUNCTIONALITY              ###
             // #############################################
             const shareModal = document.getElementById('shareModal');
             const closeShareModalBtn = document.getElementById('closeShareModal');
@@ -923,7 +946,7 @@
             });
 
             // #############################################
-            // ### ASTRO JUMPER (3D GAME) CODE         ###
+            // ### ASTRO JUMPER (3D GAME) CODE            ###
             // #############################################
             const gameContainer = document.getElementById('gameContainer');
             const canvas = document.getElementById('gameCanvas');
@@ -1085,7 +1108,7 @@
             initAstroJumper();
 
             // #############################################
-            // ### CAR RACER (2D GAME) CODE            ###
+            // ### CAR RACER (2D GAME) CODE               ###
             // #############################################
             const racerModal = document.getElementById('pixelRacerModal');
             const playRacerBtn = document.getElementById('pixel-racer-card');
@@ -1271,7 +1294,7 @@
             racerCanvas.addEventListener('touchmove', handleTouch, { passive: false });
 
             // #############################################
-            // ### TOWER DEFENSE (2D GAME) CODE        ###
+            // ### TOWER DEFENSE (2D GAME) CODE           ###
             // #############################################
             
             const tdModal = document.getElementById('towerDefenseModal');
@@ -1567,7 +1590,7 @@
             tdCanvas.addEventListener('touchend', e => { if (selectedTower) { handleCanvasClick(e); e.preventDefault(); } });
             
             // #############################################
-            // ### TIC-TAC-TOE (2D GAME) CODE          ###
+            // ### TIC-TAC-TOE (2D GAME) CODE             ###
             // #############################################
             const ticTacToeModal = document.getElementById('ticTacToeModal');
             const playTTTBtn = document.getElementById('tic-tac-toe-card');
@@ -1703,7 +1726,7 @@
             }
 
             // #############################################
-            // ### MEMORY MATCH (2D GAME) CODE         ###
+            // ### MEMORY MATCH (2D GAME) CODE            ###
             // #############################################
             const memoryMatchModal = document.getElementById('memoryMatchModal');
             const memoryMatchWinModal = document.getElementById('memoryMatchWinModal');
