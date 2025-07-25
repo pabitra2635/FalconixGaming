@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* MODIFIED: Removed 'overflow: hidden' to allow scrolling */
         body { font-family: 'Inter', sans-serif; background-color: #111827; color: #F9FAFB; }
         h1 { font-family: 'Fredoka One', cursive; }
         .font-black-ops { font-family: 'Inter', sans-serif; font-weight: 900; }
@@ -113,7 +112,7 @@
         // --- FIREBASE IMPORTS ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // --- FIREBASE CONFIGURATION ---
         const firebaseConfig = {
@@ -152,6 +151,22 @@
         let localGameState = {}; // Holds the game state from Firestore
         let roadLines = [];
         const keys = { ArrowLeft: false, ArrowRight: false };
+        let lastUpdateTime = 0;
+        const UPDATE_INTERVAL = 50; // ms - send updates 20 times per second
+
+        // --- IMAGE LOADING ---
+        const carImages = {};
+        let imagesToLoad = 2;
+        function imageLoaded() {
+            imagesToLoad--;
+        }
+        carImages.player1 = new Image();
+        carImages.player1.src = 'https://i.ibb.co/9vqd9fV/player-car.png';
+        carImages.player1.onload = imageLoaded;
+        carImages.obstacle = new Image();
+        carImages.obstacle.src = 'https://i.ibb.co/0V7j7dF/obstacle-car.png';
+        carImages.obstacle.onload = imageLoaded;
+
 
         // --- Handle game ID from URL on page load ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -195,9 +210,9 @@
                 hostId: currentUser.uid,
                 playerIds: [currentUser.uid],
                 players: {
-                    [currentUser.uid]: { name: currentUser.displayName, x: 150, crashed: false, role: 'P1' }
+                    [currentUser.uid]: { name: currentUser.displayName, x: gameCanvas.width * 0.25, crashed: false, role: 'P1' }
                 },
-                obstacles: generateObstacles(),
+                obstacles: generateObstacles(50), // Generate initial batch
                 status: 'waiting',
                 rematch: {}
             });
@@ -215,7 +230,7 @@
                 if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUser.uid)) {
                     await updateDoc(gameRef, {
                         playerIds: [...gameData.playerIds, currentUser.uid],
-                        [`players.${currentUser.uid}`]: { name: currentUser.displayName, x: 250, crashed: false, role: 'P2' },
+                        [`players.${currentUser.uid}`]: { name: currentUser.displayName, x: gameCanvas.width * 0.75, crashed: false, role: 'P2' },
                         status: 'active'
                     });
                     switchToGameView(gameId, 'P2');
@@ -231,10 +246,11 @@
         
         leaveGameBtn.onclick = async () => {
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
             if (unsubscribeGame) unsubscribeGame();
             if (unsubscribeChat) unsubscribeChat();
             
-            if (currentGameId) {
+            if (currentGameId && localGameState.status !== 'abandoned') {
                  const gameRef = doc(db, "mp-car-race", currentGameId);
                  await updateDoc(gameRef, { status: 'abandoned' }).catch(err => {});
             }
@@ -251,10 +267,10 @@
             if (Object.keys(newRematchState).length === 2) {
                 // Both players want to rematch
                 await updateDoc(gameRef, {
-                    obstacles: generateObstacles(),
+                    obstacles: generateObstacles(50),
                     players: {
-                        [gameData.playerIds[0]]: { ...gameData.players[gameData.playerIds[0]], x: 150, crashed: false },
-                        [gameData.playerIds[1]]: { ...gameData.players[gameData.playerIds[1]], x: 250, crashed: false }
+                        [gameData.playerIds[0]]: { ...gameData.players[gameData.playerIds[0]], x: gameCanvas.width * 0.25, crashed: false },
+                        [gameData.playerIds[1]]: { ...gameData.players[gameData.playerIds[1]], x: gameCanvas.width * 0.75, crashed: false }
                     },
                     status: 'active',
                     rematch: {}
@@ -330,16 +346,18 @@
             }
         }
         
-        function generateObstacles() {
+        function generateObstacles(count, startY = -100) {
             const obstacles = [];
             const lanes = [0.15, 0.5, 0.85]; // Relative X positions for 3 lanes
-            for (let i = 0; i < 50; i++) { // Generate a long track of obstacles
+            let lastY = startY;
+            for (let i = 0; i < count; i++) {
+                 const y = lastY - (200 + Math.random() * 200);
                  obstacles.push({
-                    x: lanes[Math.floor(Math.random() * lanes.length)], // position relative to canvas width
-                    y: -100 - (i * (200 + Math.random() * 200)), // position above the canvas
+                    x: lanes[Math.floor(Math.random() * lanes.length)],
+                    y: y,
                     speed: 3 + Math.random() * 2,
-                    color: Math.random() < 0.2 ? '#ef4444' : '#a855f7' // 20% fast red cars
                 });
+                lastY = y;
             }
             return obstacles;
         }
@@ -350,10 +368,23 @@
             const myPlayerState = localGameState.players[currentUser.uid];
             if (!myPlayerState || myPlayerState.crashed || localGameState.status !== 'active') return;
 
+            const now = Date.now();
+
             // Move road lines and obstacles
             const roadSpeed = 4;
             roadLines.forEach(line => { line.y += roadSpeed; if (line.y > gameCanvas.height) line.y = -40; });
             localGameState.obstacles.forEach(obs => obs.y += obs.speed);
+
+            // Host player generates new obstacles when needed
+            if (playerRole === 'P1' && localGameState.obstacles.length > 0) {
+                const lastObstacle = localGameState.obstacles[localGameState.obstacles.length - 1];
+                if (lastObstacle.y > -200) { // When the last obstacle is getting close to the screen
+                    const newObstacles = generateObstacles(20, lastObstacle.y);
+                    updateDoc(doc(db, "mp-car-race", currentGameId), {
+                        obstacles: arrayUnion(...newObstacles)
+                    });
+                }
+            }
 
             // Move local player car
             const carWidth = 40;
@@ -367,14 +398,14 @@
             for (const obs of localGameState.obstacles) {
                 const obsX = obs.x * gameCanvas.width - carWidth / 2;
                  if (currentX < obsX + carWidth && currentX + carWidth > obsX && myCarY < obs.y + carHeight && myCarY + carHeight > obs.y) {
-                    // Collision detected
                     updateDoc(doc(db, "mp-car-race", currentGameId), { [`players.${currentUser.uid}.crashed`]: true });
-                    return; // Stop updating after crash
+                    return;
                 }
             }
 
-            // Update Firestore if position changed
-            if (currentX !== myPlayerState.x) {
+            // Throttle Firestore updates
+            if (currentX !== myPlayerState.x && now - lastUpdateTime > UPDATE_INTERVAL) {
+                lastUpdateTime = now;
                 updateDoc(doc(db, "mp-car-race", currentGameId), { [`players.${currentUser.uid}.x`]: currentX });
             }
         }
@@ -390,21 +421,21 @@
                 ctx.fillRect(laneWidth * 2 - 5, line.y, 10, 40);
             });
             
-            if (!localGameState.players) return;
+            if (!localGameState.players || imagesToLoad > 0) return;
 
             // Draw obstacles
             localGameState.obstacles.forEach(obs => {
                 const carWidth = 40;
-                ctx.fillStyle = obs.color;
-                ctx.fillRect(obs.x * gameCanvas.width - carWidth / 2, obs.y, carWidth, 60);
+                const carHeight = 60;
+                ctx.drawImage(carImages.obstacle, obs.x * gameCanvas.width - carWidth / 2, obs.y, carWidth, carHeight);
             });
             
             // Draw player cars
             for (const uid in localGameState.players) {
                 const player = localGameState.players[uid];
-                ctx.fillStyle = player.role === 'P1' ? '#ec4899' : '#38bdf8'; // pink or sky blue
+                const carImg = player.role === 'P1' ? carImages.player1 : carImages.player1; // Could use different images later
                 if (player.crashed) ctx.globalAlpha = 0.4;
-                ctx.fillRect(player.x, gameCanvas.height - 100, 40, 60);
+                ctx.drawImage(carImg, player.x, gameCanvas.height - 100, 40, 60);
                 ctx.globalAlpha = 1.0;
             }
         }
@@ -465,7 +496,15 @@
             let targetX = touchX - canvasRect.left - (carWidth / 2);
             if (targetX < 0) targetX = 0;
             if (targetX > gameCanvas.width - carWidth) targetX = gameCanvas.width - carWidth;
-            updateDoc(doc(db, "mp-car-race", currentGameId), { [`players.${currentUser.uid}.x`]: targetX });
+            
+            const now = Date.now();
+            if (now - lastUpdateTime > UPDATE_INTERVAL) {
+                lastUpdateTime = now;
+                updateDoc(doc(db, "mp-car-race", currentGameId), { [`players.${currentUser.uid}.x`]: targetX });
+            } else {
+                // For local smoothness, we can update the local state immediately
+                localGameState.players[currentUser.uid].x = targetX;
+            }
         }
         gameCanvas.addEventListener('touchstart', handleTouch, { passive: false });
         gameCanvas.addEventListener('touchmove', handleTouch, { passive: false });
