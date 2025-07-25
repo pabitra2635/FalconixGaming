@@ -638,6 +638,21 @@
                             <button id="shareSnakeScore" class="btn-secondary-outline text-xl">Share Score</button>
                         </div>
                     </div>
+                    <!-- Snake Directional Controls -->
+                    <div id="snakeControls" class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 grid grid-cols-3 grid-rows-3 gap-2 w-48 h-48 pointer-events-auto">
+                        <button data-direction="up" class="snake-control-btn col-start-2 row-start-1 bg-gray-700/50 rounded-lg flex items-center justify-center active:bg-gray-600/50">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                        </button>
+                        <button data-direction="left" class="snake-control-btn col-start-1 row-start-2 bg-gray-700/50 rounded-lg flex items-center justify-center active:bg-gray-600/50">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        </button>
+                        <button data-direction="right" class="snake-control-btn col-start-3 row-start-2 bg-gray-700/50 rounded-lg flex items-center justify-center active:bg-gray-600/50">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                        <button data-direction="down" class="snake-control-btn col-start-2 row-start-3 bg-gray-700/50 rounded-lg flex items-center justify-center active:bg-gray-600/50">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
             <button id="closeSnakeModal" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-gray-800 hover:bg-gray-200">
@@ -1892,6 +1907,8 @@
             const snakeScoreEl = document.getElementById('snakeScore');
             const snakeFinalScoreEl = document.getElementById('snakeFinalScore');
             const shareSnakeScoreBtn = document.getElementById('shareSnakeScore');
+            const snakeControls = document.getElementById('snakeControls');
+            const snakeControlBtns = document.querySelectorAll('.snake-control-btn');
 
             let snakeRunning = false;
             let snakeScore = 0;
@@ -1917,6 +1934,7 @@
                 snakeStartScreen.style.display = 'flex';
                 snakeInGameUI.style.display = 'none';
                 snakeGameOverScreen.style.display = 'none';
+                snakeControls.classList.add('hidden');
             }
 
             function startSnakeGame() {
@@ -1932,6 +1950,7 @@
                 snakeStartScreen.style.display = 'none';
                 snakeGameOverScreen.style.display = 'none';
                 snakeInGameUI.style.display = 'block';
+                snakeControls.classList.remove('hidden');
                 
                 gameLoopSnake();
             }
@@ -1950,6 +1969,7 @@
                 await saveHighScore('Snake', snakeScore);
                 snakeGameOverScreen.style.display = 'flex';
                 snakeInGameUI.style.display = 'none';
+                snakeControls.classList.add('hidden');
             }
 
             function generateFood() {
@@ -2034,22 +2054,59 @@
 
             function changeDirection(event) {
                 if (!snakeRunning || changingDirection) return;
-                changingDirection = true;
-
+                
                 const keyPressed = event.key;
                 const goingUp = direction.y === -1;
                 const goingDown = direction.y === 1;
                 const goingRight = direction.x === 1;
                 const goingLeft = direction.x === -1;
+                let validKeyPress = false;
 
                 if (keyPressed === "ArrowLeft" && !goingRight) {
                     direction = { x: -1, y: 0 };
+                    validKeyPress = true;
                 } else if (keyPressed === "ArrowUp" && !goingDown) {
                     direction = { x: 0, y: -1 };
+                    validKeyPress = true;
                 } else if (keyPressed === "ArrowRight" && !goingLeft) {
                     direction = { x: 1, y: 0 };
+                    validKeyPress = true;
                 } else if (keyPressed === "ArrowDown" && !goingUp) {
                     direction = { x: 0, y: 1 };
+                    validKeyPress = true;
+                }
+
+                if(validKeyPress) {
+                    changingDirection = true;
+                }
+            }
+
+            function handleDirectionButton(e) {
+                if (!snakeRunning || changingDirection) return;
+
+                const newDirection = e.currentTarget.dataset.direction;
+                const goingUp = direction.y === -1;
+                const goingDown = direction.y === 1;
+                const goingRight = direction.x === 1;
+                const goingLeft = direction.x === -1;
+                let validPress = false;
+
+                if (newDirection === "left" && !goingRight) {
+                    direction = { x: -1, y: 0 };
+                    validPress = true;
+                } else if (newDirection === "up" && !goingDown) {
+                    direction = { x: 0, y: -1 };
+                    validPress = true;
+                } else if (newDirection === "right" && !goingLeft) {
+                    direction = { x: 1, y: 0 };
+                    validPress = true;
+                } else if (newDirection === "down" && !goingUp) {
+                    direction = { x: 0, y: 1 };
+                    validPress = true;
+                }
+                
+                if (validPress) {
+                    changingDirection = true;
                 }
             }
             
@@ -2108,6 +2165,9 @@
             snakeCanvas.addEventListener('touchmove', handleTouchMoveSnake);
             snakeCanvas.addEventListener('touchend', () => {
                 if(snakeRunning) changingDirection = false;
+            });
+            snakeControlBtns.forEach(btn => {
+                btn.addEventListener('click', handleDirectionButton);
             });
 
 
