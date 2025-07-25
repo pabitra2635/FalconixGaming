@@ -16,7 +16,7 @@
             font-family: 'Inter', sans-serif;
             font-weight: 900;
         }
-        #gameCanvas, #racerGameCanvas, #towerDefenseCanvas {
+        #gameCanvas, #carRacerGameCanvas, #towerDefenseCanvas {
             display: block;
             width: 100%;
             height: 100%;
@@ -69,7 +69,7 @@
             opacity: 0;
             transition: opacity 0.3s ease-in-out;
         }
-        #pixelRacerModal, #towerDefenseModal, #ticTacToeModal, #memoryMatchModal {
+        #carRacerModal, #towerDefenseModal, #ticTacToeModal, #memoryMatchModal {
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
         }
         .pointer-events-passthrough {
@@ -134,22 +134,22 @@
 
         /* Fullscreen on mobile */
         @media (max-width: 768px) {
-            #pixelRacerModal, #towerDefenseModal, #ticTacToeModal, #memoryMatchModal {
+            #carRacerModal, #towerDefenseModal, #ticTacToeModal, #memoryMatchModal {
                 padding: 0;
             }
-            #pixelRacerModal > div, #towerDefenseModal > div, #ticTacToeModal > div, #memoryMatchModal > div {
+            #carRacerModal > div, #towerDefenseModal > div, #ticTacToeModal > div, #memoryMatchModal > div {
                 width: 100%;
                 height: 100%;
                 max-width: 100%;
                 max-height: 100%;
                 border-radius: 0;
             }
-            #pixelRacerModal .aspect-\[3\/4\], #towerDefenseModal .aspect-\[4\/3\] {
+            #carRacerModal .aspect-\[3\/4\], #towerDefenseModal .aspect-\[4\/3\] {
                 aspect-ratio: auto; /* Remove fixed aspect ratio */
                 height: 100%;
                 width: 100%;
             }
-            #closeRacerModal, #closeTowerDefenseModal, #closeTicTacToeModal, #closeMemoryMatchModal {
+            #closeCarRacerModal, #closeTowerDefenseModal, #closeTicTacToeModal, #closeMemoryMatchModal {
                 top: 1rem;
                 right: 1rem;
                 background-color: rgba(0,0,0,0.5);
@@ -161,12 +161,10 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Header -->
     <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
         <nav class="container mx-auto px-4 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <a href="#" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
-                <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="#" class="text-gray-300 hover:text-sky-400 transition-colors">Home</a>
                     <a href="#games" class="text-gray-300 hover:text-sky-400 transition-colors">Games</a>
@@ -180,13 +178,11 @@
                         <button id="logout-button" class="px-6 py-3 font-semibold text-red-500 hover:bg-red-500/10 rounded-lg transition-colors duration-300">Logout</button>
                     </div>
                 </div>
-                <!-- Mobile Menu Button -->
-                 <button id="mobile-menu-button" class="md:hidden text-gray-300 hover:text-white">
+                <button id="mobile-menu-button" class="md:hidden text-gray-300 hover:text-white">
                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                  </button>
             </div>
         </nav>
-        <!-- Mobile Menu -->
         <div id="mobile-menu" class="hidden md:hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Home</a>
@@ -202,9 +198,7 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="flex-grow">
-        <!-- Hero Section / Featured Game -->
         <section id="featured-game" class="relative h-[600px] bg-gray-900 overflow-hidden">
             <div id="gameContainer" class="absolute inset-0">
                 <canvas id="gameCanvas"></canvas>
@@ -229,12 +223,10 @@
             </div>
         </section>
 
-        <!-- Games Grid Section -->
         <section id="games" class="py-16 sm:py-24 bg-gray-800/50">
             <div class="container mx-auto px-4 lg:px-8">
                 <h2 class="text-4xl font-black-ops text-center mb-12">Our Games</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <!-- Game Card 1 -->
                     <div id="astro-jumper-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
                         <img src="https://img.gamepix.com/games/astro-jumper/cover/astro-jumper.png?w=400&ar=16:10" alt="Astro Jumper" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -249,14 +241,13 @@
                             <span class="btn-primary pointer-events-none">Play Now</span>
                         </div>
                     </div>
-                    <!-- Game Card 2 -->
-                    <div id="pixel-racer-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
-                        <img src="https://as2.ftcdn.net/v2/jpg/04/81/59/51/1000_F_481595196_xeOLb1vk53gjYT1o2cz8hvfN4hkg83PB.jpg" alt="Pixel Racer" class="w-full h-full object-cover">
+                    <div id="car-racer-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
+                        <img src="https://as2.ftcdn.net/v2/jpg/04/81/59/51/1000_F_481595196_xeOLb1vk53gjYT1o2cz8hvfN4hkg83PB.jpg" alt="Car Racer" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-end">
                              <div class="flex items-center gap-3">
                                  <svg class="w-8 h-8 text-pink-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                 <h3 class="text-2xl font-bold text-white">Pixel Racer</h3>
+                                 <h3 class="text-2xl font-bold text-white">Car Racer</h3>
                              </div>
                             <p class="text-pink-400 mt-1">2D Arcade Racer</p>
                         </div>
@@ -264,7 +255,6 @@
                             <span class="btn-danger pointer-events-none">Play Now</span>
                         </div>
                     </div>
-                    <!-- Game Card 3 -->
                     <div id="tower-defense-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
                         <img src="https://fs-prod-cdn.nintendo-europe.com/media/images/10_share_images/games_15/nintendo_switch_download_software_1/2x1_NSwitchDS_FantasyTowerDefense_image1600w.jpg" alt="Tower Defense" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -279,7 +269,6 @@
                             <span class="btn-success pointer-events-none">Play Now</span>
                         </div>
                     </div>
-                    <!-- Game Card 4 -->
                     <div id="tic-tac-toe-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
                         <img src="https://wallpapercave.com/wp/wp8984750.jpg" alt="Tic-Tac-Toe" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -294,8 +283,7 @@
                             <span class="btn-secondary pointer-events-none">Play Now</span>
                         </div>
                     </div>
-                     <!-- Game Card 5 -->
-                    <div id="memory-match-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
+                     <div id="memory-match-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
                         <img src="https://img.gamedistribution.com/854fd8048c814acaa86b0faffe364290-1280x720.jpeg" alt="Memory Match" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-end">
@@ -309,7 +297,6 @@
                             <span class="btn-warning pointer-events-none">Play Now</span>
                         </div>
                     </div>
-                    <!-- Coming Soon Card -->
                     <div class="group relative rounded-lg overflow-hidden shadow-lg cursor-not-allowed filter grayscale">
                         <img src="https://placehold.co/400x250/1f2937/6b7280?text=?" alt="Coming Soon" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -327,12 +314,10 @@
                 </div>
             </div>
         </section>
-<!-- Multiplayer Games Section -->
 <section id="multiplayer-games" class="py-16 sm:py-24 bg-gray-900/50">
     <div class="container mx-auto px-4 lg:px-8">
         <h2 class="text-4xl font-black-ops text-center mb-12">Multiplayer Games</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <!-- Game Card 1 -->
             <a href="mptictactoe.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
                 <img src="https://www.rd.com/wp-content/uploads/2019/10/tic-tac-toe-scaled.jpg" alt="Tic-Tac-Toe" class="w-full h-full object-cover">
                  <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -347,7 +332,6 @@
                     <span class="btn-warning pointer-events-none">Play Now</span>
                 </div>
             </a>
-            <!-- Game Card 2: Memory Match -->
             <a href="mpmemory.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
                 <img src="https://static.vecteezy.com/system/resources/previews/012/672/122/original/memory-game-for-preschool-children-cards-with-cartoon-safari-desert-animals-activity-page-for-book-vector.jpg" alt="Memory Match" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -362,7 +346,6 @@
                     <span class="btn-warning pointer-events-none">Play Now</span>
                 </div>
             </a>
-            <!-- Coming Soon Card -->
             <div class="group relative rounded-lg overflow-hidden shadow-lg cursor-not-allowed filter grayscale">
                 <img src="https://placehold.co/400x250/1f2937/6b7280?text=?" alt="Coming Soon" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -381,27 +364,24 @@
     </div>
 </section>
 
-        <!-- Leaderboards Section -->
         <section id="leaderboards" class="py-16 sm:py-24 bg-gray-800/50">
             <div class="container mx-auto px-4 lg:px-8">
                 <h2 class="text-4xl font-black-ops text-center mb-12">Your High Scores</h2>
                 <div id="leaderboard-content" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Leaderboard cards will be injected here -->
-                </div>
+                    </div>
                  <div id="leaderboard-login-prompt" class="text-center text-gray-400">
                     <p>Please log in to see your high scores.</p>
                 </div>
             </div>
         </section>
 
-        <!-- How to Play Section -->
         <section id="how-to-play" class="py-16 sm:py-24 bg-gray-900">
             <div class="container mx-auto px-4 lg:px-8 text-center">
                 <h2 class="text-4xl font-black-ops text-center mb-4">How to Play</h2>
                 <p class="text-lg text-gray-400 mb-8 max-w-3xl mx-auto">Select a game below for instructions on its objective and controls.</p>
                 <div class="flex flex-wrap justify-center gap-4 mb-12">
                     <button class="btn-primary game-info-btn" data-game="Astro Jumper">Astro Jumper</button>
-                    <button class="btn-danger game-info-btn" data-game="Pixel Racer">Pixel Racer</button>
+                    <button class="btn-danger game-info-btn" data-game="Car Racer">Car Racer</button>
                     <button class="btn-success game-info-btn" data-game="Tower Defense">Tower Defense</button>
                     <button class="btn-secondary game-info-btn" data-game="Tic-Tac-Toe">Tic-Tac-Toe</button>
                     <button class="btn-warning game-info-btn" data-game="Memory Match">Memory Match</button>
@@ -413,7 +393,6 @@
         </section>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-gray-900 border-t border-gray-700">
         <div class="container mx-auto px-4 lg:px-8 py-8 text-center text-gray-400">
             <p>&copy; 2025 <a href="https://chat.whatsapp.com/DUXdfaOxJoPC87KjRWbkjo" style="text-decoration:underline;">FalconixGaming</a>. All Rights Reserved.</p>
@@ -425,9 +404,6 @@
         </div>
     </footer>
 
-    <!-- MODALS -->
-
-    <!-- Logout Confirmation Modal -->
     <div id="logout-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
         <div class="glassmorphism p-8 rounded-2xl text-center max-w-sm w-full">
             <h3 class="text-2xl font-bold text-white">Are you sure?</h3>
@@ -439,7 +415,6 @@
         </div>
     </div>
 
-    <!-- Mobile Welcome Modal -->
     <div id="mobile-welcome-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden md:hidden">
         <div class="glassmorphism p-8 rounded-2xl text-center max-w-sm w-full relative">
             <button id="close-welcome-modal" class="absolute top-2 right-2 text-gray-400 hover:text-white">
@@ -453,37 +428,35 @@
         </div>
     </div>
     
-    <!-- Pixel Racer Game Modal -->
-    <div id="pixelRacerModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
+    <div id="carRacerModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
         <div class="w-full max-w-md lg:max-w-lg relative">
             <div class="bg-gray-800 rounded-lg shadow-2xl overflow-hidden aspect-[3/4] relative">
-                <canvas id="racerGameCanvas"></canvas>
-                <div id="racerUiLayer" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 pointer-events-none">
-                    <div id="racerStartScreen" class="pointer-events-auto flex flex-col items-center">
-                        <h2 class="text-5xl font-black-ops text-white">PIXEL <span class="text-pink-500">RACER</span></h2>
+                <canvas id="carRacerGameCanvas"></canvas>
+                <div id="carRacerUiLayer" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 pointer-events-none">
+                    <div id="carRacerStartScreen" class="pointer-events-auto flex flex-col items-center">
+                        <h2 class="text-5xl font-black-ops text-white">CAR <span class="text-pink-500">RACER</span></h2>
                         <p class="mt-4 text-gray-300 px-4">Use Arrow Keys on desktop, or Drag your finger on mobile to move!</p>
-                        <button id="racerStartButton" class="btn-danger mt-8 text-xl">Start Race</button>
+                        <button id="carRacerStartButton" class="btn-danger mt-8 text-xl">Start Race</button>
                     </div>
-                    <div id="racerInGameUI" class="hidden absolute top-5 left-5 text-left">
-                        <p class="text-2xl font-bold text-white">Score: <span id="racerScore">0</span></p>
+                    <div id="carRacerInGameUI" class="hidden absolute top-5 left-5 text-left">
+                        <p class="text-2xl font-bold text-white">Score: <span id="carRacerScore">0</span></p>
                     </div>
-                    <div id="racerGameOverScreen" data-game-name="Pixel Racer" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
+                    <div id="carRacerGameOverScreen" data-game-name="Car Racer" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
                         <h2 class="text-5xl font-black-ops text-white">CRASHED!</h2>
-                        <p class="mt-4 text-2xl text-gray-200">Final Score: <span id="racerFinalScore" class="font-bold text-pink-400">0</span></p>
+                        <p class="mt-4 text-2xl text-gray-200">Final Score: <span id="carRacerFinalScore" class="font-bold text-pink-400">0</span></p>
                         <div class="mt-6 flex flex-col sm:flex-row gap-4">
-                            <button id="racerRestartButton" class="btn-danger-outline text-xl">Try Again</button>
-                            <button id="shareRacerScore" class="btn-secondary-outline text-xl">Share Score</button>
+                            <button id="carRacerRestartButton" class="btn-danger-outline text-xl">Try Again</button>
+                            <button id="shareCarRacerScore" class="btn-secondary-outline text-xl">Share Score</button>
                         </div>
                     </div>
                 </div>
             </div>
-            <button id="closeRacerModal" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-gray-800 hover:bg-gray-200">
+            <button id="closeCarRacerModal" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-gray-800 hover:bg-gray-200">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
             </button>
         </div>
     </div>
 
-    <!-- Tower Defense Game Modal -->
     <div id="towerDefenseModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
         <div class="w-full max-w-4xl relative">
             <div class="bg-gray-800 rounded-lg shadow-2xl overflow-hidden aspect-[4/3] relative">
@@ -524,7 +497,6 @@
         </div>
     </div>
 
-    <!-- Tic-Tac-Toe Game Modal -->
     <div id="ticTacToeModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
         <div class="w-full max-w-sm relative">
             <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full border border-gray-700">
@@ -564,7 +536,6 @@
         </div>
     </div>
 
-    <!-- Memory Match Game Modal -->
     <div id="memoryMatchModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
         <div class="w-full max-w-lg relative">
              <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full border border-gray-700">
@@ -573,8 +544,7 @@
                     <p class="text-gray-400 mt-2">Moves: <span id="moves-count" class="font-bold">0</span></p>
                 </div>
                 <div id="memory-game-board" class="grid grid-cols-4 gap-4 mb-6 memory-game-board">
-                    <!-- Cards will be generated by JavaScript -->
-                </div>
+                    </div>
                 <button id="memory-restart-button" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">
                     Restart Game
                 </button>
@@ -585,7 +555,6 @@
         </div>
     </div>
 
-    <!-- Memory Match Win Modal -->
     <div id="memoryMatchWinModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
         <div class="glassmorphism p-8 rounded-2xl text-center max-w-sm w-full">
             <h2 class="text-5xl font-black-ops text-white">You Won!</h2>
@@ -597,11 +566,10 @@
         </div>
     </div>
 
-    <!-- Fallback Share Modal -->
     <div id="shareModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
         <div class="glassmorphism p-8 rounded-2xl text-center max-w-md w-full relative">
             <button id="closeShareModal" class="absolute top-2 right-2 text-gray-400 hover:text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             <h3 class="text-2xl font-bold text-white">Share Your Score!</h3>
             <p class="mt-2 text-gray-300">Share your achievement with your friends.</p>
@@ -614,7 +582,6 @@
         </div>
     </div>
     
-    <!-- Scripts -->
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
     <script type="importmap">
     {
@@ -637,7 +604,7 @@
         document.addEventListener('DOMContentLoaded', () => {
 
             // #############################################
-            // ### FIREBASE SETUP                         ###
+            // ### FIREBASE SETUP                      ###
             // #############################################
             
             const firebaseConfig = {
@@ -753,7 +720,7 @@
                     const docSnap = await getDoc(scoreRef);
                     const scores = docSnap.exists() ? docSnap.data() : {};
                     
-                    const games = ["Astro Jumper", "Pixel Racer", "Tower Defense", "Memory Match"];
+                    const games = ["Astro Jumper", "Car Racer", "Tower Defense", "Memory Match"];
                     leaderboardContent.innerHTML = games.map(game => {
                         const score = scores[game] || 0;
                         let scoreLabel = 'Points';
@@ -807,7 +774,7 @@
             }
             
             // #############################################
-            // ### MOBILE MENU TOGGLE                     ###
+            // ### MOBILE MENU TOGGLE                  ###
             // #############################################
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
@@ -817,7 +784,7 @@
             });
 
             // #############################################
-            // ### HOW TO PLAY SECTION                     ###
+            // ### HOW TO PLAY SECTION                   ###
             // #############################################
             const gameInfoButtons = document.querySelectorAll('.game-info-btn');
             const gameExplanationResultEl = document.getElementById('gameExplanationResult');
@@ -829,7 +796,7 @@
                     desktop_controls: "Click anywhere on the screen to jump.",
                     mobile_controls: "Tap anywhere on the screen to jump."
                 },
-                "Pixel Racer": {
+                "Car Racer": {
                     objective: "Dodge the oncoming traffic for as long as you can to get the highest possible score.",
                     gameplay: "You control a car at the bottom of the screen. Other cars will drive down towards you, and you must move left and right to avoid crashing.",
                     desktop_controls: "Use the Left and Right Arrow Keys to move your car.",
@@ -1085,162 +1052,219 @@
             initAstroJumper();
 
             // #############################################
-            // ### PIXEL RACER (2D GAME) CODE            ###
+            // ### CAR RACER (2D GAME) CODE              ###
             // #############################################
-            const racerModal = document.getElementById('pixelRacerModal');
-            const playRacerBtn = document.getElementById('pixel-racer-card');
-            const closeRacerBtn = document.getElementById('closeRacerModal');
-            const racerCanvas = document.getElementById('racerGameCanvas');
-            const racerCtx = racerCanvas.getContext('2d');
-            const racerStartScreen = document.getElementById('racerStartScreen');
-            const racerInGameUI = document.getElementById('racerInGameUI');
-            const racerGameOverScreen = document.getElementById('racerGameOverScreen');
-            const racerStartButton = document.getElementById('racerStartButton');
-            const racerRestartButton = document.getElementById('racerRestartButton');
-            const racerScoreEl = document.getElementById('racerScore');
-            const racerFinalScoreEl = document.getElementById('racerFinalScore');
-            const shareRacerScoreBtn = document.getElementById('shareRacerScore');
-            let racerRunning = false;
-            let racerScore = 0;
-            let animationFrameId;
+            const carRacerModal = document.getElementById('carRacerModal');
+            const playCarRacerBtn = document.getElementById('car-racer-card');
+            const closeCarRacerBtn = document.getElementById('closeCarRacerModal');
+            const carRacerCanvas = document.getElementById('carRacerGameCanvas');
+            const carRacerCtx = carRacerCanvas.getContext('2d');
+            const carRacerStartScreen = document.getElementById('carRacerStartScreen');
+            const carRacerInGameUI = document.getElementById('carRacerInGameUI');
+            const carRacerGameOverScreen = document.getElementById('carRacerGameOverScreen');
+            const carRacerStartButton = document.getElementById('carRacerStartButton');
+            const carRacerRestartButton = document.getElementById('carRacerRestartButton');
+            const carRacerScoreEl = document.getElementById('carRacerScore');
+            const carRacerFinalScoreEl = document.getElementById('carRacerFinalScore');
+            const shareCarRacerScoreBtn = document.getElementById('shareCarRacerScore');
+            let carRacerRunning = false;
+            let carRacerScore = 0;
+            let carRacerAnimationId;
             let playerCar, obstacles, roadLines;
             const keys = { ArrowLeft: false, ArrowRight: false };
-            function openRacerModal() {
-                racerModal.classList.remove('invisible', 'opacity-0');
-                racerCanvas.width = racerCanvas.parentElement.clientWidth;
-                racerCanvas.height = racerCanvas.parentElement.clientHeight;
-                showRacerStartScreen();
-            }
-            function closeRacerModal() {
-                racerModal.classList.add('invisible', 'opacity-0');
-                stopRacerGame();
-            }
-            function showRacerStartScreen() {
-                racerStartScreen.style.display = 'flex';
-                racerInGameUI.style.display = 'none';
-                racerGameOverScreen.style.display = 'none';
-            }
-            function startRacerGame() {
-                stopRacerGame();
-                racerRunning = true;
-                racerScore = 0;
-                playerCar = { x: racerCanvas.width / 2 - 20, y: racerCanvas.height - 100, width: 40, height: 60, speed: 7 };
-                obstacles = [];
-                roadLines = [];
-                for (let i = 0; i < 8; i++) spawnObstacle();
-                for (let i = 0; i < 5; i++) roadLines.push({ y: i * (racerCanvas.height / 4) });
-                racerStartScreen.style.display = 'none';
-                racerGameOverScreen.style.display = 'none';
-                racerInGameUI.style.display = 'block';
-                gameLoop();
-            }
-            function stopRacerGame() {
-                racerRunning = false;
-                if (animationFrameId) {
-                    cancelAnimationFrame(animationFrameId);
-                    animationFrameId = null;
-                }
-            }
-            async function endRacerGame() {
-                stopRacerGame();
-                const finalRacerScore = Math.floor(racerScore);
-                racerFinalScoreEl.textContent = finalRacerScore;
-                await saveHighScore('Pixel Racer', finalRacerScore);
-                racerGameOverScreen.style.display = 'flex';
-                racerInGameUI.style.display = 'none';
-            }
-            function spawnObstacle() {
-                const obsWidth = 40;
-                const lastObstacleY = obstacles.length > 0 ? obstacles[obstacles.length - 1].y : -200;
-                let speed;
-                let color;
 
-                // 20% chance to spawn a fast car
-                if (Math.random() < 0.2) { 
-                    speed = 6 + Math.random() * 2 + (racerScore / 50); // Faster base speed
-                    color = '#ef4444'; // Red color for fast cars
-                } else {
-                    speed = 3 + Math.random() * 2 + (racerScore / 50); // Normal speed
-                    color = '#a855f7'; // Original purple color
-                }
+            // --- Car Image Loading ---
+            let playerCarImg, obstacleCarImgs = [];
+            let imagesLoaded = false;
+            const playerImgUrl = 'https://static.vecteezy.com/system/resources/previews/023/264/462/large_2x/yellow-car-top-view-free-png.png';
+            const obstacleImgUrls = [
+                'https://www.pngkit.com/png/full/54-546494_car-top-view-png.png',
+                'https://www.pngmart.com/files/15/Car-Top-View-PNG-Image.png',
+                'http://pluspng.com/img-png/car-png-top-view-png-hatchback-car-top-view-png-clipart-1092.png',
+                'https://static.vecteezy.com/system/resources/thumbnails/025/307/233/small_2x/white-sport-car-on-transparent-background-3d-rendering-illustration-free-png.png'
+            ];
 
-                obstacles.push({ 
-                    x: Math.random() * (racerCanvas.width - obsWidth), 
-                    y: lastObstacleY - (Math.random() * 200 + 300), 
-                    width: obsWidth, 
-                    height: 60, 
-                    speed: speed,
-                    color: color 
+            function loadCarImages() {
+                let loadedCount = 0;
+                const totalImages = obstacleImgUrls.length + 1; // +1 for player car
+
+                const onImageLoad = () => {
+                    loadedCount++;
+                    if (loadedCount === totalImages) {
+                        imagesLoaded = true;
+                        console.log("All car images loaded.");
+                    }
+                };
+
+                playerCarImg = new Image();
+                playerCarImg.crossOrigin = "Anonymous";
+                playerCarImg.onload = onImageLoad;
+                playerCarImg.src = playerImgUrl;
+
+                obstacleImgUrls.forEach(url => {
+                    const img = new Image();
+                    img.crossOrigin = "Anonymous";
+                    img.onload = onImageLoad;
+                    img.src = url;
+                    obstacleCarImgs.push(img);
                 });
             }
-            function update() {
-                if (!racerRunning) return;
-                racerScore += 0.1;
-                racerScoreEl.textContent = Math.floor(racerScore);
+            loadCarImages(); // Preload images as soon as script runs
+
+            function openCarRacerModal() {
+                carRacerModal.classList.remove('invisible', 'opacity-0');
+                carRacerCanvas.width = carRacerCanvas.parentElement.clientWidth;
+                carRacerCanvas.height = carRacerCanvas.parentElement.clientHeight;
+                showCarRacerStartScreen();
+            }
+            function closeCarRacerModal() {
+                carRacerModal.classList.add('invisible', 'opacity-0');
+                stopCarRacerGame();
+            }
+            function showCarRacerStartScreen() {
+                carRacerStartScreen.style.display = 'flex';
+                carRacerInGameUI.style.display = 'none';
+                carRacerGameOverScreen.style.display = 'none';
+            }
+            function startCarRacerGame() {
+                if (!imagesLoaded) {
+                    carRacerStartButton.textContent = "Loading...";
+                    setTimeout(startCarRacerGame, 200);
+                    return;
+                }
+                carRacerStartButton.textContent = "Start Race";
+
+                stopCarRacerGame();
+                carRacerRunning = true;
+                carRacerScore = 0;
+                playerCar = { x: carRacerCanvas.width / 2 - 20, y: carRacerCanvas.height - 100, width: 40, height: 70, speed: 7, img: playerCarImg };
+                obstacles = [];
+                roadLines = [];
+                // pre-populate some obstacles far away
+                for (let i = 0; i < 5; i++) {
+                    spawnObstacle(true);
+                }
+                for (let i = 0; i < 5; i++) {
+                    roadLines.push({ y: i * (carRacerCanvas.height / 4) });
+                }
+                carRacerStartScreen.style.display = 'none';
+                carRacerGameOverScreen.style.display = 'none';
+                carRacerInGameUI.style.display = 'block';
+                gameLoopCarRacer();
+            }
+            function stopCarRacerGame() {
+                carRacerRunning = false;
+                if (carRacerAnimationId) {
+                    cancelAnimationFrame(carRacerAnimationId);
+                    carRacerAnimationId = null;
+                }
+            }
+            async function endCarRacerGame() {
+                stopCarRacerGame();
+                const finalCarRacerScore = Math.floor(carRacerScore);
+                carRacerFinalScoreEl.textContent = finalCarRacerScore;
+                await saveHighScore('Car Racer', finalCarRacerScore);
+                carRacerGameOverScreen.style.display = 'flex';
+                carRacerInGameUI.style.display = 'none';
+            }
+            function spawnObstacle(isInitial = false) {
+                const obsWidth = 40;
+                const obsHeight = 70;
+                const lastObstacleY = obstacles.length > 0 ? obstacles[obstacles.length - 1].y : -200;
+                const newY = isInitial ? lastObstacleY - (Math.random() * 400 + 400) : lastObstacleY - (Math.random() * 200 + 300);
+
+                let speed;
+                if (Math.random() < 0.2) { 
+                    speed = 6 + Math.random() * 2 + (carRacerScore / 50); // Faster car
+                } else {
+                    speed = 3 + Math.random() * 2 + (carRacerScore / 50); // Normal car
+                }
+
+                const randomImg = obstacleCarImgs[Math.floor(Math.random() * obstacleCarImgs.length)];
+
+                obstacles.push({ 
+                    x: Math.random() * (carRacerCanvas.width - obsWidth), 
+                    y: newY, 
+                    width: obsWidth, 
+                    height: obsHeight, 
+                    speed: speed,
+                    img: randomImg
+                });
+            }
+            function updateCarRacer() {
+                if (!carRacerRunning) return;
+                carRacerScore += 0.1;
+                carRacerScoreEl.textContent = Math.floor(carRacerScore);
                 if (keys.ArrowLeft && playerCar.x > 0) playerCar.x -= playerCar.speed;
-                if (keys.ArrowRight && playerCar.x < racerCanvas.width - playerCar.width) playerCar.x += playerCar.speed;
-                roadLines.forEach(line => { line.y += 4; if (line.y > racerCanvas.height) line.y = -40; });
+                if (keys.ArrowRight && playerCar.x < carRacerCanvas.width - playerCar.width) playerCar.x += playerCar.speed;
+                roadLines.forEach(line => { line.y += 6; if (line.y > carRacerCanvas.height) line.y = -40; });
+                
                 obstacles.forEach((obs, index) => {
                     obs.y += obs.speed;
-                    if (obs.y > racerCanvas.height) {
+                    if (obs.y > carRacerCanvas.height) {
                         obstacles.splice(index, 1);
                         spawnObstacle();
                     }
                     if (playerCar.x < obs.x + obs.width && playerCar.x + playerCar.width > obs.x && playerCar.y < obs.y + obs.height && playerCar.y + playerCar.height > obs.y) {
-                        endRacerGame();
+                        endCarRacerGame();
                     }
                 });
             }
-            function draw() {
-                racerCtx.fillStyle = '#374151';
-                racerCtx.fillRect(0, 0, racerCanvas.width, racerCanvas.height);
-                racerCtx.fillStyle = '#6b7280';
-                const laneWidth = racerCanvas.width / 3;
+            function drawCarRacer() {
+                carRacerCtx.fillStyle = '#374151';
+                carRacerCtx.fillRect(0, 0, carRacerCanvas.width, carRacerCanvas.height);
+                carRacerCtx.fillStyle = '#6b7280';
+                const laneWidth = carRacerCanvas.width / 3;
                 roadLines.forEach(line => {
-                    racerCtx.fillRect(laneWidth - 5, line.y, 10, 40);
-                    racerCtx.fillRect(laneWidth * 2 - 5, line.y, 10, 40);
+                    carRacerCtx.fillRect(laneWidth - 5, line.y, 10, 40);
+                    carRacerCtx.fillRect(laneWidth * 2 - 5, line.y, 10, 40);
                 });
-                racerCtx.fillStyle = '#ec4899';
-                racerCtx.fillRect(playerCar.x, playerCar.y, playerCar.width, playerCar.height);
+                
+                if (playerCar && playerCar.img) {
+                    carRacerCtx.drawImage(playerCar.img, playerCar.x, playerCar.y, playerCar.width, playerCar.height);
+                }
+                
                 obstacles.forEach(obs => {
-                    racerCtx.fillStyle = obs.color;
-                    racerCtx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                    if (obs.img) {
+                        carRacerCtx.drawImage(obs.img, obs.x, obs.y, obs.width, obs.height);
+                    }
                 });
             }
-            function gameLoop() {
-                update();
-                draw();
-                if (racerRunning) {
-                    animationFrameId = requestAnimationFrame(gameLoop);
+            function gameLoopCarRacer() {
+                updateCarRacer();
+                drawCarRacer();
+                if (carRacerRunning) {
+                    carRacerAnimationId = requestAnimationFrame(gameLoopCarRacer);
                 }
             }
-            playRacerBtn.addEventListener('click', openRacerModal);
-            closeRacerBtn.addEventListener('click', closeRacerModal);
-            racerStartButton.addEventListener('click', startRacerGame);
-            racerRestartButton.addEventListener('click', startRacerGame);
-            shareRacerScoreBtn.addEventListener('click', () => {
-                shareScore('Pixel Racer', Math.floor(racerScore), 'points');
+            playCarRacerBtn.addEventListener('click', openCarRacerModal);
+            closeCarRacerBtn.addEventListener('click', closeCarRacerModal);
+            carRacerStartButton.addEventListener('click', startCarRacerGame);
+            carRacerRestartButton.addEventListener('click', startCarRacerGame);
+            shareCarRacerScoreBtn.addEventListener('click', () => {
+                shareScore('Car Racer', Math.floor(carRacerScore), 'points');
             });
             window.addEventListener('keydown', (e) => {
-                if (racerModal.classList.contains('invisible')) return;
+                if (carRacerModal.classList.contains('invisible')) return;
                 if (e.key in keys) { e.preventDefault(); keys[e.key] = true; }
             });
             window.addEventListener('keyup', (e) => {
-                if (racerModal.classList.contains('invisible')) return;
+                if (carRacerModal.classList.contains('invisible')) return;
                 if (e.key in keys) { e.preventDefault(); keys[e.key] = false; }
             });
             function handleTouch(e) {
-                if (racerModal.classList.contains('invisible') || !racerRunning) return;
+                if (carRacerModal.classList.contains('invisible') || !carRacerRunning) return;
                 e.preventDefault();
                 const touchX = e.touches[0].clientX;
-                const racerCanvasRect = racerCanvas.getBoundingClientRect();
-                let targetX = touchX - racerCanvasRect.left - (playerCar.width / 2);
+                const carRacerCanvasRect = carRacerCanvas.getBoundingClientRect();
+                let targetX = touchX - carRacerCanvasRect.left - (playerCar.width / 2);
                 if (targetX < 0) targetX = 0;
-                if (targetX > racerCanvas.width - playerCar.width) targetX = racerCanvas.width - playerCar.width;
+                if (targetX > carRacerCanvas.width - playerCar.width) targetX = carRacerCanvas.width - playerCar.width;
                 playerCar.x = targetX;
             }
-            racerCanvas.addEventListener('touchstart', handleTouch, { passive: false });
-            racerCanvas.addEventListener('touchmove', handleTouch, { passive: false });
+            carRacerCanvas.addEventListener('touchstart', handleTouch, { passive: false });
+            carRacerCanvas.addEventListener('touchmove', handleTouch, { passive: false });
+
 
             // #############################################
             // ### TOWER DEFENSE (2D GAME) CODE          ###
@@ -1281,7 +1305,7 @@
             function openTDModal() {
                 tdModal.classList.remove('invisible', 'opacity-0');
                 setupTDGrid();
-                tdStartScreen.style.display = 'block';
+                tdStartScreen.style.display = 'flex';
                 tdInGameUI.style.display = 'none';
                 tdGameOverScreen.style.display = 'none';
             }
@@ -1291,9 +1315,18 @@
             }
             function setupTDGrid() {
                 const parent = tdCanvas.parentElement;
-                const size = Math.min(parent.clientWidth, parent.clientHeight);
-                tdCanvas.width = size;
-                tdCanvas.height = size * (GRID_ROWS / GRID_COLS);
+                const parentWidth = parent.clientWidth;
+                const parentHeight = parent.clientHeight;
+                
+                // Maintain 4:3 aspect ratio
+                tdCanvas.width = parentWidth;
+                tdCanvas.height = parentWidth * (GRID_ROWS / GRID_COLS);
+
+                if (tdCanvas.height > parentHeight) {
+                    tdCanvas.height = parentHeight;
+                    tdCanvas.width = parentHeight * (GRID_COLS / GRID_ROWS);
+                }
+
                 TILE_SIZE = tdCanvas.width / GRID_COLS;
                 grid = [];
                 for (let y = 0; y < GRID_ROWS; y++) { grid.push(Array(GRID_COLS).fill(0)); }
@@ -1358,7 +1391,10 @@
                         enemies.splice(i, 1);
                         health--;
                         updateTDUI();
-                        if (health <= 0) endGameTD(false);
+                        if (health <= 0) {
+                            endGameTD(false);
+                            return; // Exit loop to avoid further processing
+                        }
                     } else if (e.health <= 0) {
                         enemies.splice(i, 1);
                         gold += 10;
@@ -1371,13 +1407,18 @@
                 if (waveInProgress && enemies.length === 0) {
                     waveInProgress = false;
                     nextWaveButton.style.display = 'block';
-                    if (wave >= 10) endGameTD(true);
+                    if (wave >= 50) { // Let's set a win condition
+                        endGameTD(true); 
+                        return;
+                    }
                 }
                 if (selectedTower) drawPlacementPreview();
                 requestAnimationFrame(gameLoopTD);
             }
             function drawTDGrid() {
-                tdCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                tdCtx.fillStyle = '#1e293b'; // Darker grass color
+                tdCtx.fillRect(0,0, tdCanvas.width, tdCanvas.height);
+                tdCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
                 for (let i = 0; i < GRID_COLS; i++) {
                     tdCtx.beginPath();
                     tdCtx.moveTo(i * TILE_SIZE, 0);
@@ -1392,7 +1433,7 @@
                 }
             }
             function drawTDPath() {
-                tdCtx.fillStyle = '#374151';
+                tdCtx.fillStyle = '#475569';
                 for(let y=0; y < grid.length; y++) {
                     for(let x=0; x < grid[y].length; x++) {
                         if(grid[y][x] === 1) {
@@ -1411,7 +1452,8 @@
             }
             function updateEnemy(enemy) {
                 if (enemy.pathIndex >= pathCoords.length - 1) {
-                    return 'finished';
+                    // Check if passed the final point
+                     if (enemy.x > tdCanvas.width) return 'finished';
                 }
                 const endPoint = pathCoords[enemy.pathIndex + 1];
                 const targetX = endPoint.x * TILE_SIZE;
@@ -1421,10 +1463,21 @@
                 const distance = Math.sqrt(dx*dx + dy*dy);
                 if (distance < enemy.speed) {
                     enemy.pathIndex++;
+                    if (enemy.pathIndex >= pathCoords.length -1) {
+                        // Handle final straight path to exit
+                        const finalTargetX = (pathCoords[pathCoords.length-1].x +1) * TILE_SIZE;
+                        const finalDx = finalTargetX - enemy.x;
+                        const finalDy = 0;
+                        const finalDist = Math.sqrt(finalDx*finalDx + finalDy*finalDy);
+                        enemy.x += (finalDx / finalDist) * enemy.speed;
+                        enemy.y += (finalDy / finalDist) * enemy.speed;
+
+                    }
                 } else {
                     enemy.x += (dx / distance) * enemy.speed;
                     enemy.y += (dy / distance) * enemy.speed;
                 }
+                 if (enemy.x > tdCanvas.width) return 'finished';
                 return 'alive';
             }
             function createTower(gridX, gridY) {
@@ -1532,7 +1585,7 @@
                 shareScore('Tower Defense', wave, 'waves');
             });
             nextWaveButton.addEventListener('click', startNextWave);
-            buyTurretButton.addEventListener('click', () => { if (gold >= 100) selectedTower = 'turret'; });
+            buyTurretButton.addEventListener('click', () => { if (gold >= 100) selectedTower = 'turret'; else selectedTower = null;});
             tdCanvas.addEventListener('mousemove', e => { mousePos = getMousePos(tdCanvas, e); });
             tdCanvas.addEventListener('touchmove', e => { mousePos = getMousePos(tdCanvas, e); });
             tdCanvas.addEventListener('click', handleCanvasClick);
@@ -1788,9 +1841,9 @@
                     if (matchedPairs === cardSymbols.length) {
                        await saveHighScore('Memory Match', moves, 'asc');
                        memoryFinalMovesEl.textContent = moves;
-                       setTimeout(() => {
-                           memoryMatchWinModal.classList.remove('hidden');
-                       }, 500);
+                        setTimeout(() => {
+                            memoryMatchWinModal.classList.remove('hidden');
+                        }, 500);
                     }
                 }
                 
@@ -1826,9 +1879,9 @@
                 camera.aspect = gameContainer.clientWidth / gameContainer.clientHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize(gameContainer.clientWidth, gameContainer.clientHeight);
-                if(racerCanvas) {
-                    racerCanvas.width = racerCanvas.parentElement.clientWidth;
-                    racerCanvas.height = racerCanvas.parentElement.clientHeight;
+                if(carRacerCanvas) {
+                    carRacerCanvas.width = carRacerCanvas.parentElement.clientWidth;
+                    carRacerCanvas.height = carRacerCanvas.parentElement.clientHeight;
                 }
                 if(tdCanvas) {
                     setupTDGrid();
