@@ -81,8 +81,14 @@
                 </div>
                 <!-- Scoreboard -->
                 <div id="scoreboard" class="flex justify-around text-center mb-2">
-                    <div id="player1-score-box" class="p-2 rounded-lg transition-all duration-300"><p id="player1-name" class="text-lg font-bold text-pink-500">Player 1</p></div>
-                    <div id="player2-score-box" class="p-2 rounded-lg transition-all duration-300"><p id="player2-name" class="text-lg font-bold text-sky-500">Player 2</p></div>
+                    <div id="player1-score-box" class="p-2 rounded-lg transition-all duration-300">
+                        <p id="player1-name" class="text-lg font-bold text-pink-500">Player 1</p>
+                        <p id="player1-score" class="text-2xl font-bold text-white">0</p>
+                    </div>
+                    <div id="player2-score-box" class="p-2 rounded-lg transition-all duration-300">
+                        <p id="player2-name" class="text-lg font-bold text-sky-500">Player 2</p>
+                        <p id="player2-score" class="text-2xl font-bold text-white">0</p>
+                    </div>
                 </div>
                  <!-- Status Display -->
                 <div id="status" class="text-center text-xl font-semibold text-gray-400 mb-2 h-8 flex items-center justify-center"></div>
@@ -139,6 +145,7 @@
         const gameIdInput = document.getElementById('game-id-input'), userIdDisplay = document.getElementById('user-id-display');
         const gameIdDisplay = document.getElementById('game-id-display'), statusDisplay = document.getElementById('status');
         const player1Name = document.getElementById('player1-name'), player2Name = document.getElementById('player2-name');
+        const player1Score = document.getElementById('player1-score'), player2Score = document.getElementById('player2-score');
         const gameCanvas = document.getElementById('game-canvas'), ctx = gameCanvas.getContext('2d');
         const chatMessages = document.getElementById('chat-messages'), chatInput = document.getElementById('chat-input'), sendChatBtn = document.getElementById('send-chat-btn');
         const messageModal = document.getElementById('message-modal'), messageText = document.getElementById('message-text'), closeModalBtn = document.getElementById('close-modal-btn');
@@ -153,19 +160,24 @@
         const keys = { ArrowLeft: false, ArrowRight: false };
         let lastUpdateTime = 0;
         const UPDATE_INTERVAL = 50; // ms - send updates 20 times per second
+        let lastScoreUpdateTime = 0;
 
         // --- IMAGE LOADING ---
         const carImages = {};
-        let imagesToLoad = 2;
+        let imagesToLoad = 3; // UPDATED: Now loading 3 images
         function imageLoaded() {
             imagesToLoad--;
         }
         carImages.player1 = new Image();
         carImages.player1.src = 'https://i.ibb.co/9vqd9fV/player-car.png';
         carImages.player1.onload = imageLoaded;
-        carImages.obstacle = new Image();
-        carImages.obstacle.src = 'https://i.ibb.co/0V7j7dF/obstacle-car.png';
-        carImages.obstacle.onload = imageLoaded;
+        carImages.obstacle1 = new Image();
+        carImages.obstacle1.src = 'https://i.ibb.co/0V7j7dF/obstacle-car.png';
+        carImages.obstacle1.onload = imageLoaded;
+        carImages.obstacle2 = new Image(); // NEW: Second obstacle car image
+        carImages.obstacle2.src = 'https://i.ibb.co/L8DDd7z/obstacle-car-2.png';
+        carImages.obstacle2.onload = imageLoaded;
+        const obstacleCarImgs = [carImages.obstacle1, carImages.obstacle2];
 
 
         // --- Handle game ID from URL on page load ---
@@ -210,9 +222,9 @@
                 hostId: currentUser.uid,
                 playerIds: [currentUser.uid],
                 players: {
-                    [currentUser.uid]: { name: currentUser.displayName, x: gameCanvas.width * 0.25, crashed: false, role: 'P1' }
+                    [currentUser.uid]: { name: currentUser.displayName, x: gameCanvas.width * 0.25, crashed: false, role: 'P1', score: 0 }
                 },
-                obstacles: generateObstacles(50), // Generate initial batch
+                obstacles: generateObstacles(50),
                 status: 'waiting',
                 rematch: {}
             });
@@ -230,7 +242,7 @@
                 if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUser.uid)) {
                     await updateDoc(gameRef, {
                         playerIds: [...gameData.playerIds, currentUser.uid],
-                        [`players.${currentUser.uid}`]: { name: currentUser.displayName, x: gameCanvas.width * 0.75, crashed: false, role: 'P2' },
+                        [`players.${currentUser.uid}`]: { name: currentUser.displayName, x: gameCanvas.width * 0.75, crashed: false, role: 'P2', score: 0 },
                         status: 'active'
                     });
                     switchToGameView(gameId, 'P2');
@@ -265,12 +277,11 @@
             const newRematchState = { ...gameData.rematch, [currentUser.uid]: true };
             
             if (Object.keys(newRematchState).length === 2) {
-                // Both players want to rematch
                 await updateDoc(gameRef, {
                     obstacles: generateObstacles(50),
                     players: {
-                        [gameData.playerIds[0]]: { ...gameData.players[gameData.playerIds[0]], x: gameCanvas.width * 0.25, crashed: false },
-                        [gameData.playerIds[1]]: { ...gameData.players[gameData.playerIds[1]], x: gameCanvas.width * 0.75, crashed: false }
+                        [gameData.playerIds[0]]: { ...gameData.players[gameData.playerIds[0]], x: gameCanvas.width * 0.25, crashed: false, score: 0 },
+                        [gameData.playerIds[1]]: { ...gameData.players[gameData.playerIds[1]], x: gameCanvas.width * 0.75, crashed: false, score: 0 }
                     },
                     status: 'active',
                     rematch: {}
@@ -300,7 +311,7 @@
                 if (gameData) {
                     localGameState = gameData;
                     if (!animationFrameId) {
-                       gameLoop(); // Start the game loop if it's not already running
+                       gameLoop();
                     }
                 } else {
                     showMessage("The game session has ended.");
@@ -348,14 +359,14 @@
         
         function generateObstacles(count, startY = -100) {
             const obstacles = [];
-            const lanes = [0.15, 0.5, 0.85]; // Relative X positions for 3 lanes
             let lastY = startY;
             for (let i = 0; i < count; i++) {
                  const y = lastY - (200 + Math.random() * 200);
                  obstacles.push({
-                    x: lanes[Math.floor(Math.random() * lanes.length)],
+                    x: Math.random() * 0.9 + 0.05, // Random position between 5% and 95% of screen width
                     y: y,
                     speed: 3 + Math.random() * 2,
+                    imgIndex: Math.floor(Math.random() * obstacleCarImgs.length) // Assign a random image
                 });
                 lastY = y;
             }
@@ -375,14 +386,28 @@
             roadLines.forEach(line => { line.y += roadSpeed; if (line.y > gameCanvas.height) line.y = -40; });
             localGameState.obstacles.forEach(obs => obs.y += obs.speed);
 
-            // Host player generates new obstacles when needed
-            if (playerRole === 'P1' && localGameState.obstacles.length > 0) {
-                const lastObstacle = localGameState.obstacles[localGameState.obstacles.length - 1];
-                if (lastObstacle.y > -200) { // When the last obstacle is getting close to the screen
-                    const newObstacles = generateObstacles(20, lastObstacle.y);
-                    updateDoc(doc(db, "mp-car-race", currentGameId), {
-                        obstacles: arrayUnion(...newObstacles)
-                    });
+            // Host player generates new obstacles and updates score
+            if (playerRole === 'P1') {
+                // Generate new obstacles
+                if (localGameState.obstacles.length > 0) {
+                    const lastObstacle = localGameState.obstacles[localGameState.obstacles.length - 1];
+                    if (lastObstacle.y > -200) {
+                        const newObstacles = generateObstacles(20, lastObstacle.y);
+                        updateDoc(doc(db, "mp-car-race", currentGameId), { obstacles: arrayUnion(...newObstacles) });
+                    }
+                }
+                // Update scores every second
+                if (now - lastScoreUpdateTime > 1000) {
+                    lastScoreUpdateTime = now;
+                    let scoreUpdates = {};
+                    for (const uid in localGameState.players) {
+                        if (!localGameState.players[uid].crashed) {
+                            scoreUpdates[`players.${uid}.score`] = (localGameState.players[uid].score || 0) + 10;
+                        }
+                    }
+                    if (Object.keys(scoreUpdates).length > 0) {
+                        updateDoc(doc(db, "mp-car-race", currentGameId), scoreUpdates);
+                    }
                 }
             }
 
@@ -403,7 +428,7 @@
                 }
             }
 
-            // Throttle Firestore updates
+            // Throttle Firestore updates for position
             if (currentX !== myPlayerState.x && now - lastUpdateTime > UPDATE_INTERVAL) {
                 lastUpdateTime = now;
                 updateDoc(doc(db, "mp-car-race", currentGameId), { [`players.${currentUser.uid}.x`]: currentX });
@@ -411,7 +436,7 @@
         }
 
         function draw() {
-            ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height); // Clear canvas
+            ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
             // Draw road lines
             ctx.fillStyle = '#6b7280';
@@ -427,13 +452,14 @@
             localGameState.obstacles.forEach(obs => {
                 const carWidth = 40;
                 const carHeight = 60;
-                ctx.drawImage(carImages.obstacle, obs.x * gameCanvas.width - carWidth / 2, obs.y, carWidth, carHeight);
+                const img = obstacleCarImgs[obs.imgIndex];
+                ctx.drawImage(img, obs.x * gameCanvas.width - carWidth / 2, obs.y, carWidth, carHeight);
             });
             
             // Draw player cars
             for (const uid in localGameState.players) {
                 const player = localGameState.players[uid];
-                const carImg = player.role === 'P1' ? carImages.player1 : carImages.player1; // Could use different images later
+                const carImg = player.role === 'P1' ? carImages.player1 : carImages.player1;
                 if (player.crashed) ctx.globalAlpha = 0.4;
                 ctx.drawImage(carImg, player.x, gameCanvas.height - 100, 40, 60);
                 ctx.globalAlpha = 1.0;
@@ -447,10 +473,23 @@
             const p1 = playerStates.find(p => p.role === 'P1');
             const p2 = playerStates.find(p => p.role === 'P2');
             
-            player1Name.textContent = p1 ? p1.name.split(' ')[0] : 'Waiting...';
-            player1Name.classList.toggle('crashed', p1?.crashed);
-            player2Name.textContent = p2 ? p2.name.split(' ')[0] : 'Waiting...';
-            player2Name.classList.toggle('crashed', p2?.crashed);
+            if (p1) {
+                player1Name.textContent = p1.name.split(' ')[0];
+                player1Name.classList.toggle('crashed', p1.crashed);
+                player1Score.textContent = p1.score || 0;
+            } else {
+                player1Name.textContent = 'Waiting...';
+                player1Score.textContent = 0;
+            }
+
+            if (p2) {
+                player2Name.textContent = p2.name.split(' ')[0];
+                player2Name.classList.toggle('crashed', p2.crashed);
+                player2Score.textContent = p2.score || 0;
+            } else {
+                 player2Name.textContent = 'Waiting...';
+                 player2Score.textContent = 0;
+            }
 
             rematchBtn.classList.add('hidden');
             if (localGameState.status === 'finished') {
@@ -502,7 +541,6 @@
                 lastUpdateTime = now;
                 updateDoc(doc(db, "mp-car-race", currentGameId), { [`players.${currentUser.uid}.x`]: targetX });
             } else {
-                // For local smoothness, we can update the local state immediately
                 localGameState.players[currentUser.uid].x = targetX;
             }
         }
