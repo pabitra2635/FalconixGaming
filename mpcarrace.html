@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Multiplayer Pixel Racer</title>
+    <title>Multiplayer Car Racer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
@@ -26,6 +26,7 @@
 </head>
 <body class="bg-gray-900 text-gray-50 flex flex-col min-h-screen">
 
+    <!-- Header -->
     <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
         <nav class="w-full max-w-7xl mx-auto px-4 lg:px-8">
             <div class="flex items-center justify-between h-16">
@@ -39,20 +40,24 @@
         </nav>
     </header>
 
+    <!-- Main Content -->
     <main class="flex items-center justify-center flex-grow w-full px-4">
         <div id="main-container" class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md my-8 border border-gray-700">
 
+            <!-- Loading View -->
             <div id="loading-view" class="text-center">
                 <h1 class="text-4xl font-bold text-gray-100 mb-4">Checking Login Status...</h1>
                 <p class="text-gray-400">Please wait.</p>
             </div>
 
+            <!-- Auth View -->
             <div id="auth-view" class="text-center hidden">
                 <h1 class="text-4xl font-bold text-gray-100 mb-4">Welcome Racer!</h1>
                 <p class="text-gray-400 mb-6">Please log in on the main page to play multiplayer.</p>
                 <a href="index.html?login=true" class="btn-primary w-full inline-block">Go to Login</a>
             </div>
 
+            <!-- Lobby View -->
             <div id="lobby-view" class="hidden">
                 <h1 class="text-4xl text-center font-bold text-gray-100 mb-6">Multiplayer Racer</h1>
                 <div class="space-y-4">
@@ -61,18 +66,32 @@
                     <input type="text" id="game-id-input" placeholder="Enter Game ID to Join" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-400">
                     <button id="join-game-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700">Join Game</button>
                 </div>
+                <div class="text-center mt-6 text-xs text-gray-500"><p>Your User ID: <span id="user-id-display" class="font-mono"></span></p></div>
             </div>
 
+            <!-- Game View -->
             <div id="game-view" class="hidden w-full">
-                <div id="status" class="text-center text-xl font-semibold text-gray-400 mb-2 h-8 flex items-center justify-center"></div>
+                 <!-- Game ID and Share Button -->
+                <div class="text-center mb-4 flex justify-center items-center gap-4">
+                    <p class="text-sm text-gray-400">Game ID: <span id="game-id-display" class="font-mono cursor-pointer" title="Click to copy"></span></p>
+                    <button id="share-game-btn" class="bg-indigo-500 text-white text-xs font-bold py-1 px-3 rounded-lg hover:bg-indigo-600 transition-all hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" /></svg>
+                        Share
+                    </button>
+                </div>
+                <!-- Scoreboard -->
                 <div id="scoreboard" class="flex justify-around text-center mb-2">
                     <div id="player1-score-box" class="p-2 rounded-lg transition-all duration-300"><p id="player1-name" class="text-lg font-bold text-pink-500">Player 1</p></div>
                     <div id="player2-score-box" class="p-2 rounded-lg transition-all duration-300"><p id="player2-name" class="text-lg font-bold text-sky-500">Player 2</p></div>
                 </div>
+                 <!-- Status Display -->
+                <div id="status" class="text-center text-xl font-semibold text-gray-400 mb-2 h-8 flex items-center justify-center"></div>
+                <!-- Game Canvas -->
                 <div class="relative w-full aspect-[3/4] mb-4">
                      <canvas id="game-canvas" class="rounded-lg w-full h-full"></canvas>
                 </div>
-                 <div id="chat-box" class="mb-4">
+                 <!-- Chat Box -->
+                <div id="chat-box" class="mb-4">
                     <div id="chat-messages" class="bg-gray-900 rounded-lg p-2 overflow-y-auto border border-gray-600"></div>
                     <div class="flex mt-2">
                         <input type="text" id="chat-input" placeholder="Type a message..." class="flex-grow p-2 bg-gray-700 border border-gray-600 rounded-l-lg text-white focus:outline-none focus:ring-2 focus:ring-sky-400">
@@ -84,7 +103,8 @@
                     <button id="leave-game-btn" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700">Leave Game</button>
                 </div>
             </div>
-             <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"><div class="bg-gray-800 p-6 rounded-lg shadow-xl text-center max-w-sm"><p id="message-text" class="text-lg mb-4"></p><button id="close-modal-btn" class="btn-primary">Close</button></div></div>
+             <!-- Message Modal -->
+            <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"><div class="bg-gray-800 p-6 rounded-lg shadow-xl text-center max-w-sm"><p id="message-text" class="text-lg mb-4"></p><button id="close-modal-btn" class="btn-primary">Close</button></div></div>
         </div>
     </main>
 
@@ -116,21 +136,31 @@
         const userInfoHeader = document.getElementById('user-info-header'), userDisplayName = document.getElementById('user-display-name');
         const createGameBtn = document.getElementById('create-game-btn'), joinGameBtn = document.getElementById('join-game-btn');
         const leaveGameBtn = document.getElementById('leave-game-btn'), rematchBtn = document.getElementById('rematch-btn');
-        const gameIdInput = document.getElementById('game-id-input');
-        const statusDisplay = document.getElementById('status');
+        const gameIdInput = document.getElementById('game-id-input'), userIdDisplay = document.getElementById('user-id-display');
+        const gameIdDisplay = document.getElementById('game-id-display'), statusDisplay = document.getElementById('status');
         const player1Name = document.getElementById('player1-name'), player2Name = document.getElementById('player2-name');
         const gameCanvas = document.getElementById('game-canvas'), ctx = gameCanvas.getContext('2d');
         const chatMessages = document.getElementById('chat-messages'), chatInput = document.getElementById('chat-input'), sendChatBtn = document.getElementById('send-chat-btn');
         const messageModal = document.getElementById('message-modal'), messageText = document.getElementById('message-text'), closeModalBtn = document.getElementById('close-modal-btn');
+        const shareGameBtn = document.getElementById('share-game-btn');
         
         // --- GAME STATE & CONSTANTS ---
         let currentUser = null, currentGameId = null, playerRole = null;
         let unsubscribeGame = null, unsubscribeChat = null;
         let animationFrameId = null;
         let localGameState = {}; // Holds the game state from Firestore
-        let localPlayerCar = {};
         let roadLines = [];
         const keys = { ArrowLeft: false, ArrowRight: false };
+
+        // --- Handle game ID from URL on page load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameIdFromUrl = urlParams.get('gameId');
+            if (gameIdFromUrl) {
+                gameIdInput.value = gameIdFromUrl;
+                showMessage(`Ready to join game ${gameIdFromUrl}. Click "Join Game" when you're logged in!`);
+            }
+        });
 
         // --- AUTHENTICATION FLOW ---
         onAuthStateChanged(auth, user => {
@@ -138,6 +168,7 @@
             loadingView.classList.add('hidden'); 
             if (user) {
                 userDisplayName.textContent = user.displayName;
+                userIdDisplay.textContent = user.uid;
                 userInfoHeader.classList.remove('hidden');
                 authView.classList.add('hidden');
                 if (gameView.classList.contains('hidden')) { 
@@ -236,10 +267,12 @@
         function switchToGameView(gameId, role) {
             currentGameId = gameId; 
             playerRole = role;
+            gameIdDisplay.textContent = gameId;
             mainContainer.classList.remove('max-w-md');
             mainContainer.classList.add('max-w-2xl');
             lobbyView.classList.add('hidden');
             gameView.classList.remove('hidden');
+            shareGameBtn.classList.remove('hidden');
             
             resizeCanvas();
             initRoadLines();
@@ -279,6 +312,7 @@
             if(currentUser) lobbyView.classList.remove('hidden');
             else authView.classList.remove('hidden');
             gameIdInput.value = '';
+            shareGameBtn.classList.add('hidden');
         }
 
         // --- CANVAS & GAME LOGIC ---
@@ -367,7 +401,6 @@
             // Draw player cars
             for (const uid in localGameState.players) {
                 const player = localGameState.players[uid];
-                const isMe = uid === currentUser.uid;
                 ctx.fillStyle = player.role === 'P1' ? '#ec4899' : '#38bdf8'; // pink or sky blue
                 if (player.crashed) ctx.globalAlpha = 0.4;
                 ctx.fillRect(player.x, gameCanvas.height - 100, 40, 60);
@@ -397,8 +430,7 @@
             } else if (localGameState.status === 'waiting') {
                 statusDisplay.textContent = 'Waiting for Player 2...';
             } else if (localGameState.status === 'active') {
-                statusDisplay.innerHTML = `Game On! <span class="text-sm font-mono text-gray-500 cursor-pointer" title="Click to copy Game ID" id="copy-game-id">${currentGameId}</span>`;
-                document.getElementById('copy-game-id').onclick = () => navigator.clipboard.writeText(currentGameId).then(() => showMessage("Game ID copied!"));
+                statusDisplay.textContent = "Game On!";
             } else if (localGameState.status === 'abandoned') {
                  showMessage("Your opponent left the game.");
                  setTimeout(() => leaveGameBtn.click(), 2000);
@@ -449,7 +481,30 @@
         
         function showMessage(msg) { messageText.textContent = msg; messageModal.classList.remove('hidden'); }
         closeModalBtn.onclick = () => messageModal.classList.add('hidden');
+        gameIdDisplay.onclick = () => navigator.clipboard.writeText(currentGameId).then(() => showMessage("Game ID copied!"));
+
+        shareGameBtn.onclick = async () => {
+            if (!currentGameId) return;
+            const shareUrl = `${window.location.origin}${window.location.pathname.replace('index.html', 'mpcarrace.html')}?gameId=${currentGameId}`;
+            const shareText = `I challenge you to a race on FalconixGaming! 🏎️💨\n\nJoin my game with this code: ${currentGameId}\n\nOr click the link to join directly:`;
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'FalconixGaming Car Race Challenge',
+                        text: shareText,
+                        url: shareUrl,
+                    });
+                } catch (error) {
+                    console.error('Error sharing:', error);
+                    showMessage('Sharing was cancelled or failed.');
+                }
+            } else {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showMessage('Share feature not supported. Game link copied to clipboard!');
+                });
+            }
+        };
 
     </script>
 </body>
-</html>
+</ht
