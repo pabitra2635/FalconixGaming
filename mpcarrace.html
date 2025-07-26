@@ -105,6 +105,7 @@
                     </div>
                 </div>
                 <div class="space-y-2">
+                    <button id="start-game-btn" class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 hidden">Start Game</button>
                     <button id="rematch-btn" class="w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 hidden">Request Rematch</button>
                     <button id="leave-game-btn" class="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700">Leave Game</button>
                 </div>
@@ -141,7 +142,7 @@
         const authView = document.getElementById('auth-view'), lobbyView = document.getElementById('lobby-view'), gameView = document.getElementById('game-view');
         const userInfoHeader = document.getElementById('user-info-header'), userDisplayName = document.getElementById('user-display-name');
         const createGameBtn = document.getElementById('create-game-btn'), joinGameBtn = document.getElementById('join-game-btn');
-        const leaveGameBtn = document.getElementById('leave-game-btn'), rematchBtn = document.getElementById('rematch-btn');
+        const leaveGameBtn = document.getElementById('leave-game-btn'), rematchBtn = document.getElementById('rematch-btn'), startGameBtn = document.getElementById('start-game-btn');
         const gameIdInput = document.getElementById('game-id-input'), userIdDisplay = document.getElementById('user-id-display');
         const gameIdDisplay = document.getElementById('game-id-display'), statusDisplay = document.getElementById('status');
         const player1Name = document.getElementById('player1-name'), player2Name = document.getElementById('player2-name');
@@ -246,8 +247,8 @@
                 if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUser.uid)) {
                     await updateDoc(gameRef, {
                         playerIds: [...gameData.playerIds, currentUser.uid],
-                        [`players.${currentUser.uid}`]: { name: currentUser.displayName, x: gameCanvas.width * 0.75, crashed: false, role: 'P2', score: 0, invincibleUntil: 0 },
-                        status: 'active'
+                        [`players.${currentUser.uid}`]: { name: currentUser.displayName, x: gameCanvas.width * 0.75, crashed: false, role: 'P2', score: 0, invincibleUntil: 0 }
+                        // Status remains 'waiting' until host starts
                     });
                     switchToGameView(gameId, 'P2');
                 } else if (gameData.playerIds.includes(currentUser.uid)) {
@@ -260,6 +261,13 @@
             }
         };
         
+        startGameBtn.onclick = async () => {
+             if (playerRole === 'P1' && currentGameId) {
+                const gameRef = doc(db, "mp-car-race", currentGameId);
+                await updateDoc(gameRef, { status: 'active' });
+            }
+        };
+
         leaveGameBtn.onclick = async () => {
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
@@ -393,11 +401,14 @@
             const now = Date.now();
             const roadSpeed = 4;
             roadLines.forEach(line => { line.y += roadSpeed; if (line.y > gameCanvas.height) line.y = -40; });
-            if (localGameState.obstacles) {
-                localGameState.obstacles.forEach(obs => obs.y += obs.speed);
-            }
-            if (localGameState.powerups) {
-                localGameState.powerups.forEach(p => p.y += p.speed);
+
+            if (localGameState.status === 'active') {
+                if (localGameState.obstacles) {
+                    localGameState.obstacles.forEach(obs => obs.y += obs.speed);
+                }
+                if (localGameState.powerups) {
+                    localGameState.powerups.forEach(p => p.y += p.speed);
+                }
             }
 
             const myPlayerState = localGameState.players[currentUser.uid];
@@ -555,6 +566,7 @@
                  player2Score.textContent = 0;
             }
 
+            startGameBtn.classList.add('hidden');
             rematchBtn.classList.add('hidden');
             if (localGameState.status === 'finished') {
                 const winner = playerStates.find(p => !p.crashed);
@@ -563,7 +575,16 @@
                 rematchBtn.disabled = localGameState.rematch[currentUser.uid];
                 rematchBtn.textContent = localGameState.rematch[currentUser.uid] ? 'Waiting for opponent...' : 'Request Rematch';
             } else if (localGameState.status === 'waiting') {
-                statusDisplay.textContent = 'Waiting for Player 2...';
+                if (localGameState.playerIds.length === 2) {
+                    if (playerRole === 'P1') {
+                        startGameBtn.classList.remove('hidden');
+                        statusDisplay.textContent = 'Ready! Press Start.';
+                    } else {
+                        statusDisplay.textContent = 'Waiting for host to start...';
+                    }
+                } else {
+                    statusDisplay.textContent = 'Waiting for Player 2...';
+                }
             } else if (localGameState.status === 'active') {
                 statusDisplay.textContent = "Game On!";
             } else if (localGameState.status === 'abandoned') {
