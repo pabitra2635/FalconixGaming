@@ -118,7 +118,7 @@
         // --- FIREBASE IMPORTS ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy, arrayUnion, arrayRemove, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // --- FIREBASE CONFIGURATION ---
         const firebaseConfig = {
@@ -160,12 +160,11 @@
         const keys = { ArrowLeft: false, ArrowRight: false };
         let lastUpdateTime = 0;
         const UPDATE_INTERVAL = 50; // ms - send updates 20 times per second
-        let lastScoreUpdateTime = 0;
         let pixelTrails = [];
 
         // --- IMAGE LOADING ---
         const gameImages = {};
-        let imagesToLoad = 4; // UPDATED: Now loading 4 images
+        let imagesToLoad = 4;
         function imageLoaded() {
             imagesToLoad--;
         }
@@ -178,7 +177,7 @@
         gameImages.obstacle2 = new Image();
         gameImages.obstacle2.src = 'https://i.ibb.co/L8DDd7z/obstacle-car-2.png';
         gameImages.obstacle2.onload = imageLoaded;
-        gameImages.powerup = new Image(); // NEW: Power-up shield image
+        gameImages.powerup = new Image();
         gameImages.powerup.src = 'https://i.ibb.co/PN11V3c/shield.png';
         gameImages.powerup.onload = imageLoaded;
         const obstacleCarImgs = [gameImages.obstacle1, gameImages.obstacle2];
@@ -286,8 +285,8 @@
                     obstacles: generateObstacles(50),
                     powerups: [],
                     players: {
-                        [gameData.playerIds[0]]: { ...gameData.players[gameData.playerIds[0]], x: gameCanvas.width * 0.25, crashed: false, score: 0, invincibleUntil: 0 },
-                        [gameData.playerIds[1]]: { ...gameData.players[gameData.playerIds[1]], x: gameCanvas.width * 0.75, crashed: false, score: 0, invincibleUntil: 0 }
+                        [gameData.playerIds[0]]: { ...gameData.players[gameData.playerIds[0]], x: gameCanvas.width * 0.25, crashed: false, invincibleUntil: 0 },
+                        [gameData.playerIds[1]]: { ...gameData.players[gameData.playerIds[1]], x: gameCanvas.width * 0.75, crashed: false, invincibleUntil: 0 }
                     },
                     status: 'active',
                     rematch: {}
@@ -406,7 +405,6 @@
 
             // Host player (P1) is responsible for game management
             if (playerRole === 'P1') {
-                // Generate new obstacles
                 if (localGameState.obstacles && localGameState.obstacles.length > 0) {
                     const lastObstacle = localGameState.obstacles[localGameState.obstacles.length - 1];
                     if (lastObstacle.y > -200) {
@@ -414,24 +412,9 @@
                         updateDoc(doc(db, "mp-car-race", currentGameId), { obstacles: arrayUnion(...newObstacles) });
                     }
                 }
-                // Generate new power-ups
                 if (localGameState.status === 'active' && (!localGameState.powerups || localGameState.powerups.length === 0)) {
-                    if (Math.random() < 0.005) { // Low chance each frame to spawn a powerup
+                    if (Math.random() < 0.005) {
                          updateDoc(doc(db, "mp-car-race", currentGameId), { powerups: arrayUnion(generatePowerup()) });
-                    }
-                }
-
-                // Update scores every second for active players
-                if (localGameState.status === 'active' && now - lastScoreUpdateTime > 1000) {
-                    lastScoreUpdateTime = now;
-                    let scoreUpdates = {};
-                    for (const uid in localGameState.players) {
-                        if (!localGameState.players[uid].crashed) {
-                            scoreUpdates[`players.${uid}.score`] = (localGameState.players[uid].score || 0) + 10;
-                        }
-                    }
-                    if (Object.keys(scoreUpdates).length > 0) {
-                        updateDoc(doc(db, "mp-car-race", currentGameId), scoreUpdates);
                     }
                 }
             }
@@ -465,12 +448,11 @@
                     const powerupSize = 30;
                     const powerupX = powerup.x * gameCanvas.width - powerupSize / 2;
                     if (currentX < powerupX + powerupSize && currentX + carWidth > powerupX && myCarY < powerup.y + powerupSize && myCarY + carHeight > powerup.y) {
-                        // Player collected the powerup
                         updateDoc(doc(db, "mp-car-race", currentGameId), {
-                            [`players.${currentUser.uid}.invincibleUntil`]: Date.now() + 5000, // 5 seconds of invincibility
-                            powerups: arrayRemove(powerup) // Remove the collected powerup
+                            [`players.${currentUser.uid}.invincibleUntil`]: Date.now() + 5000,
+                            powerups: arrayRemove(powerup)
                         });
-                        break; // Only collect one at a time
+                        break;
                     }
                 }
             }
@@ -494,7 +476,6 @@
             
             if (!localGameState.players || imagesToLoad > 0) return;
 
-            // Update and draw pixel trails
             for (let i = pixelTrails.length - 1; i >= 0; i--) {
                 const p = pixelTrails[i];
                 p.life--;
@@ -534,7 +515,6 @@
                 ctx.drawImage(carImg, player.x, gameCanvas.height - 100, 40, 60);
                 ctx.globalAlpha = 1.0;
 
-                // Draw invincibility shield
                 if (player.invincibleUntil && Date.now() < player.invincibleUntil) {
                     ctx.strokeStyle = 'rgba(56, 189, 248, 0.8)';
                     ctx.lineWidth = 3;
@@ -543,7 +523,7 @@
                     ctx.stroke();
                 }
 
-                if (!player.crashed && localGameState.status === 'active') {
+                if (!player.crashed && (localGameState.status === 'active' || localGameState.status === 'waiting')) {
                      pixelTrails.push({
                         x: player.x + 20 + (Math.random() * 10 - 5),
                         y: gameCanvas.height - 40,
@@ -598,7 +578,16 @@
 
             const activePlayers = playerStates.filter(p => !p.crashed).length;
             if (localGameState.status === 'active' && playerStates.length === 2 && activePlayers <= 1) {
-                updateDoc(doc(db, "mp-car-race", currentGameId), { status: 'finished' });
+                const winner = playerStates.find(p => !p.crashed);
+                if (winner) {
+                    const winnerId = Object.keys(localGameState.players).find(key => localGameState.players[key] === winner);
+                    updateDoc(doc(db, "mp-car-race", currentGameId), { 
+                        status: 'finished',
+                        [`players.${winnerId}.score`]: increment(1)
+                    });
+                } else { // Draw
+                     updateDoc(doc(db, "mp-car-race", currentGameId), { status: 'finished' });
+                }
             }
         }
 
@@ -628,8 +617,6 @@
             if (now - lastUpdateTime > UPDATE_INTERVAL) {
                 lastUpdateTime = now;
                 updateDoc(doc(db, "mp-car-race", currentGameId), { [`players.${currentUser.uid}.x`]: targetX });
-            } else {
-                localGameState.players[currentUser.uid].x = targetX;
             }
         }
         gameCanvas.addEventListener('touchstart', handleTouch, { passive: false });
