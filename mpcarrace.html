@@ -403,7 +403,6 @@
             const myPlayerState = localGameState.players[currentUser.uid];
             if (!myPlayerState) return;
 
-            // Host player (P1) is responsible for game management
             if (playerRole === 'P1') {
                 if (localGameState.obstacles && localGameState.obstacles.length > 0) {
                     const lastObstacle = localGameState.obstacles[localGameState.obstacles.length - 1];
@@ -421,7 +420,6 @@
             
             if (myPlayerState.crashed || localGameState.status !== 'active') return;
 
-            // Move local player car
             const carWidth = 40;
             let currentX = myPlayerState.x;
             if (keys.ArrowLeft && currentX > 0) currentX -= 5;
@@ -430,7 +428,6 @@
             const carHeight = 60;
             const myCarY = gameCanvas.height - 100;
 
-            // Check for collision with obstacles
             const isInvincible = myPlayerState.invincibleUntil && now < myPlayerState.invincibleUntil;
             if (!isInvincible && localGameState.obstacles) {
                 for (const obs of localGameState.obstacles) {
@@ -442,7 +439,6 @@
                 }
             }
 
-            // Check for collision with power-ups
             if (localGameState.powerups) {
                 for (const powerup of localGameState.powerups) {
                     const powerupSize = 30;
@@ -457,7 +453,6 @@
                 }
             }
 
-            // Throttle Firestore updates for position
             if (currentX !== myPlayerState.x && now - lastUpdateTime > UPDATE_INTERVAL) {
                 lastUpdateTime = now;
                 updateDoc(doc(db, "mp-car-race", currentGameId), { [`players.${currentUser.uid}.x`]: currentX });
@@ -585,7 +580,7 @@
                         status: 'finished',
                         [`players.${winnerId}.score`]: increment(1)
                     });
-                } else { // Draw
+                } else {
                      updateDoc(doc(db, "mp-car-race", currentGameId), { status: 'finished' });
                 }
             }
