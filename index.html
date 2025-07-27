@@ -131,6 +131,14 @@
             background-color: #16a34a; /* bg-green-600 */
         }
 
+        /* Scrollbar Hiding Utility */
+       .hide-scrollbar::-webkit-scrollbar {
+           display: none;
+       }
+       .hide-scrollbar {
+           -ms-overflow-style: none;  /* IE and Edge */
+           scrollbar-width: none;  /* Firefox */
+       }
 
         /* Fullscreen on mobile */
         @media (max-width: 768px) {
@@ -233,15 +241,16 @@
         <section id="games" class="py-16 sm:py-24 bg-gray-800/50">
             <div class="container mx-auto px-4 lg:px-8">
                 <h2 class="text-4xl font-black-ops text-center mb-12">Our Games</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- This container will be a flex row on mobile and a grid on larger screens -->
+                <div class="flex overflow-x-auto space-x-6 pb-4 sm:grid sm:grid-cols-2 sm:gap-8 lg:grid-cols-4 hide-scrollbar">
                     <!-- Game Card 1 -->
-                    <div id="astro-jumper-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
+                    <div id="astro-jumper-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
                         <img src="https://img.gamepix.com/games/astro-jumper/cover/astro-jumper.png?w=400&ar=16:10" alt="Astro Jumper" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-end">
                             <div class="flex items-center gap-3">
                                 <svg class="w-8 h-8 text-sky-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <h3 class="text-2xl font-bold text-white">Astro Jumper</h3>
+                                <h3 class="text-xl sm:text-2xl font-bold text-white">Astro Jumper</h3>
                             </div>
                             <p class="text-sky-300 mt-1">3D Platformer</p>
                         </div>
@@ -250,13 +259,13 @@
                         </div>
                     </div>
                     <!-- Game Card 2 -->
-                    <div id="pixel-racer-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
+                    <div id="pixel-racer-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
                         <img src="https://as2.ftcdn.net/v2/jpg/04/81/59/51/1000_F_481595196_xeOLb1vk53gjYT1o2cz8hvfN4hkg83PB.jpg" alt="Car Racer" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-end">
                              <div class="flex items-center gap-3">
                                  <svg class="w-8 h-8 text-pink-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                 <h3 class="text-2xl font-bold text-white">Car Racer</h3>
+                                 <h3 class="text-xl sm:text-2xl font-bold text-white">Car Racer</h3>
                                </div>
                             <p class="text-pink-400 mt-1">2D Arcade Racer</p>
                         </div>
@@ -265,13 +274,13 @@
                         </div>
                     </div>
                     <!-- Game Card 3 -->
-                    <div id="tower-defense-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
+                    <div id="tower-defense-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
                         <img src="https://fs-prod-cdn.nintendo-europe.com/media/images/10_share_images/games_15/nintendo_switch_download_software_1/2x1_NSwitchDS_FantasyTowerDefense_image1600w.jpg" alt="Tower Defense" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-end">
                             <div class="flex items-center gap-3">
                                 <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <h3 class="text-2xl font-bold text-white">Tower Defense</h3>
+                                <h3 class="text-xl sm:text-2xl font-bold text-white">Tower Defense</h3>
                             </div>
                             <p class="text-green-400 mt-1">Strategy</p>
                         </div>
@@ -280,13 +289,13 @@
                         </div>
                     </div>
                     <!-- Game Card 4 -->
-                    <div id="tic-tac-toe-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
+                    <div id="tic-tac-toe-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
                         <img src="https://wallpapercave.com/wp/wp8984750.jpg" alt="Tic-Tac-Toe" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-end">
                             <div class="flex items-center gap-3">
                                 <svg class="w-8 h-8 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <h3 class="text-2xl font-bold text-white">Tic-Tac-Toe</h3>
+                                <h3 class="text-xl sm:text-2xl font-bold text-white">Tic-Tac-Toe</h3>
                             </div>
                             <p class="text-purple-400 mt-1">Classic Puzzle</p>
                         </div>
@@ -294,14 +303,14 @@
                             <span class="btn-secondary pointer-events-none">Play Now</span>
                         </div>
                     </div>
-                      <!-- Game Card 5 -->
-                    <div id="memory-match-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
+                     <!-- Game Card 5 -->
+                    <div id="memory-match-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
                         <img src="https://img.gamedistribution.com/854fd8048c814acaa86b0faffe364290-1280x720.jpeg" alt="Memory Match" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-end">
                             <div class="flex items-center gap-3">
                                 <svg class="w-8 h-8 text-orange-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <h3 class="text-2xl font-bold text-white">Memory Match</h3>
+                                <h3 class="text-xl sm:text-2xl font-bold text-white">Memory Match</h3>
                             </div>
                             <p class="text-orange-400 mt-1">Puzzle</p>
                         </div>
@@ -310,13 +319,13 @@
                         </div>
                     </div>
                     <!-- Coming Soon Card -->
-                    <div class="group relative rounded-lg overflow-hidden shadow-lg cursor-not-allowed filter grayscale">
+                    <div class="group relative rounded-lg overflow-hidden shadow-lg cursor-not-allowed filter grayscale w-64 sm:w-auto flex-shrink-0">
                         <img src="https://placehold.co/400x250/1f2937/6b7280?text=?" alt="Coming Soon" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                         <div class="absolute inset-0 p-6 flex flex-col justify-end">
                             <div class="flex items-center gap-3">
                                 <svg class="w-8 h-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>
-                                <h3 class="text-2xl font-bold text-white">Coming Soon</h3>
+                                <h3 class="text-xl sm:text-2xl font-bold text-white">Coming Soon</h3>
                             </div>
                             <p class="text-gray-400 mt-1">Stay Tuned!</p>
                         </div>
@@ -331,15 +340,16 @@
 <section id="multiplayer-games" class="py-16 sm:py-24 bg-gray-900/50">
     <div class="container mx-auto px-4 lg:px-8">
         <h2 class="text-4xl font-black-ops text-center mb-12">Multiplayer Games</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <!-- This container will be a flex row on mobile and a grid on larger screens -->
+        <div class="flex overflow-x-auto space-x-6 pb-4 sm:grid sm:grid-cols-2 sm:gap-8 lg:grid-cols-4 hide-scrollbar">
             <!-- Game Card 1 -->
-            <a href="mptictactoe.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+            <a href="mptictactoe.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 w-64 sm:w-auto flex-shrink-0">
                 <img src="https://www.rd.com/wp-content/uploads/2019/10/tic-tac-toe-scaled.jpg" alt="Tic-Tac-Toe" class="w-full h-full object-cover">
                  <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                 <div class="absolute inset-0 p-6 flex flex-col justify-end">
                     <div class="flex items-center gap-3">
                         <svg class="w-8 h-8 text-orange-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <h3 class="text-2xl font-bold text-white">Tic-Tac-Toe</h3>
+                        <h3 class="text-xl sm:text-2xl font-bold text-white">Tic-Tac-Toe</h3>
                     </div>
                     <p class="text-orange-400 mt-1">Puzzle</p>
                 </div>
@@ -348,13 +358,13 @@
                 </div>
             </a>
             <!-- Game Card 2: Memory Match -->
-            <a href="mpmemory.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300">
+            <a href="mpmemory.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 w-64 sm:w-auto flex-shrink-0">
                 <img src="https://static.vecteezy.com/system/resources/previews/012/672/122/original/memory-game-for-preschool-children-cards-with-cartoon-safari-desert-animals-activity-page-for-book-vector.jpg" alt="Memory Match" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                 <div class="absolute inset-0 p-6 flex flex-col justify-end">
                     <div class="flex items-center gap-3">
                         <svg class="w-8 h-8 text-yellow-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <h3 class="text-2xl font-bold text-white">Memory Match</h3>
+                        <h3 class="text-xl sm:text-2xl font-bold text-white">Memory Match</h3>
                     </div>
                     <p class="text-yellow-400 mt-1">Puzzle</p>
                 </div>
@@ -363,13 +373,13 @@
                 </div>
             </a>
             <!-- Coming Soon Card -->
-            <div class="group relative rounded-lg overflow-hidden shadow-lg cursor-not-allowed filter grayscale">
+            <div class="group relative rounded-lg overflow-hidden shadow-lg cursor-not-allowed filter grayscale w-64 sm:w-auto flex-shrink-0">
                 <img src="https://placehold.co/400x250/1f2937/6b7280?text=?" alt="Coming Soon" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                 <div class="absolute inset-0 p-6 flex flex-col justify-end">
                     <div class="flex items-center gap-3">
                         <svg class="w-8 h-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>
-                        <h3 class="text-2xl font-bold text-white">Coming Soon</h3>
+                        <h3 class="text-xl sm:text-2xl font-bold text-white">Coming Soon</h3>
                     </div>
                     <p class="text-gray-400 mt-1">More Multiplayer Fun!</p>
                 </div>
@@ -389,8 +399,8 @@
                     <!-- Leaderboard cards will be injected here -->
                 </div>
                  <div id="leaderboard-login-prompt" class="text-center text-gray-400">
-                    <p>Please log in to see your high scores.</p>
-                </div>
+                     <p>Please log in to see your high scores.</p>
+                 </div>
             </div>
         </section>
 
@@ -495,19 +505,19 @@
                         <button id="tdStartButton" class="btn-success mt-8 text-xl">Start Game</button>
                     </div>
                      <div id="tdInGameUI" class="hidden absolute top-0 left-0 w-full h-full pointer-events-none">
-                        <div class="absolute top-2 left-2 text-left bg-gray-900/50 p-2 rounded-lg">
-                            <p class="font-bold text-white">❤️ Health: <span id="tdHealth"></span></p>
-                            <p class="font-bold text-white">💰 Gold: <span id="tdGold"></span></p>
-                            <p class="font-bold text-white">🌊 Wave: <span id="tdWave"></span></p>
-                        </div>
-                        <div id="tdTowerSelection" class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-4 pointer-events-auto">
-                            <button id="buyTurretButton" class="bg-gray-700 p-3 rounded-lg border-2 border-transparent hover:border-green-400">
-                                <p class="font-bold">Turret</p>
-                                <p class="text-sm">Cost: 100💰</p>
-                            </button>
-                        </div>
-                        <button id="nextWaveButton" class="absolute bottom-2 right-2 btn-success pointer-events-auto">Next Wave</button>
-                    </div>
+                         <div class="absolute top-2 left-2 text-left bg-gray-900/50 p-2 rounded-lg">
+                             <p class="font-bold text-white">❤️ Health: <span id="tdHealth"></span></p>
+                             <p class="font-bold text-white">💰 Gold: <span id="tdGold"></span></p>
+                             <p class="font-bold text-white">🌊 Wave: <span id="tdWave"></span></p>
+                         </div>
+                         <div id="tdTowerSelection" class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-4 pointer-events-auto">
+                             <button id="buyTurretButton" class="bg-gray-700 p-3 rounded-lg border-2 border-transparent hover:border-green-400">
+                                 <p class="font-bold">Turret</p>
+                                 <p class="text-sm">Cost: 100💰</p>
+                             </button>
+                         </div>
+                         <button id="nextWaveButton" class="absolute bottom-2 right-2 btn-success pointer-events-auto">Next Wave</button>
+                     </div>
                     <div id="tdGameOverScreen" data-game-name="Tower Defense" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
                         <h2 id="tdEndTitle" class="text-5xl font-black-ops text-white"></h2>
                         <p class="mt-4 text-2xl text-gray-200">You survived <span id="tdFinalWave" class="font-bold text-green-400">0</span> waves.</p>
