@@ -115,17 +115,17 @@
         "imports": {
             "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
             "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js",
-             "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js" // *** Added Auth import ***
+             "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"
         }
     }
     </script>
     <script type="module">
         import { initializeApp } from 'firebase/app';
         import { getFirestore, collection, getDocs } from 'firebase/firestore';
-        // *** Added Auth imports ***
         import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
-        document.addEventListener('DOMContentLoaded', () => { // Removed async from here
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOM Loaded. Initializing Firebase..."); // Debug log
 
             // #############################################
             // ### FIREBASE SETUP                      ###
@@ -140,9 +140,27 @@
                 measurementId: "G-VJ6YC0GXK5"
             };
 
-            const app = initializeApp(firebaseConfig);
-            const db = getFirestore(app);
-            const auth = getAuth(app); // *** Initialize Auth ***
+            let app;
+            let db;
+            let auth;
+
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                console.log("Firebase initialized successfully."); // Debug log
+            } catch (error) {
+                console.error("Firebase initialization failed:", error); // Error log
+                // Display error to user if initialization fails
+                const errorDisplay = document.getElementById('global-leaderboard-error');
+                errorDisplay.innerHTML = `<p>Failed to connect to Firebase services. Please check your connection or configuration.</p>`;
+                errorDisplay.style.display = 'block';
+                document.getElementById('loading-indicator').style.display = 'none'; // Hide loader
+                 document.getElementById('user-status').textContent = 'Error initializing';
+                 document.getElementById('user-status').classList.add('text-red-400');
+                return; // Stop execution if Firebase fails
+            }
+
 
             // --- UI Elements ---
             const globalLeaderboardGrid = document.getElementById('global-leaderboard-grid');
@@ -154,12 +172,13 @@
             const userStatusEl = document.getElementById('user-status');
 
             // --- Function to Display Global Leaderboards (Dynamically from /highscores) ---
-            const displayGlobalLeaderboards = async (currentUser) => { // Accept user object
+            const displayGlobalLeaderboards = async (currentUser) => {
+                console.log("displayGlobalLeaderboards called. User:", currentUser ? currentUser.uid : 'null'); // Debug log
                 loadingIndicator.style.display = 'block';
                 globalLeaderboardContent.style.display = 'none';
                 errorDisplay.style.display = 'none';
                 noScoresMessage.style.display = 'none';
-                loginPrompt.style.display = 'none'; // Ensure login prompt is hidden when fetching
+                loginPrompt.style.display = 'none';
                 globalLeaderboardGrid.innerHTML = '';
 
                 const games = ["Astro Jumper", "Car Racer", "Tower Defense", "Memory Match"];
@@ -168,16 +187,15 @@
 
                 let fetchError = false;
                 let hasAnyScores = false;
-                let snapshot = null; // Declare snapshot variable
+                let snapshot = null;
 
                 try {
                     const highscoresCol = collection(db, "highscores");
-                    snapshot = await getDocs(highscoresCol); // Assign snapshot here
+                    console.log("Fetching documents from /highscores..."); // Debug log
+                    snapshot = await getDocs(highscoresCol);
+                    console.log("Fetched snapshot. Empty:", snapshot.empty); // Debug log
 
-                    if (snapshot.empty) {
-                        console.log("No high score documents found.");
-                        // Message shown in finally block
-                    } else {
+                    if (!snapshot.empty) {
                         snapshot.forEach(doc => {
                             const userData = doc.data();
                             const userId = doc.id;
@@ -191,6 +209,8 @@
                             });
                         });
                     }
+
+                    console.log("Aggregated scores:", allScoresByGame); // Debug log
 
                     // Process and display scores
                     games.forEach(game => {
@@ -209,8 +229,8 @@
 
                         let leaderboardHTML = `<div class="glassmorphism p-6 rounded-xl"><h3 class="text-2xl font-bold text-center text-indigo-300 mb-4">${game}</h3><ol class="space-y-3">`;
                         if (scores.length > 0) {
-                            scores.slice(0, 5).forEach((entry, index) => { // Show Top 5
-                                const isCurrentUser = currentUser && entry.userId === currentUser.uid; // Check if it's the logged-in user's score
+                            scores.slice(0, 5).forEach((entry, index) => {
+                                const isCurrentUser = currentUser && entry.userId === currentUser.uid;
                                 leaderboardHTML += `
                                     <li class="flex items-center justify-between text-lg ${isCurrentUser ? 'bg-sky-900/50 rounded px-2 py-1' : ''}">
                                         <span class="flex items-center min-w-0">
@@ -228,13 +248,12 @@
                     });
 
                 } catch (error) {
-                    console.error("Error fetching or processing high scores: ", error);
+                    console.error("Error fetching or processing high scores: ", error); // Error log
                     fetchError = true;
                      if (error.code === 'permission-denied') {
-                         // Update error message for clarity when auth is required
                          errorDisplay.innerHTML = `<p>Could not load leaderboards due to permissions. Please ensure you are logged in and Firestore rules allow list access for authenticated users on the 'highscores' collection.</p>`;
                      } else {
-                         errorDisplay.innerHTML = `<p>Could not load leaderboards. An unexpected error occurred.</p>`;
+                         errorDisplay.innerHTML = `<p>Could not load leaderboards. An unexpected error occurred: ${error.message}</p>`; // Show more error details
                      }
                 } finally {
                     loadingIndicator.style.display = 'none';
@@ -243,14 +262,16 @@
                     } else if (hasAnyScores) {
                          globalLeaderboardContent.style.display = 'block';
                     } else {
-                        // Show "no scores" message if snapshot was empty OR if it wasn't empty but contained no game scores
                          noScoresMessage.style.display = 'block';
                     }
+                     console.log("displayGlobalLeaderboards finished."); // Debug log
                 }
             };
 
              // *** Authentication Check ***
+             console.log("Setting up onAuthStateChanged listener..."); // Debug log
              onAuthStateChanged(auth, (user) => {
+                 console.log("onAuthStateChanged triggered. User:", user ? user.uid : 'null'); // Debug log
                  // Hide all content sections initially
                  loadingIndicator.style.display = 'none';
                  globalLeaderboardContent.style.display = 'none';
@@ -258,19 +279,37 @@
                  noScoresMessage.style.display = 'none';
                  loginPrompt.style.display = 'none';
 
-                 if (user) {
-                     // User is signed in
-                     userStatusEl.textContent = `Logged in as: ${user.displayName || 'User'}`;
-                     userStatusEl.classList.remove('text-red-400'); // Ensure correct color
-                     userStatusEl.classList.add('text-green-400');
-                     displayGlobalLeaderboards(user); // Fetch and display leaderboards, passing the user object
-                 } else {
-                     // User is signed out
-                     userStatusEl.textContent = 'Not logged in';
-                     userStatusEl.classList.remove('text-green-400'); // Ensure correct color
-                     userStatusEl.classList.add('text-red-400');
-                     loginPrompt.style.display = 'block'; // Show the login prompt message
+                 try { // Add try...catch around UI updates
+                     if (user) {
+                         // User is signed in
+                         console.log("User is signed in:", user.displayName); // Debug log
+                         userStatusEl.textContent = `Logged in as: ${user.displayName || 'User'}`;
+                         userStatusEl.classList.remove('text-red-400');
+                         userStatusEl.classList.add('text-green-400');
+                         displayGlobalLeaderboards(user); // Fetch and display leaderboards
+                     } else {
+                         // User is signed out
+                         console.log("User is signed out."); // Debug log
+                         userStatusEl.textContent = 'Not logged in';
+                         userStatusEl.classList.remove('text-green-400');
+                         userStatusEl.classList.add('text-red-400');
+                         loginPrompt.style.display = 'block'; // Show the login prompt message
+                     }
+                 } catch (uiError) {
+                     console.error("Error updating UI in onAuthStateChanged:", uiError); // Error log for UI updates
+                     errorDisplay.innerHTML = '<p>An error occurred while updating the page status.</p>';
+                     errorDisplay.style.display = 'block';
                  }
+             }, (error) => {
+                  // This error callback is for the listener itself
+                  console.error("Error in onAuthStateChanged listener:", error); // Error log for the listener
+                  userStatusEl.textContent = 'Auth Error';
+                  userStatusEl.classList.add('text-red-400');
+                  errorDisplay.innerHTML = '<p>Could not check authentication status. Please refresh the page.</p>';
+                  errorDisplay.style.display = 'block';
+                  loadingIndicator.style.display = 'none';
+                  loginPrompt.style.display = 'none';
+                  globalLeaderboardContent.style.display = 'none';
              });
 
         }); // End DOMContentLoaded
