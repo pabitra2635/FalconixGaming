@@ -284,7 +284,7 @@
                      if (user) {
                          // User is signed in
                          console.log("Leaderboard Page: User is signed in:", user.displayName, user.uid); // Debug log
-                         userStatusEl.textContent = `Logged in as: ${user.displayName || 'User'}`;
+                         userStatusEl.textContent = `${user.displayName || 'User'}`;
                          userStatusEl.classList.remove('text-red-400');
                          userStatusEl.classList.add('text-green-400');
                          displayGlobalLeaderboards(user); // Fetch and display leaderboards
@@ -326,4 +326,3 @@
     </script>
 </body>
 </html>
-
