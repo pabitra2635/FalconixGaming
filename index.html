@@ -1873,6 +1873,11 @@
                 }
             });
         });
+        // Inside saveHighScore in index.html, when updating personal score:
+await setDoc(personalScoreRef, {
+    [gameName]: newScore,
+    playerName: user.displayName || 'Anonymous' // Store the name
+}, { merge: true });
     </script>
 </body>
 </html>
