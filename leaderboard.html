@@ -125,7 +125,7 @@
         import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("DOM Loaded. Initializing Firebase..."); // Debug log
+            console.log("Leaderboard Page: DOM Loaded. Initializing Firebase..."); // Debug log
 
             // #############################################
             // ### FIREBASE SETUP                      ###
@@ -148,19 +148,17 @@
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-                console.log("Firebase initialized successfully."); // Debug log
+                console.log("Leaderboard Page: Firebase initialized successfully."); // Debug log
             } catch (error) {
-                console.error("Firebase initialization failed:", error); // Error log
-                // Display error to user if initialization fails
-                const errorDisplay = document.getElementById('global-leaderboard-error');
-                errorDisplay.innerHTML = `<p>Failed to connect to Firebase services. Please check your connection or configuration.</p>`;
-                errorDisplay.style.display = 'block';
-                document.getElementById('loading-indicator').style.display = 'none'; // Hide loader
+                console.error("Leaderboard Page: Firebase initialization failed:", error); // Error log
+                const errorDisplayInit = document.getElementById('global-leaderboard-error');
+                errorDisplayInit.innerHTML = `<p>Failed to connect to Firebase services. Please check connection/configuration.</p>`;
+                errorDisplayInit.style.display = 'block';
+                document.getElementById('loading-indicator').style.display = 'none';
                  document.getElementById('user-status').textContent = 'Error initializing';
                  document.getElementById('user-status').classList.add('text-red-400');
-                return; // Stop execution if Firebase fails
+                return;
             }
-
 
             // --- UI Elements ---
             const globalLeaderboardGrid = document.getElementById('global-leaderboard-grid');
@@ -173,7 +171,7 @@
 
             // --- Function to Display Global Leaderboards (Dynamically from /highscores) ---
             const displayGlobalLeaderboards = async (currentUser) => {
-                console.log("displayGlobalLeaderboards called. User:", currentUser ? currentUser.uid : 'null'); // Debug log
+                console.log("Leaderboard Page: displayGlobalLeaderboards called. User:", currentUser ? currentUser.uid : 'null'); // Debug log
                 loadingIndicator.style.display = 'block';
                 globalLeaderboardContent.style.display = 'none';
                 errorDisplay.style.display = 'none';
@@ -191,9 +189,9 @@
 
                 try {
                     const highscoresCol = collection(db, "highscores");
-                    console.log("Fetching documents from /highscores..."); // Debug log
+                    console.log("Leaderboard Page: Fetching documents from /highscores..."); // Debug log
                     snapshot = await getDocs(highscoresCol);
-                    console.log("Fetched snapshot. Empty:", snapshot.empty); // Debug log
+                    console.log("Leaderboard Page: Fetched snapshot. Empty:", snapshot.empty, "Size:", snapshot.size); // Debug log
 
                     if (!snapshot.empty) {
                         snapshot.forEach(doc => {
@@ -210,7 +208,7 @@
                         });
                     }
 
-                    console.log("Aggregated scores:", allScoresByGame); // Debug log
+                    console.log("Leaderboard Page: Aggregated scores:", allScoresByGame); // Debug log
 
                     // Process and display scores
                     games.forEach(game => {
@@ -229,7 +227,7 @@
 
                         let leaderboardHTML = `<div class="glassmorphism p-6 rounded-xl"><h3 class="text-2xl font-bold text-center text-indigo-300 mb-4">${game}</h3><ol class="space-y-3">`;
                         if (scores.length > 0) {
-                            scores.slice(0, 5).forEach((entry, index) => {
+                            scores.slice(0, 5).forEach((entry, index) => { // Show Top 5
                                 const isCurrentUser = currentUser && entry.userId === currentUser.uid;
                                 leaderboardHTML += `
                                     <li class="flex items-center justify-between text-lg ${isCurrentUser ? 'bg-sky-900/50 rounded px-2 py-1' : ''}">
@@ -248,12 +246,15 @@
                     });
 
                 } catch (error) {
-                    console.error("Error fetching or processing high scores: ", error); // Error log
+                    console.error("Leaderboard Page: Error fetching or processing high scores: ", error); // *** More detailed Error log ***
+                    console.error("Error Name:", error.name);
+                    console.error("Error Code:", error.code);
+                    console.error("Error Message:", error.message);
                     fetchError = true;
-                     if (error.code === 'permission-denied') {
+                     if (error.code === 'permission-denied' || error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions')) {
                          errorDisplay.innerHTML = `<p>Could not load leaderboards due to permissions. Please ensure you are logged in and Firestore rules allow list access for authenticated users on the 'highscores' collection.</p>`;
                      } else {
-                         errorDisplay.innerHTML = `<p>Could not load leaderboards. An unexpected error occurred: ${error.message}</p>`; // Show more error details
+                         errorDisplay.innerHTML = `<p>Could not load leaderboards. An unexpected error occurred: ${error.message}</p>`;
                      }
                 } finally {
                     loadingIndicator.style.display = 'none';
@@ -264,14 +265,14 @@
                     } else {
                          noScoresMessage.style.display = 'block';
                     }
-                     console.log("displayGlobalLeaderboards finished."); // Debug log
+                     console.log("Leaderboard Page: displayGlobalLeaderboards finished."); // Debug log
                 }
             };
 
              // *** Authentication Check ***
-             console.log("Setting up onAuthStateChanged listener..."); // Debug log
-             onAuthStateChanged(auth, (user) => {
-                 console.log("onAuthStateChanged triggered. User:", user ? user.uid : 'null'); // Debug log
+             console.log("Leaderboard Page: Setting up onAuthStateChanged listener..."); // Debug log
+             const unsubscribe = onAuthStateChanged(auth, (user) => { // Store the unsubscribe function
+                 console.log("Leaderboard Page: onAuthStateChanged triggered. User:", user ? user.uid : 'null', "User Object:", user); // *** Log the whole user object ***
                  // Hide all content sections initially
                  loadingIndicator.style.display = 'none';
                  globalLeaderboardContent.style.display = 'none';
@@ -279,38 +280,47 @@
                  noScoresMessage.style.display = 'none';
                  loginPrompt.style.display = 'none';
 
-                 try { // Add try...catch around UI updates
+                 try {
                      if (user) {
                          // User is signed in
-                         console.log("User is signed in:", user.displayName); // Debug log
+                         console.log("Leaderboard Page: User is signed in:", user.displayName, user.uid); // Debug log
                          userStatusEl.textContent = `Logged in as: ${user.displayName || 'User'}`;
                          userStatusEl.classList.remove('text-red-400');
                          userStatusEl.classList.add('text-green-400');
                          displayGlobalLeaderboards(user); // Fetch and display leaderboards
                      } else {
                          // User is signed out
-                         console.log("User is signed out."); // Debug log
+                         console.log("Leaderboard Page: User is signed out."); // Debug log
                          userStatusEl.textContent = 'Not logged in';
                          userStatusEl.classList.remove('text-green-400');
                          userStatusEl.classList.add('text-red-400');
                          loginPrompt.style.display = 'block'; // Show the login prompt message
                      }
                  } catch (uiError) {
-                     console.error("Error updating UI in onAuthStateChanged:", uiError); // Error log for UI updates
+                     console.error("Leaderboard Page: Error updating UI in onAuthStateChanged:", uiError);
                      errorDisplay.innerHTML = '<p>An error occurred while updating the page status.</p>';
                      errorDisplay.style.display = 'block';
                  }
              }, (error) => {
-                  // This error callback is for the listener itself
-                  console.error("Error in onAuthStateChanged listener:", error); // Error log for the listener
+                  console.error("Leaderboard Page: Error in onAuthStateChanged listener:", error); // Error log for the listener
                   userStatusEl.textContent = 'Auth Error';
                   userStatusEl.classList.add('text-red-400');
                   errorDisplay.innerHTML = '<p>Could not check authentication status. Please refresh the page.</p>';
                   errorDisplay.style.display = 'block';
+                  // Hide other sections on auth error
                   loadingIndicator.style.display = 'none';
-                  loginPrompt.style.display = 'none';
                   globalLeaderboardContent.style.display = 'none';
+                  noScoresMessage.style.display = 'none';
+                  loginPrompt.style.display = 'none';
              });
+
+             // Optional: Detach listener when the user navigates away (if needed, less critical for simple pages)
+             // window.addEventListener('beforeunload', () => {
+             //     if (unsubscribe) {
+             //         console.log("Leaderboard Page: Unsubscribing from auth changes.");
+             //         unsubscribe();
+             //     }
+             // });
 
         }); // End DOMContentLoaded
     </script>
