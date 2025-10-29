@@ -77,9 +77,10 @@
                 </div>
             </div>
             <div id="global-leaderboard-error" class="hidden text-center text-red-400 mt-8">
-                <p>Could not load leaderboards. Please ensure Firestore rules allow public reads on the 'highscores' collection, or try again later.</p>
+                {/* Error message set dynamically */}
+                <p>Could not load leaderboards. Please ensure Firestore rules allow public list access on the 'highscores' collection, or try again later.</p>
             </div>
-             <div id="no-scores-message" class="hidden text-center text-gray-400 mt-8">
+            <div id="no-scores-message" class="hidden text-center text-gray-400 mt-8">
                 <p>No high scores recorded yet for any games.</p>
             </div>
         </section>
@@ -104,8 +105,8 @@
     </script>
     <script type="module">
         import { initializeApp } from 'firebase/app';
-        // Import necessary Firestore functions
-        import { getFirestore, collection, getDocs } from 'firebase/firestore';
+        // *** UPDATED: Import necessary Firestore functions ***
+        import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore'; // Added collection, getDocs
 
         document.addEventListener('DOMContentLoaded', async () => {
 
@@ -132,7 +133,7 @@
             const errorDisplay = document.getElementById('global-leaderboard-error');
             const noScoresMessage = document.getElementById('no-scores-message');
 
-            // --- Function to Display Global Leaderboards ---
+            // --- Function to Display Global Leaderboards (Dynamically from /highscores) ---
             const displayGlobalLeaderboards = async () => {
                 loadingIndicator.style.display = 'block';
                 globalLeaderboardContent.style.display = 'none';
@@ -147,37 +148,36 @@
 
                 let fetchError = false;
                 let hasAnyScores = false;
+                let snapshot = null; // To check if snapshot was empty later
 
                 try {
-                    // Fetch all documents from the 'highscores' collection
+                    // *** UPDATED: Fetch all documents from the 'highscores' collection ***
                     const highscoresCol = collection(db, "highscores");
-                    const snapshot = await getDocs(highscoresCol);
+                    snapshot = await getDocs(highscoresCol);
 
                     if (snapshot.empty) {
                         console.log("No high score documents found.");
-                        noScoresMessage.style.display = 'block'; // Show no scores message if collection is empty
+                        // Message will be shown in finally block
                     } else {
                         snapshot.forEach(doc => {
                             const userData = doc.data();
-                            const userId = doc.id; // Or ideally get a playerName if stored
+                            const userId = doc.id;
+                            // *** Use playerName from data if available, otherwise fallback ***
+                            const playerName = userData.playerName || `User ${userId.substring(0, 6)}...`;
 
                             // Go through each game and add the score if it exists for this user
                             games.forEach(game => {
                                 if (userData[game] !== undefined && typeof userData[game] === 'number') {
-                                    // Store score along with user identifier (using userId for now)
-                                    // NOTE: Storing playerName here would require it to be in the highscores document
-                                    allScoresByGame[game].push({ score: userData[game], playerName: `User ${userId.substring(0, 6)}...` }); // Using partial userId as placeholder
+                                    allScoresByGame[game].push({
+                                        score: userData[game],
+                                        playerName: playerName,
+                                        userId: userId // Include userId for potential future use (like highlighting)
+                                    });
                                     hasAnyScores = true; // Mark that we found at least one score
                                 }
                             });
                         });
                     }
-
-                    if(!hasAnyScores && !snapshot.empty){
-                         // If we looped through documents but found no game scores
-                         noScoresMessage.style.display = 'block';
-                    }
-
 
                     // Process and display scores for each game
                     games.forEach(game => {
@@ -193,11 +193,10 @@
 
                         // Sort the scores for the current game
                         scores.sort((a, b) => {
-                            if (sortOrder === 'asc') {
-                                return a.score - b.score;
-                            } else {
-                                return b.score - a.score; // Descending
-                            }
+                            // Basic validation inside sort
+                            if (typeof a.score !== 'number') return 1;
+                            if (typeof b.score !== 'number') return -1;
+                            return (sortOrder === 'asc') ? a.score - b.score : b.score - a.score;
                         });
 
                         // Build HTML for this game's leaderboard
@@ -210,14 +209,16 @@
                             scores.slice(0, 10).forEach((entry, index) => { // Take top 10
                                 leaderboardHTML += `
                                     <li class="flex items-center justify-between text-lg">
-                                        <span class="flex items-center min-w-0">
+                                        <span class="flex items-center min-w-0"> {/* Allow shrinking */}
                                             <span class="font-bold text-gray-400 w-8 flex-shrink-0">${index + 1}.</span>
+                                            {/* Display playerName */}
                                             <span class="text-white truncate" title="${entry.playerName}">${entry.playerName}</span>
                                         </span>
                                         <span class="font-bold text-sky-400 flex-shrink-0 ml-2">${entry.score} ${scoreLabel}</span>
                                     </li>`;
                             });
                         } else {
+                            // Show message if *this specific game* has no scores, even if others do
                             leaderboardHTML += `<li class="text-center text-gray-400">No scores yet for this game.</li>`;
                         }
 
@@ -229,10 +230,11 @@
                 } catch (error) {
                     console.error("Error fetching or processing high scores: ", error);
                     fetchError = true; // Mark that an error occurred
+                     // Provide more specific feedback based on the error
                      if (error.code === 'permission-denied') {
                          errorDisplay.innerHTML = `<p>Could not load leaderboards due to permissions. Please ensure Firestore rules allow public list access on the 'highscores' collection.</p>`;
                      } else {
-                         errorDisplay.innerHTML = `<p>Could not load leaderboards. Please try again later.</p>`;
+                         errorDisplay.innerHTML = `<p>Could not load leaderboards. An unexpected error occurred. Please try again later.</p>`;
                      }
                 } finally {
                     loadingIndicator.style.display = 'none'; // Hide loading indicator
@@ -240,8 +242,9 @@
                         errorDisplay.style.display = 'block'; // Show error message
                     } else if (hasAnyScores) {
                          globalLeaderboardContent.style.display = 'block'; // Show leaderboard content only if scores were found
-                    } else if (!snapshot || snapshot.empty) {
-                        noScoresMessage.style.display = 'block'; // Ensure no scores message shows if snapshot was empty initially
+                    } else {
+                        // Show "no scores" message if snapshot was empty OR if it wasn't empty but contained no game scores
+                        noScoresMessage.style.display = 'block';
                     }
                 }
             };
