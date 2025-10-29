@@ -47,10 +47,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- *** NEW SECTION: User ID Display *** -->
-    <div id="user-id-display" class="bg-gray-900 text-gray-400 text-xs text-center py-1 px-4 break-all hidden">
-        <!-- User ID will be injected here -->
-    </div>
+
 
     <!-- Header -->
     <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
@@ -60,12 +57,14 @@
                  <div class="flex items-center space-x-4 text-right">
                      <!-- Display user status (name or 'Not logged in') -->
                      <div id="user-status" class="text-sm text-gray-300">Checking status...</div>
-                     <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors flex-shrink-0">Back to Games</a>
                  </div>
             </div>
         </nav>
     </header>
-
+    <!-- *** NEW SECTION: User ID Display *** -->
+    <div id="user-id-display" class="bg-gray-900 text-gray-400 text-xs text-center py-1 px-4 break-all hidden">
+        <!-- User ID will be injected here -->
+    </div>
     <!-- Main Content: Leaderboards Section -->
     <main class="flex-grow py-16 sm:py-24 bg-gray-800/50">
         <section id="leaderboards" class="container mx-auto px-4 lg:px-8">
@@ -292,7 +291,7 @@
                          // User is signed in
                          console.log("Leaderboard Page: User is signed in:", user.displayName, user.uid);
                          // *** UPDATED: Show User Name in header status, ID above header ***
-                         userStatusEl.textContent = `Logged in as: ${user.displayName || 'User'}`; // Display name in header
+                         userStatusEl.textContent = `${user.displayName || 'User'}`; // Display name in header
                          userIdDisplayEl.textContent = `Your ID: ${user.uid}`; // Display ID above header
                          userIdDisplayEl.style.display = 'block'; // Show the ID element
                          userStatusEl.classList.remove('text-red-400');
@@ -330,4 +329,3 @@
     </script>
 </body>
 </html>
-
