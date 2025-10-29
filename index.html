@@ -78,7 +78,7 @@
         .pointer-events-auto {
             pointer-events: auto;
         }
-        
+
         /* Tic-Tac-Toe Styles */
         .ttt-cell, .memory-card-face {
             font-family: 'Fredoka One', cursive;
@@ -133,11 +133,11 @@
 
         /* Scrollbar Hiding Utility */
        .hide-scrollbar::-webkit-scrollbar {
-           display: none;
+            display: none;
        }
        .hide-scrollbar {
-           -ms-overflow-style: none;  /* IE and Edge */
-           scrollbar-width: none;  /* Firefox */
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
        }
 
         /* Fullscreen on mobile */
@@ -164,6 +164,32 @@
                 color: white;
                 z-index: 100;
             }
+            /* Adjust leaderboard grid columns for mobile */
+             #global-ranks-grid, #your-scores-content {
+                 grid-template-columns: 1fr;
+             }
+        }
+         /* Leaderboard Tabs */
+        .leaderboard-tab {
+            @apply px-4 py-2 font-semibold text-gray-400 border-b-2 border-transparent hover:text-white hover:border-sky-400 transition-all duration-300 cursor-pointer;
+        }
+        .leaderboard-tab.active {
+            @apply text-sky-400 border-sky-400;
+        }
+        /* Style for loading indicator */
+        .loader {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -179,6 +205,7 @@
                     <a href="#" class="text-gray-300 hover:text-sky-400 transition-colors">Home</a>
                     <a href="#games" class="text-gray-300 hover:text-sky-400 transition-colors">Games</a>
                     <a href="#how-to-play" class="text-gray-300 hover:text-sky-400 transition-colors">How to Play</a>
+                    <!-- Updated Leaderboards link to point to the section -->
                     <a href="#leaderboards" class="text-gray-300 hover:text-sky-400 transition-colors">Leaderboards</a>
                 </div>
                 <div class="hidden md:flex items-center space-x-4">
@@ -200,6 +227,7 @@
                 <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Home</a>
                 <a href="#games" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Games</a>
                 <a href="#how-to-play" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">How to Play</a>
+                <!-- Updated Leaderboards link for mobile -->
                 <a href="#leaderboards" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Leaderboards</a>
                 <button id="mobile-login-button" class="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Login with Google</button>
                 <div id="mobile-user-info" class="hidden px-3 py-2">
@@ -241,9 +269,8 @@
         <section id="games" class="py-16 sm:py-24 bg-gray-800/50">
             <div class="container mx-auto px-4 lg:px-8">
                 <h2 class="text-4xl font-black-ops text-center mb-12">Our Games</h2>
-                <!-- This container will be a flex row on mobile and a grid on larger screens -->
                 <div class="flex overflow-x-auto space-x-6 pb-4 sm:grid sm:grid-cols-2 sm:gap-8 lg:grid-cols-4 hide-scrollbar">
-                    <!-- Game Card 1 -->
+                    <!-- Game Card 1: Astro Jumper -->
                     <div id="astro-jumper-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
                         <img src="https://img.gamepix.com/games/astro-jumper/cover/astro-jumper.png?w=400&ar=16:10" alt="Astro Jumper" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -258,7 +285,7 @@
                             <span class="btn-primary pointer-events-none">Play Now</span>
                         </div>
                     </div>
-                    <!-- Game Card 2 -->
+                    <!-- Game Card 2: Car Racer -->
                     <div id="pixel-racer-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
                         <img src="https://as2.ftcdn.net/v2/jpg/04/81/59/51/1000_F_481595196_xeOLb1vk53gjYT1o2cz8hvfN4hkg83PB.jpg" alt="Car Racer" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -273,7 +300,7 @@
                             <span class="btn-danger pointer-events-none">Play Now</span>
                         </div>
                     </div>
-                    <!-- Game Card 3 -->
+                    <!-- Game Card 3: Tower Defense -->
                     <div id="tower-defense-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
                         <img src="https://fs-prod-cdn.nintendo-europe.com/media/images/10_share_images/games_15/nintendo_switch_download_software_1/2x1_NSwitchDS_FantasyTowerDefense_image1600w.jpg" alt="Tower Defense" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -288,7 +315,7 @@
                             <span class="btn-success pointer-events-none">Play Now</span>
                         </div>
                     </div>
-                    <!-- Game Card 4 -->
+                    <!-- Game Card 4: Tic-Tac-Toe -->
                     <div id="tic-tac-toe-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
                         <img src="https://wallpapercave.com/wp/wp8984750.jpg" alt="Tic-Tac-Toe" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -303,7 +330,7 @@
                             <span class="btn-secondary pointer-events-none">Play Now</span>
                         </div>
                     </div>
-                     <!-- Game Card 5 -->
+                     <!-- Game Card 5: Memory Match -->
                     <div id="memory-match-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
                         <img src="https://img.gamedistribution.com/854fd8048c814acaa86b0faffe364290-1280x720.jpeg" alt="Memory Match" class="w-full h-full object-cover">
                          <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
@@ -336,73 +363,101 @@
                 </div>
             </div>
         </section>
-<!-- Multiplayer Games Section -->
-<section id="multiplayer-games" class="py-16 sm:py-24 bg-gray-900/50">
-    <div class="container mx-auto px-4 lg:px-8">
-        <h2 class="text-4xl font-black-ops text-center mb-12">Multiplayer Games</h2>
-        <!-- This container will be a flex row on mobile and a grid on larger screens -->
-        <div class="flex overflow-x-auto space-x-6 pb-4 sm:grid sm:grid-cols-2 sm:gap-8 lg:grid-cols-4 hide-scrollbar">
-            <!-- Game Card 1 -->
-            <a href="mptictactoe.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 w-64 sm:w-auto flex-shrink-0">
-                <img src="https://www.rd.com/wp-content/uploads/2019/10/tic-tac-toe-scaled.jpg" alt="Tic-Tac-Toe" class="w-full h-full object-cover">
-                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <div class="absolute inset-0 p-6 flex flex-col justify-end">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-8 h-8 text-orange-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <h3 class="text-xl sm:text-2xl font-bold text-white">Tic-Tac-Toe</h3>
+
+        <!-- Multiplayer Games Section -->
+        <section id="multiplayer-games" class="py-16 sm:py-24 bg-gray-900/50">
+            <div class="container mx-auto px-4 lg:px-8">
+                <h2 class="text-4xl font-black-ops text-center mb-12">Multiplayer Games</h2>
+                <div class="flex overflow-x-auto space-x-6 pb-4 sm:grid sm:grid-cols-2 sm:gap-8 lg:grid-cols-4 hide-scrollbar">
+                    <!-- MP Game Card 1: Tic-Tac-Toe -->
+                    <a href="mptictactoe.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 w-64 sm:w-auto flex-shrink-0">
+                        <img src="https://www.rd.com/wp-content/uploads/2019/10/tic-tac-toe-scaled.jpg" alt="Multiplayer Tic-Tac-Toe" class="w-full h-full object-cover">
+                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-8 h-8 text-orange-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <h3 class="text-xl sm:text-2xl font-bold text-white">Tic-Tac-Toe <span class="text-xs text-orange-300">(MP)</span></h3>
+                            </div>
+                            <p class="text-orange-400 mt-1">Puzzle</p>
+                        </div>
+                         <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
+                            <span class="btn-warning pointer-events-none">Play Now</span>
+                        </div>
+                    </a>
+                    <!-- MP Game Card 2: Memory Match -->
+                    <a href="mpmemory.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 w-64 sm:w-auto flex-shrink-0">
+                        <img src="https://static.vecteezy.com/system/resources/previews/012/672/122/original/memory-game-for-preschool-children-cards-with-cartoon-safari-desert-animals-activity-page-for-book-vector.jpg" alt="Multiplayer Memory Match" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-8 h-8 text-yellow-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <h3 class="text-xl sm:text-2xl font-bold text-white">Memory Match <span class="text-xs text-yellow-300">(MP)</span></h3>
+                            </div>
+                            <p class="text-yellow-400 mt-1">Puzzle</p>
+                        </div>
+                        <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
+                            <span class="btn-warning pointer-events-none">Play Now</span>
+                        </div>
+                    </a>
+                    <!-- Coming Soon Card -->
+                    <div class="group relative rounded-lg overflow-hidden shadow-lg cursor-not-allowed filter grayscale w-64 sm:w-auto flex-shrink-0">
+                        <img src="https://placehold.co/400x250/1f2937/6b7280?text=?" alt="Coming Soon" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-8 h-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>
+                                <h3 class="text-xl sm:text-2xl font-bold text-white">Coming Soon</h3>
+                            </div>
+                            <p class="text-gray-400 mt-1">More Multiplayer Fun!</p>
+                        </div>
+                        <div class="absolute inset-0 bg-black/70 flex items-center justify-center">
+                            <span class="btn-secondary opacity-50 pointer-events-none">Coming Soon</span>
+                        </div>
                     </div>
-                    <p class="text-orange-400 mt-1">Puzzle</p>
-                </div>
-                 <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
-                    <span class="btn-warning pointer-events-none">Play Now</span>
-                </div>
-            </a>
-            <!-- Game Card 2: Memory Match -->
-            <a href="mpmemory.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 w-64 sm:w-auto flex-shrink-0">
-                <img src="https://static.vecteezy.com/system/resources/previews/012/672/122/original/memory-game-for-preschool-children-cards-with-cartoon-safari-desert-animals-activity-page-for-book-vector.jpg" alt="Memory Match" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <div class="absolute inset-0 p-6 flex flex-col justify-end">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-8 h-8 text-yellow-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <h3 class="text-xl sm:text-2xl font-bold text-white">Memory Match</h3>
-                    </div>
-                    <p class="text-yellow-400 mt-1">Puzzle</p>
-                </div>
-                <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
-                    <span class="btn-warning pointer-events-none">Play Now</span>
-                </div>
-            </a>
-            <!-- Coming Soon Card -->
-            <div class="group relative rounded-lg overflow-hidden shadow-lg cursor-not-allowed filter grayscale w-64 sm:w-auto flex-shrink-0">
-                <img src="https://placehold.co/400x250/1f2937/6b7280?text=?" alt="Coming Soon" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <div class="absolute inset-0 p-6 flex flex-col justify-end">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-8 h-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>
-                        <h3 class="text-xl sm:text-2xl font-bold text-white">Coming Soon</h3>
-                    </div>
-                    <p class="text-gray-400 mt-1">More Multiplayer Fun!</p>
-                </div>
-                <div class="absolute inset-0 bg-black/70 flex items-center justify-center">
-                    <span class="btn-secondary opacity-50 pointer-events-none">Coming Soon</span>
                 </div>
             </div>
-        </div>
-    </div>
-</section>
+        </section>
 
         <!-- Leaderboards Section -->
         <section id="leaderboards" class="py-16 sm:py-24 bg-gray-800/50">
             <div class="container mx-auto px-4 lg:px-8">
-                <h2 class="text-4xl font-black-ops text-center mb-12">Your High Scores</h2>
-                <div id="leaderboard-content" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Leaderboard cards will be injected here -->
+                <h2 class="text-4xl font-black-ops text-center mb-6">Leaderboards</h2>
+
+                <!-- Tabs -->
+                <div class="flex justify-center border-b border-gray-700 mb-12">
+                    <button id="your-scores-tab" class="leaderboard-tab active" data-target="your-scores">Your High Scores</button>
+                    <button id="global-ranks-tab" class="leaderboard-tab" data-target="global-ranks">Global Ranks</button>
                 </div>
-                 <div id="leaderboard-login-prompt" class="text-center text-gray-400">
-                     <p>Please log in to see your high scores.</p>
-                 </div>
+
+                <!-- Tab Content -->
+                <div id="leaderboard-tab-content">
+                    <!-- Your Scores Content -->
+                    <div id="your-scores-content-wrapper">
+                         <div id="your-scores-content" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <!-- User's high scores will be injected here -->
+                        </div>
+                         <div id="your-scores-login-prompt" class="text-center text-gray-400 mt-8">
+                            <p>Please log in to see your high scores.</p>
+                        </div>
+                    </div>
+
+                    <!-- Global Ranks Content -->
+                    <div id="global-ranks-content-wrapper" class="hidden">
+                         <div id="global-ranks-loading" class="text-center">
+                            <div class="loader"></div>
+                            <p class="text-gray-400">Loading global ranks...</p>
+                        </div>
+                         <div id="global-ranks-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                            <!-- Global leaderboard tables will be injected here -->
+                        </div>
+                        <div id="global-ranks-error" class="hidden text-center text-red-400 mt-8">
+                            <p>Could not load global leaderboards. Please try again later.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
+
 
         <!-- How to Play Section -->
         <section id="how-to-play" class="py-16 sm:py-24 bg-gray-900">
@@ -416,8 +471,20 @@
                     <button class="btn-secondary game-info-btn" data-game="Tic-Tac-Toe">Tic-Tac-Toe</button>
                     <button class="btn-warning game-info-btn" data-game="Memory Match">Memory Match</button>
                 </div>
-                <div id="gameExplanationResult" class="mt-12 min-h-[200px] flex items-center justify-center">
-                    <p class="text-gray-500">Select a game to see instructions.</p>
+                <div id="gameExplanationResult" class="mt-12 min-h-[200px] flex flex-col items-center justify-center">
+                     <p class="text-gray-500 mb-4">Select a game to see instructions.</p>
+                     <!-- Placeholder for AI Tips button and results -->
+                     <div id="ai-tips-container" class="mt-6 w-full max-w-2xl text-left hidden">
+                         <button id="get-ai-tips-button" class="btn-secondary-outline mx-auto block mb-4">✨ Get AI Tips</button>
+                         <div id="ai-tips-loading" class="text-center hidden">
+                            <div class="loader !w-6 !h-6"></div>
+                            <p class="text-gray-400">Generating tips...</p>
+                         </div>
+                         <div id="ai-tips-result" class="glassmorphism p-4 rounded-lg text-gray-300 hidden whitespace-pre-wrap"></div>
+                         <div id="ai-tips-error" class="text-center text-red-400 mt-4 hidden">
+                            <p>Could not generate tips. Please try again later.</p>
+                         </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -607,7 +674,7 @@
         </div>
     </div>
 
-    <!-- Fallback Share Modal -->
+    <!-- Share Modal (Fallback + AI Banter) -->
     <div id="shareModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
         <div class="glassmorphism p-8 rounded-2xl text-center max-w-md w-full relative">
             <button id="closeShareModal" class="absolute top-2 right-2 text-gray-400 hover:text-white">
@@ -615,7 +682,14 @@
             </button>
             <h3 class="text-2xl font-bold text-white">Share Your Score!</h3>
             <p class="mt-2 text-gray-300">Share your achievement with your friends.</p>
-            <textarea id="shareText" class="w-full bg-gray-900 text-white rounded-lg p-2 mt-4 h-24 resize-none" readonly></textarea>
+             <textarea id="shareText" class="w-full bg-gray-900 text-white rounded-lg p-2 mt-4 h-24 resize-none" readonly></textarea>
+             <!-- AI Banter Button and Loading/Result Area -->
+             <button id="generateBanterButton" class="btn-secondary-outline w-full mt-2">✨ Generate Banter</button>
+             <div id="banter-loading" class="text-center hidden mt-2">
+                <div class="loader !w-5 !h-5 !border-2"></div>
+             </div>
+             <div id="banter-error" class="text-red-400 mt-2 hidden">Could not generate banter.</div>
+
             <button id="copyShareText" class="btn-primary w-full mt-4">Copy Text</button>
             <div class="mt-4 flex justify-center gap-4">
                 <a id="whatsappShareLink" href="#" target="_blank" class="btn-success">WhatsApp</a>
@@ -674,8 +748,6 @@
             const mobileUserInfo = document.getElementById('mobile-user-info');
             const userDisplayName = document.getElementById('user-display-name');
             const mobileUserDisplayName = document.getElementById('mobile-user-display-name');
-            const leaderboardContent = document.getElementById('leaderboard-content');
-            const leaderboardLoginPrompt = document.getElementById('leaderboard-login-prompt');
             const logoutModal = document.getElementById('logout-modal');
             const confirmLogoutBtn = document.getElementById('confirm-logout-btn');
             const cancelLogoutBtn = document.getElementById('cancel-logout-btn');
@@ -683,7 +755,19 @@
             const closeWelcomeModal = document.getElementById('close-welcome-modal');
             const modalLoginButton = document.getElementById('modal-login-button');
 
-            // --- Auth Functions ---
+            // Leaderboard Elements
+            const yourScoresTab = document.getElementById('your-scores-tab');
+            const globalRanksTab = document.getElementById('global-ranks-tab');
+            const yourScoresContentWrapper = document.getElementById('your-scores-content-wrapper');
+            const globalRanksContentWrapper = document.getElementById('global-ranks-content-wrapper');
+            const yourScoresContent = document.getElementById('your-scores-content');
+            const yourScoresLoginPrompt = document.getElementById('your-scores-login-prompt');
+            const globalRanksGrid = document.getElementById('global-ranks-grid');
+            const globalRanksLoading = document.getElementById('global-ranks-loading');
+            const globalRanksError = document.getElementById('global-ranks-error');
+            let globalLeaderboardsLoaded = false; // Flag to check if global data is fetched
+
+             // --- Auth Functions ---
             const signInWithGoogle = () => {
                 signInWithPopup(auth, provider).catch(e => console.error(e));
                 hideWelcomeModal();
@@ -728,63 +812,222 @@
                 const user = auth.currentUser;
                 if (!user || !gameName || typeof newScore !== 'number') return;
 
-                const scoreRef = doc(db, "highscores", user.uid);
+                const playerName = user.displayName || 'Anonymous'; // Get player name
+                const userId = user.uid;
+
+                // 1. Save Personal High Score
+                const scoreRef = doc(db, "highscores", userId);
                 try {
                     const docSnap = await getDoc(scoreRef);
                     const currentData = docSnap.exists() ? docSnap.data() : {};
                     const currentScore = currentData[gameName];
 
-                    let shouldUpdate = false;
+                    let shouldUpdatePersonal = false;
                     if (scoreType === 'desc') { // Higher is better
-                        if (currentScore === undefined || newScore > currentScore) {
-                            shouldUpdate = true;
-                        }
+                        if (currentScore === undefined || newScore > currentScore) shouldUpdatePersonal = true;
                     } else { // Lower is better (asc)
-                        if (currentScore === undefined || newScore < currentScore) {
-                            shouldUpdate = true;
-                        }
+                        if (currentScore === undefined || newScore < currentScore) shouldUpdatePersonal = true;
                     }
 
-                    if (shouldUpdate) {
+                    if (shouldUpdatePersonal) {
                         await setDoc(scoreRef, { [gameName]: newScore }, { merge: true });
-                        console.log(`New high score for ${gameName}: ${newScore}`);
-                        displayUserHighScores(user);
+                        console.log(`New personal high score for ${gameName}: ${newScore}`);
+                        // Update UI immediately only if 'Your Scores' tab is active
+                        if (yourScoresTab.classList.contains('active')) {
+                           displayUserHighScores(user);
+                        }
                     }
                 } catch (error) {
-                    console.error("Error saving high score: ", error);
+                    console.error("Error saving personal high score: ", error);
+                }
+
+                // 2. Update Global Leaderboard
+                const globalLeaderboardRef = doc(db, "global_leaderboards", gameName);
+                try {
+                    const docSnap = await getDoc(globalLeaderboardRef);
+                    let scores = (docSnap.exists() && Array.isArray(docSnap.data().scores)) ? docSnap.data().scores : [];
+
+                    // Check if player already exists and update score if new one is better
+                    let playerIndex = scores.findIndex(entry => entry && entry.userId === userId);
+                    let shouldUpdateGlobal = false;
+
+                    if (playerIndex > -1) { // Player exists
+                        const existingScore = scores[playerIndex].score;
+                        if ((scoreType === 'desc' && newScore > existingScore) || (scoreType === 'asc' && newScore < existingScore)) {
+                           scores[playerIndex].score = newScore;
+                           scores[playerIndex].playerName = playerName; // Update name in case it changed
+                           shouldUpdateGlobal = true;
+                        }
+                    } else { // New player entry
+                        scores.push({ userId, playerName, score: newScore });
+                        shouldUpdateGlobal = true;
+                    }
+
+                    if (shouldUpdateGlobal) {
+                        // Sort scores (descending for high score, ascending for low score like Memory Match moves)
+                        scores.sort((a, b) => {
+                             if (!a || typeof a.score !== 'number') return 1;
+                             if (!b || typeof b.score !== 'number') return -1;
+                             return (scoreType === 'asc') ? a.score - b.score : b.score - a.score;
+                         });
+
+                        // Keep only top 10
+                        if (scores.length > 10) {
+                            scores = scores.slice(0, 10);
+                        }
+
+                        // Save updated scores array
+                        await setDoc(globalLeaderboardRef, { scores: scores });
+                        console.log(`Global leaderboard updated for ${gameName}`);
+                        globalLeaderboardsLoaded = false; // Mark global data as stale
+                        // Update UI immediately only if 'Global Ranks' tab is active
+                        if (globalRanksTab.classList.contains('active')) {
+                           displayGlobalLeaderboards();
+                        }
+                    }
+
+                } catch (error) {
+                    console.error("Error updating global leaderboard: ", error);
                 }
             };
-            
+
+            // Display User's Personal High Scores
             const displayUserHighScores = async (user) => {
                 if (user) {
-                    leaderboardContent.style.display = 'grid';
-                    leaderboardLoginPrompt.style.display = 'none';
+                    yourScoresContent.style.display = 'grid';
+                    yourScoresLoginPrompt.style.display = 'none';
                     const scoreRef = doc(db, "highscores", user.uid);
-                    const docSnap = await getDoc(scoreRef);
-                    const scores = docSnap.exists() ? docSnap.data() : {};
-                    
-                    const games = ["Astro Jumper", "Car Racer", "Tower Defense", "Memory Match"];
-                    leaderboardContent.innerHTML = games.map(game => {
-                        const score = scores[game] || 0;
-                        let scoreLabel = 'Points';
-                        if (game === 'Tower Defense') scoreLabel = 'Waves';
-                        if (game === 'Memory Match') scoreLabel = 'Moves';
+                    try {
+                        const docSnap = await getDoc(scoreRef);
+                        const scores = docSnap.exists() ? docSnap.data() : {};
+                        
+                        const games = ["Astro Jumper", "Car Racer", "Tower Defense", "Memory Match"];
+                        yourScoresContent.innerHTML = games.map(game => {
+                            const score = scores[game] === undefined ? '-' : scores[game]; // Handle undefined score
+                            let scoreLabel = 'Points';
+                            if (game === 'Tower Defense') scoreLabel = 'Waves';
+                            if (game === 'Memory Match') scoreLabel = 'Moves';
 
-                        return `
-                        <div class="glassmorphism p-6 rounded-xl text-center">
-                            <h3 class="text-2xl font-bold text-indigo-300">${game}</h3>
-                            <p class="text-4xl font-black-ops text-white mt-4">${score}</p>
-                            <p class="text-gray-400 mt-1">${scoreLabel}</p>
-                        </div>
-                        `;
-                    }).join('');
-
+                            return `
+                            <div class="glassmorphism p-6 rounded-xl text-center">
+                                <h3 class="text-2xl font-bold text-indigo-300">${game}</h3>
+                                <p class="text-4xl font-black-ops text-white mt-4">${score}</p>
+                                <p class="text-gray-400 mt-1">${scoreLabel}</p>
+                            </div>
+                            `;
+                        }).join('');
+                    } catch (error) {
+                         console.error("Error fetching user scores:", error);
+                         yourScoresContent.innerHTML = '<p class="text-center text-red-400 col-span-full">Could not load your scores.</p>';
+                    }
                 } else {
-                    leaderboardContent.style.display = 'none';
-                    leaderboardLoginPrompt.style.display = 'block';
-                    leaderboardContent.innerHTML = '';
+                    yourScoresContent.style.display = 'none';
+                    yourScoresLoginPrompt.style.display = 'block';
+                    yourScoresContent.innerHTML = '';
                 }
             };
+
+            // Display Global Leaderboards
+            const displayGlobalLeaderboards = async () => {
+                if (!auth.currentUser) {
+                    globalRanksGrid.innerHTML = ''; // Clear previous content
+                    globalRanksLoading.style.display = 'none';
+                    globalRanksError.style.display = 'none';
+                    globalRanksContentWrapper.innerHTML += '<p id="global-login-prompt" class="text-center text-gray-400 mt-8">Please log in to view global ranks.</p>';
+                     // Hide other elements if they exist
+                    const existingPrompt = document.getElementById('global-login-prompt');
+                    if(existingPrompt) existingPrompt.style.display = 'block';
+                    return;
+                }
+
+                // Remove login prompt if user is logged in
+                 const loginPrompt = document.getElementById('global-login-prompt');
+                 if (loginPrompt) loginPrompt.style.display = 'none';
+
+
+                globalRanksLoading.style.display = 'block'; // Show loading indicator
+                globalRanksGrid.innerHTML = ''; // Clear previous content
+                globalRanksError.style.display = 'none';
+
+                const games = ["Astro Jumper", "Car Racer", "Tower Defense", "Memory Match"];
+                let fetchError = false;
+
+                try {
+                     for (const game of games) {
+                         const leaderboardRef = doc(db, "global_leaderboards", game);
+                         const docSnap = await getDoc(leaderboardRef);
+                         const scores = (docSnap.exists() && Array.isArray(docSnap.data().scores)) ? docSnap.data().scores : [];
+
+                         let scoreLabel = 'Points';
+                         if (game === 'Tower Defense') scoreLabel = 'Waves';
+                         if (game === 'Memory Match') scoreLabel = 'Moves';
+
+                         // Sort scores (desc for points/waves, asc for moves) before displaying
+                         scores.sort((a, b) => {
+                             if (!a || typeof a.score !== 'number') return 1;
+                             if (!b || typeof b.score !== 'number') return -1;
+                             return (scoreLabel === 'Moves') ? a.score - b.score : b.score - a.score;
+                         });
+
+                         let leaderboardHTML = `
+                            <div class="glassmorphism p-6 rounded-xl">
+                                <h3 class="text-2xl font-bold text-center text-indigo-300 mb-4">${game}</h3>
+                                <ol class="space-y-3">`;
+
+                         if (scores.length > 0) {
+                             scores.slice(0, 10).forEach((entry, index) => { // Take only top 10
+                                 if (entry && typeof entry.playerName === 'string' && typeof entry.score === 'number') {
+                                     leaderboardHTML += `
+                                        <li class="flex items-center justify-between text-lg">
+                                            <span class="flex items-center min-w-0">
+                                                <span class="font-bold text-gray-400 w-8 flex-shrink-0">${index + 1}.</span>
+                                                <span class="text-white truncate" title="${entry.playerName}">${entry.playerName}</span>
+                                            </span>
+                                            <span class="font-bold text-sky-400 flex-shrink-0 ml-2">${entry.score} ${scoreLabel}</span>
+                                        </li>`;
+                                 } else {
+                                     console.warn(`Invalid entry format in ${game} leaderboard:`, entry);
+                                 }
+                             });
+                         } else {
+                             leaderboardHTML += `<li class="text-center text-gray-400">No scores yet. Be the first!</li>`;
+                         }
+
+                         leaderboardHTML += `</ol></div>`;
+                         globalRanksGrid.innerHTML += leaderboardHTML;
+                     }
+                     globalLeaderboardsLoaded = true; // Mark as loaded
+                } catch (error) {
+                    console.error("Error fetching global leaderboards: ", error);
+                    fetchError = true;
+                } finally {
+                    globalRanksLoading.style.display = 'none'; // Hide loading indicator
+                    if (fetchError) {
+                        globalRanksError.style.display = 'block';
+                    }
+                }
+            };
+
+            // --- Leaderboard Tab Switching Logic ---
+            function switchTab(targetId) {
+                const isActiveYourScores = targetId === 'your-scores';
+
+                yourScoresTab.classList.toggle('active', isActiveYourScores);
+                globalRanksTab.classList.toggle('active', !isActiveYourScores);
+
+                yourScoresContentWrapper.classList.toggle('hidden', !isActiveYourScores);
+                globalRanksContentWrapper.classList.toggle('hidden', isActiveYourScores);
+
+                if (!isActiveYourScores && !globalLeaderboardsLoaded) {
+                    displayGlobalLeaderboards(); // Fetch global scores only when tab is clicked & not already loaded
+                } else if(isActiveYourScores) {
+                    // Refresh personal scores when switching back, in case they changed
+                    displayUserHighScores(auth.currentUser);
+                }
+            }
+
+            yourScoresTab.addEventListener('click', () => switchTab('your-scores'));
+            globalRanksTab.addEventListener('click', () => switchTab('global-ranks'));
 
 
             // --- Auth State Change Listener ---
@@ -796,28 +1039,36 @@
                 mobileUserInfo.style.display = isLoggedIn ? 'block' : 'none';
 
                 if (user) {
-                    userDisplayName.innerHTML = `${user.displayName} <br> <span class="text-xs text-gray-400">${user.email}</span>`;
-                    mobileUserDisplayName.innerHTML = `${user.displayName} <br> <span class="text-xs text-gray-400">${user.email}</span>`;
+                    userDisplayName.innerHTML = `${user.displayName} <br> <span class="text-xs text-gray-400">${user.email || 'No email'}</span>`;
+                    mobileUserDisplayName.innerHTML = `${user.displayName} <br> <span class="text-xs text-gray-400">${user.email || 'No email'}</span>`;
                     hideWelcomeModal();
                 } else {
                     const isMobile = window.innerWidth <= 768;
-                    if (isMobile) {
-                        showWelcomeModal();
-                    }
+                    if (isMobile) showWelcomeModal();
+                    globalLeaderboardsLoaded = false; // Reset global load status on logout
                 }
-                displayUserHighScores(user);
+                 // Always update the currently active tab content
+                 if (yourScoresTab.classList.contains('active')) {
+                     displayUserHighScores(user);
+                 } else {
+                     globalLeaderboardsLoaded = false; // Mark stale
+                     displayGlobalLeaderboards(); // Re-fetch or show login prompt
+                 }
+                 switchTab(yourScoresTab.classList.contains('active') ? 'your-scores' : 'global-ranks'); // Ensure correct tab content visibility
             });
-            // --- Handle Login Redirect ---
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('login') === 'true') {
-                // Check if a user is already signed in
-                if (!auth.currentUser) {
-                    signInWithGoogle();
-                }
+
+             // --- Handle Login Redirect ---
+            // (Keep this logic if you use it for specific login flows)
+            const urlParamsCheck = new URLSearchParams(window.location.search);
+            if (urlParamsCheck.get('login') === 'true' && !auth.currentUser) {
+                signInWithGoogle();
             }
-            
+
+            // --- Initial Load ---
+             switchTab('your-scores'); // Default to showing "Your Scores"
+
             // #############################################
-            // ### MOBILE MENU TOGGLE                  ###
+            // ### MOBILE MENU TOGGLE                    ###
             // #############################################
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
@@ -827,42 +1078,23 @@
             });
 
             // #############################################
-            // ### HOW TO PLAY SECTION                 ###
+            // ### HOW TO PLAY & AI TIPS SECTION         ###
             // #############################################
             const gameInfoButtons = document.querySelectorAll('.game-info-btn');
             const gameExplanationResultEl = document.getElementById('gameExplanationResult');
+            const aiTipsContainer = document.getElementById('ai-tips-container');
+            const getAiTipsButton = document.getElementById('get-ai-tips-button');
+            const aiTipsLoading = document.getElementById('ai-tips-loading');
+            const aiTipsResult = document.getElementById('ai-tips-result');
+            const aiTipsError = document.getElementById('ai-tips-error');
+            let currentGameForTips = null;
 
-            const gameExplanations = {
-                "Astro Jumper": {
-                    objective: "Survive as long as possible by jumping from one platform to the next without falling into the void.",
-                    gameplay: "Your character moves forward automatically. Your only job is to time your jumps perfectly to land on the next platform.",
-                    desktop_controls: "Click anywhere on the screen to jump.",
-                    mobile_controls: "Tap anywhere on the screen to jump."
-                },
-                "Car Racer": {
-                    objective: "Dodge the oncoming traffic for as long as you can to get the highest possible score.",
-                    gameplay: "You control a car at the bottom of the screen. Other cars will drive down towards you, and you must move left and right to avoid crashing.",
-                    desktop_controls: "Use the Left and Right Arrow Keys to move your car.",
-                    mobile_controls: "Touch and drag your finger left or right on the screen to move the car."
-                },
-                "Tower Defense": {
-                    objective: "Prevent enemies from reaching the end of the path by building and placing defensive towers.",
-                    gameplay: "Use your starting gold to build turrets on the grass. Defeated enemies give you more gold to build more towers. Survive as many waves as you can!",
-                    desktop_controls: "Click the 'Turret' button, then click on a valid green tile to place it. Click 'Next Wave' to start the attack.",
-                    mobile_controls: "Tap the 'Turret' button, then tap on a valid green tile to place it. Tap 'Next Wave' to start the attack."
-                },
-                 "Tic-Tac-Toe": {
-                    objective: "Be the first player to get three of your marks in a row, either horizontally, vertically, or diagonally.",
-                    gameplay: "Players take turns placing their mark ('X' or 'O') in an empty square on a 3x3 grid. The game ends when one player wins or the board is full, resulting in a draw.",
-                    desktop_controls: "Click on an empty square to place your mark.",
-                    mobile_controls: "Tap on an empty square to place your mark."
-                },
-                "Memory Match": {
-                    objective: "Find all the matching pairs of cards in the fewest number of moves.",
-                    gameplay: "Click or tap on a card to flip it over. Then, try to find its matching pair. If the cards don't match, they will be flipped back over.",
-                    desktop_controls: "Click on a card to flip it.",
-                    mobile_controls: "Tap on a card to flip it."
-                }
+            const gameExplanations = { /* ... Keep your existing game explanations ... */
+                 "Astro Jumper": { objective: "Survive as long as possible by jumping from one platform to the next without falling into the void.", gameplay: "Your character moves forward automatically. Your only job is to time your jumps perfectly to land on the next platform.", desktop_controls: "Click anywhere on the screen to jump.", mobile_controls: "Tap anywhere on the screen to jump." },
+                 "Car Racer": { objective: "Dodge the oncoming traffic for as long as you can to get the highest possible score.", gameplay: "You control a car at the bottom of the screen. Other cars will drive down towards you, and you must move left and right to avoid crashing.", desktop_controls: "Use the Left and Right Arrow Keys to move your car.", mobile_controls: "Touch and drag your finger left or right on the screen to move the car." },
+                 "Tower Defense": { objective: "Prevent enemies from reaching the end of the path by building and placing defensive towers.", gameplay: "Use your starting gold to build turrets on the grass. Defeated enemies give you more gold to build more towers. Survive as many waves as you can!", desktop_controls: "Click the 'Turret' button, then click on a valid green tile to place it. Click 'Next Wave' to start the attack.", mobile_controls: "Tap the 'Turret' button, then tap on a valid green tile to place it. Tap 'Next Wave' to start the attack." },
+                 "Tic-Tac-Toe": { objective: "Be the first player to get three of your marks in a row, either horizontally, vertically, or diagonally.", gameplay: "Players take turns placing their mark ('X' or 'O') in an empty square on a 3x3 grid. The game ends when one player wins or the board is full, resulting in a draw.", desktop_controls: "Click on an empty square to place your mark.", mobile_controls: "Tap on an empty square to place your mark." },
+                 "Memory Match": { objective: "Find all the matching pairs of cards in the fewest number of moves.", gameplay: "Click or tap on a card to flip it over. Then, try to find its matching pair. If the cards don't match, they will be flipped back over.", desktop_controls: "Click on a card to flip it.", mobile_controls: "Tap on a card to flip it." }
             };
 
             gameInfoButtons.forEach(button => {
@@ -875,6 +1107,8 @@
             function showGameExplanation(gameName) {
                 const info = gameExplanations[gameName];
                 if (info) {
+                     // Display basic info first
+                    gameExplanationResultEl.querySelector('p').classList.add('hidden'); // Hide initial prompt
                     gameExplanationResultEl.innerHTML = `
                         <div class="glassmorphism p-8 rounded-2xl text-left max-w-2xl w-full">
                             <h3 class="text-2xl font-bold text-indigo-300">Objective</h3>
@@ -885,55 +1119,226 @@
                             <p class="mt-2 text-gray-300"><strong class="text-white">Desktop:</strong> ${info.desktop_controls}</p>
                             <p class="mt-2 text-gray-300"><strong class="text-white">Mobile:</strong> ${info.mobile_controls}</p>
                         </div>
-                    `;
+                        ${gameExplanationResultEl.querySelector('#ai-tips-container').outerHTML}
+                    `; // Re-append AI tips container structure
+
+                    currentGameForTips = gameName;
+                    // Reset and show AI tips section
+                    const newAiTipsContainer = gameExplanationResultEl.querySelector('#ai-tips-container');
+                    newAiTipsContainer.classList.remove('hidden');
+                    newAiTipsContainer.querySelector('#ai-tips-loading').classList.add('hidden');
+                    newAiTipsContainer.querySelector('#ai-tips-result').classList.add('hidden').textContent = '';
+                    newAiTipsContainer.querySelector('#ai-tips-error').classList.add('hidden');
+                    // Re-add event listener to the new button
+                     newAiTipsContainer.querySelector('#get-ai-tips-button').addEventListener('click', fetchAiTips);
+
+                } else {
+                    // Reset if game info not found
+                    gameExplanationResultEl.querySelector('p').classList.remove('hidden');
+                    gameExplanationResultEl.querySelector('#ai-tips-container').classList.add('hidden');
+                    currentGameForTips = null;
+                }
+            }
+             // --- Function to call Gemini API for tips ---
+            async function fetchAiTips() {
+                if (!currentGameForTips) return;
+
+                aiTipsLoading.classList.remove('hidden');
+                aiTipsResult.classList.add('hidden');
+                aiTipsError.classList.add('hidden');
+                getAiTipsButton.disabled = true;
+
+                const apiKey = ""; // Leave empty for Canvas environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                const systemPrompt = `You are a helpful gaming expert providing concise tips for the game specified. Format tips clearly, perhaps using bullet points or numbered lists. Focus on strategy and improvement. Keep it brief (2-4 key tips).`;
+                const userQuery = `Give me some expert tips for playing ${currentGameForTips}.`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                };
+
+                try {
+                    // Implement exponential backoff for retries
+                    let response;
+                    let attempts = 0;
+                    const maxAttempts = 5;
+                    let delay = 1000; // Start with 1 second
+
+                    while (attempts < maxAttempts) {
+                        response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (response.ok) {
+                            break; // Success
+                        } else if (response.status === 429 || response.status >= 500) {
+                             // Retry on rate limit or server errors
+                            attempts++;
+                            if (attempts >= maxAttempts) throw new Error(`API request failed after ${maxAttempts} attempts with status ${response.status}`);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            delay *= 2; // Double the delay
+                        } else {
+                            // Don't retry for other client errors (e.g., 400 Bad Request)
+                            throw new Error(`API request failed with status ${response.status}`);
+                        }
+                    }
+
+
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                    if (text) {
+                        aiTipsResult.textContent = text;
+                        aiTipsResult.classList.remove('hidden');
+                    } else {
+                        throw new Error("No text content found in API response.");
+                    }
+                } catch (error) {
+                    console.error("Error fetching AI tips:", error);
+                    aiTipsError.classList.remove('hidden');
+                } finally {
+                    aiTipsLoading.classList.add('hidden');
+                    getAiTipsButton.disabled = false;
                 }
             }
 
+
             // #############################################
-            // ### SHARE SCORE FUNCTIONALITY           ###
+            // ### SHARE SCORE & AI BANTER FUNCTIONALITY ###
             // #############################################
             const shareModal = document.getElementById('shareModal');
             const closeShareModalBtn = document.getElementById('closeShareModal');
             const copyShareTextBtn = document.getElementById('copyShareText');
-            
-            function shareScore(gameName, score, scoreType = 'points') {
-                const url = window.location.origin + window.location.pathname;
-                let text = `I just scored ${score} ${scoreType} in ${gameName} on FalconixGaming! Can you beat my score?`;
+            const generateBanterButton = document.getElementById('generateBanterButton');
+            const banterLoading = document.getElementById('banter-loading');
+            const banterError = document.getElementById('banter-error');
+            const shareTextEl = document.getElementById('shareText'); // Ensure this is defined
+            let currentShareInfo = { gameName: '', score: 0, scoreType: '' }; // Store current game info for banter
 
-                if (navigator.share) {
-                    navigator.share({
-                        title: `My ${gameName} Score!`,
-                        text: `${text}\n\nPlay now!`,
-                        url: url,
-                    })
-                    .then(() => console.log('Successful share'))
-                    .catch((error) => console.log('Error sharing', error));
-                } else {
-                    const shareTextEl = document.getElementById('shareText');
-                    const whatsappLink = document.getElementById('whatsappShareLink');
-                    const twitterLink = document.getElementById('twitterShareLink');
+            function openShareModal(gameName, score, scoreType = 'points') {
+                 currentShareInfo = { gameName, score, scoreType }; // Store context
+                 const url = window.location.origin + window.location.pathname;
+                 const baseText = `I just scored ${score} ${scoreType} in ${gameName} on FalconixGaming! Can you beat my score?\n\nPlay now: ${url}`;
+                 shareTextEl.value = baseText; // Set initial text
 
-                    const fullShareText = `${text}\n\nPlay now: ${url}`;
-                    shareTextEl.value = fullShareText;
-                    whatsappLink.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(fullShareText)}`;
-                    twitterLink.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullShareText)}`;
-                    
-                    shareModal.classList.remove('hidden');
+                 // Reset banter state
+                 banterLoading.classList.add('hidden');
+                 banterError.classList.add('hidden');
+                 generateBanterButton.disabled = false;
+
+                 // Set up social links with base text
+                 const whatsappLink = document.getElementById('whatsappShareLink');
+                 const twitterLink = document.getElementById('twitterShareLink');
+                 whatsappLink.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(baseText)}`;
+                 twitterLink.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(baseText)}`;
+
+                 shareModal.classList.remove('hidden');
+            }
+
+
+            // --- Function to call Gemini API for banter ---
+            async function fetchAiBanter() {
+                const { gameName, score, scoreType } = currentShareInfo;
+                if (!gameName) return;
+
+                banterLoading.classList.remove('hidden');
+                banterError.classList.add('hidden');
+                generateBanterButton.disabled = true;
+
+                const apiKey = ""; // Leave empty
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                // More creative/taunting system prompt
+                const systemPrompt = `You are a witty gamer generating short, fun, and slightly taunting social media messages about a high score. Be creative and playful. Keep it under 140 characters. Include the score and game name naturally.`;
+                const userQuery = `Generate a fun social media post bragging about my score of ${score} ${scoreType} in the game ${gameName}. Make it a challenge to my friends.`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                };
+
+                 try {
+                     // Implement exponential backoff for retries
+                    let response;
+                    let attempts = 0;
+                    const maxAttempts = 5;
+                    let delay = 1000;
+
+                    while (attempts < maxAttempts) {
+                        response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                         if (response.ok) break;
+                         else if (response.status === 429 || response.status >= 500) {
+                            attempts++;
+                            if (attempts >= maxAttempts) throw new Error(`API request failed after ${maxAttempts} attempts with status ${response.status}`);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            delay *= 2;
+                        } else {
+                            throw new Error(`API request failed with status ${response.status}`);
+                        }
+                    }
+
+                    const result = await response.json();
+                    const banterText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                    if (banterText) {
+                        const url = window.location.origin + window.location.pathname;
+                        const fullShareText = `${banterText.trim()}\n\nThink you can do better? Play now: ${url}`;
+                        shareTextEl.value = fullShareText; // Update text area
+
+                         // Update social links
+                         const whatsappLink = document.getElementById('whatsappShareLink');
+                         const twitterLink = document.getElementById('twitterShareLink');
+                         whatsappLink.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(fullShareText)}`;
+                         twitterLink.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullShareText)}`;
+
+                    } else {
+                        throw new Error("No banter text found in API response.");
+                    }
+                } catch (error) {
+                    console.error("Error fetching AI banter:", error);
+                    banterError.classList.remove('hidden');
+                     // Optionally revert to base text on error
+                     // openShareModal(gameName, score, scoreType);
+                } finally {
+                    banterLoading.classList.add('hidden');
+                    generateBanterButton.disabled = false;
                 }
             }
 
+            generateBanterButton.addEventListener('click', fetchAiBanter);
+
             closeShareModalBtn.addEventListener('click', () => shareModal.classList.add('hidden'));
             copyShareTextBtn.addEventListener('click', () => {
-                const shareTextEl = document.getElementById('shareText');
                 shareTextEl.select();
-                shareTextEl.setSelectionRange(0, 99999); // For mobile devices
-                document.execCommand('copy');
-                copyShareTextBtn.textContent = 'Copied!';
-                setTimeout(() => { copyShareTextBtn.textContent = 'Copy Text'; }, 2000);
+                shareTextEl.setSelectionRange(0, 99999); // For mobile
+                try {
+                    document.execCommand('copy');
+                    copyShareTextBtn.textContent = 'Copied!';
+                    setTimeout(() => { copyShareTextBtn.textContent = 'Copy Text'; }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                    copyShareTextBtn.textContent = 'Copy Failed';
+                     setTimeout(() => { copyShareTextBtn.textContent = 'Copy Text'; }, 2000);
+                }
             });
 
+
+            // --- Modify existing share button listeners to use openShareModal ---
+            shareAstroJumperScoreBtn.addEventListener('click', () => openShareModal('Astro Jumper', score, 'points'));
+            shareRacerScoreBtn.addEventListener('click', () => openShareModal('Car Racer', Math.floor(racerScore), 'points'));
+            shareTDScoreBtn.addEventListener('click', () => openShareModal('Tower Defense', wave, 'waves'));
+            shareMemoryScoreBtn.addEventListener('click', () => openShareModal('Memory Match', moves, 'moves'));
+
+
             // #############################################
-            // ### ASTRO JUMPER (3D GAME) CODE         ###
+            // ### ASTRO JUMPER (3D GAME) CODE           ###
             // #############################################
             const gameContainer = document.getElementById('gameContainer');
             const canvas = document.getElementById('gameCanvas');
@@ -942,7 +1347,7 @@
             const restartButton = document.getElementById('restartButton');
             const scoreElement = document.getElementById('score');
             const finalScoreElement = document.getElementById('finalScore');
-            const shareAstroJumperScoreBtn = document.getElementById('shareAstroJumperScore');
+            // shareAstroJumperScoreBtn is already defined above
             let isGameRunning = false;
             let score = 0;
             let player, playerBody;
@@ -954,925 +1359,1362 @@
             const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
             const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -20, 0) });
             
-            function initAstroJumper() {
-                renderer.setSize(gameContainer.clientWidth, gameContainer.clientHeight);
-                renderer.setPixelRatio(window.devicePixelRatio);
-                renderer.shadowMap.enabled = true;
-                renderer.setClearColor(0x111827, 1);
-                camera.position.set(0, 5, 15);
-                camera.lookAt(0, 0, 0);
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-                scene.add(ambientLight);
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-                directionalLight.position.set(10, 20, 5);
-                directionalLight.castShadow = true;
-                scene.add(directionalLight);
-                createStarfield();
-                resetAstroJumper();
-                animateAstroJumper();
+            function initAstroJumper() { /* ... Astro Jumper init logic ... */
+                 renderer.setSize(gameContainer.clientWidth, gameContainer.clientHeight);
+                 renderer.setPixelRatio(window.devicePixelRatio);
+                 renderer.shadowMap.enabled = true;
+                 renderer.setClearColor(0x111827, 1); // Match body background
+                 camera.position.set(0, 5, 15);
+                 camera.lookAt(0, 0, 0);
+                 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                 scene.add(ambientLight);
+                 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                 directionalLight.position.set(10, 20, 5);
+                 directionalLight.castShadow = true;
+                 scene.add(directionalLight);
+                 createStarfield(); // Add starfield background
+                 resetAstroJumper(); // Initial setup
+                 animateAstroJumper(); // Start render loop
             }
-            function createStarfield() {
-                const starVertices = [];
-                for (let i = 0; i < 10000; i++) { starVertices.push(THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000)); }
-                const starGeometry = new THREE.BufferGeometry();
-                starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
-                const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: 0x888888 }));
-                scene.add(stars);
+            function createStarfield() { /* ... Astro Jumper starfield logic ... */
+                 const starVertices = [];
+                 for (let i = 0; i < 10000; i++) { starVertices.push(THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000)); }
+                 const starGeometry = new THREE.BufferGeometry();
+                 starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+                 const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: 0x888888, size: 1.5, sizeAttenuation: true }));
+                 scene.add(stars);
             }
-            function createPlayer() {
-                const geometry = new THREE.IcosahedronGeometry(0.5, 0);
-                const material = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, flatShading: true });
-                player = new THREE.Mesh(geometry, material);
-                player.castShadow = true;
-                scene.add(player);
-                const shape = new CANNON.Sphere(0.5);
-                playerBody = new CANNON.Body({ mass: 1, shape });
-                playerBody.position.set(0, 5, 0);
-                world.addBody(playerBody);
+            function createPlayer() { /* ... Astro Jumper player creation ... */
+                 const geometry = new THREE.IcosahedronGeometry(0.5, 0);
+                 const material = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, flatShading: true });
+                 player = new THREE.Mesh(geometry, material);
+                 player.castShadow = true;
+                 scene.add(player);
+                 const shape = new CANNON.Sphere(0.5);
+                 playerBody = new CANNON.Body({ mass: 1, shape });
+                 playerBody.position.set(0, 5, 0); // Start slightly above first platform
+                 world.addBody(playerBody);
             }
-            function createPlatform(x, y, z, isFirst = false) {
-                const width = isFirst ? 4 : THREE.MathUtils.randFloat(2.5, 4);
-                const geometry = new THREE.BoxGeometry(width, 0.5, 3);
-                const material = new THREE.MeshStandardMaterial({ color: 0x475569, flatShading: true });
-                const platform = new THREE.Mesh(geometry, material);
-                platform.position.set(x, y, z);
-                platform.receiveShadow = true;
-                scene.add(platform);
-                platforms.push(platform);
-                const shape = new CANNON.Box(new CANNON.Vec3(width / 2, 0.5 / 2, 3 / 2));
-                const platformBody = new CANNON.Body({ mass: 0, shape, material: new CANNON.Material() });
-                platformBody.position.set(x, y, z);
-                world.addBody(platformBody);
-                platformBodies.push(platformBody);
+            function createPlatform(x, y, z, isFirst = false) { /* ... Astro Jumper platform creation ... */
+                 const width = isFirst ? 4 : THREE.MathUtils.randFloat(2.5, 4);
+                 const geometry = new THREE.BoxGeometry(width, 0.5, 3);
+                 const material = new THREE.MeshStandardMaterial({ color: 0x475569, flatShading: true }); // gray-600
+                 const platform = new THREE.Mesh(geometry, material);
+                 platform.position.set(x, y, z);
+                 platform.receiveShadow = true;
+                 scene.add(platform);
+                 platforms.push(platform);
+                 // Physics body
+                 const shape = new CANNON.Box(new CANNON.Vec3(width / 2, 0.5 / 2, 3 / 2));
+                 const platformBody = new CANNON.Body({ mass: 0, shape, material: new CANNON.Material() }); // Static body
+                 platformBody.position.set(x, y, z);
+                 world.addBody(platformBody);
+                 platformBodies.push(platformBody);
             }
-            function generatePlatforms() {
-                createPlatform(0, 0, 0, true);
+            function generatePlatforms() { /* ... Astro Jumper platform generation ... */
+                createPlatform(0, 0, 0, true); // First platform at origin
                 nextPlatformX = 0;
-                for (let i = 0; i < 15; i++) generateNextPlatform();
-            }
-            function generateNextPlatform() {
-                const lastPlatform = platforms[platforms.length - 1];
-                const x = lastPlatform.position.x + THREE.MathUtils.randFloat(5, 8);
-                const y = lastPlatform.position.y + THREE.MathUtils.randFloat(-1.5, 1.5);
-                createPlatform(x, y, 0);
-                nextPlatformX = x;
-            }
-            function playerJump() {
-                if (!isGameRunning) return;
-                const from = playerBody.position;
-                const to = new CANNON.Vec3(from.x, from.y - 0.51, from.z);
-                if (world.raycastClosest(from, to, {}, new CANNON.RaycastResult())) { playerBody.velocity.y = 10; }
-            }
-            function resetAstroJumper() {
-                platforms.forEach(p => scene.remove(p));
-                platformBodies.forEach(b => world.removeBody(b));
-                if (player) scene.remove(player);
-                if (playerBody) world.removeBody(playerBody);
-                platforms.length = 0;
-                platformBodies.length = 0;
-                createPlayer();
-                playerBody.velocity.x = 6;
-                generatePlatforms();
-                score = 0;
-                scoreElement.innerText = '0';
-                camera.position.set(0, 5, 15);
-            }
-            function startAstroJumper() {
-                resetAstroJumper();
-                isGameRunning = true;
-                document.getElementById('uiLayer').classList.add('pointer-events-passthrough');
-                document.getElementById('uiLayer').style.backgroundColor = 'transparent';
-                document.getElementById('startScreen').style.display = 'none';
-                document.getElementById('gameOverScreen').style.display = 'none';
-                document.getElementById('inGameUI').style.display = 'block';
-            }
-            async function endAstroJumper() {
-                isGameRunning = false;
-                finalScoreElement.innerText = score;
-                await saveHighScore('Astro Jumper', score);
-                document.getElementById('uiLayer').classList.remove('pointer-events-passthrough');
-                document.getElementById('uiLayer').style.backgroundColor = 'rgba(0,0,0,0.5)';
-                document.getElementById('inGameUI').style.display = 'none';
-                document.getElementById('gameOverScreen').style.display = 'flex';
-            }
-            function animateAstroJumper() {
-                requestAnimationFrame(animateAstroJumper);
-                if (isGameRunning) {
-                    world.step(1 / 60);
-                    if (player && playerBody) {
-                        player.position.copy(playerBody.position);
-                        player.quaternion.copy(playerBody.quaternion);
-
-                        const newScore = Math.floor(player.position.x);
-                        if (newScore > score) {
-                            score = newScore;
-                            scoreElement.innerText = score;
-                        }
-                    }
-                    const targetCameraX = player.position.x + 5;
-                    const targetCameraY = player.position.y + 5;
-                    camera.position.x += (targetCameraX - camera.position.x) * 0.05;
-                    camera.position.y += (targetCameraY - camera.position.y) * 0.05;
-                    camera.lookAt(player.position.x, player.position.y, player.position.z);
-                    if (player.position.x > nextPlatformX - 20) generateNextPlatform();
-                    if (platforms.length > 20) {
-                        scene.remove(platforms.shift());
-                        world.removeBody(platformBodies.shift());
-                    }
-                    if (player.position.y < -10 || player.position.y > 20) endAstroJumper();
+                for (let i = 0; i < 15; i++) { // Generate initial platforms
+                    generateNextPlatform();
                 }
-                renderer.render(scene, camera);
+            }
+            function generateNextPlatform() { /* ... Astro Jumper next platform logic ... */
+                const lastPlatform = platforms[platforms.length - 1];
+                const x = lastPlatform.position.x + THREE.MathUtils.randFloat(5, 8); // Distance between platforms
+                const y = lastPlatform.position.y + THREE.MathUtils.randFloat(-1.5, 1.5); // Height variation
+                createPlatform(x, y, 0);
+                nextPlatformX = x; // Update position for generating next one
+            }
+            function playerJump() { /* ... Astro Jumper jump logic ... */
+                 if (!isGameRunning) return;
+                 // Raycast down to check if player is grounded
+                 const from = playerBody.position;
+                 const to = new CANNON.Vec3(from.x, from.y - 0.51, from.z); // Slightly below the player sphere
+                 const result = new CANNON.RaycastResult();
+                 if (world.raycastClosest(from, to, {}, result)) {
+                     playerBody.velocity.y = 10; // Apply upward velocity (jump force)
+                 }
+            }
+            function resetAstroJumper() { /* ... Astro Jumper reset logic ... */
+                 // Remove existing objects
+                 platforms.forEach(p => scene.remove(p));
+                 platformBodies.forEach(b => world.removeBody(b));
+                 if (player) scene.remove(player);
+                 if (playerBody) world.removeBody(playerBody);
+
+                 // Clear arrays
+                 platforms.length = 0;
+                 platformBodies.length = 0;
+
+                 // Create new player and platforms
+                 createPlayer();
+                 playerBody.velocity.x = 6; // Set constant forward velocity
+                 generatePlatforms();
+
+                 // Reset score and camera
+                 score = 0;
+                 scoreElement.innerText = '0';
+                 camera.position.set(0, 5, 15); // Reset camera position relative to start
+            }
+            function startAstroJumper() { /* ... Astro Jumper start logic ... */
+                 resetAstroJumper();
+                 isGameRunning = true;
+                 document.getElementById('uiLayer').classList.add('pointer-events-passthrough'); // Allow clicks through UI to canvas
+                 document.getElementById('uiLayer').style.backgroundColor = 'transparent';
+                 document.getElementById('startScreen').style.display = 'none';
+                 document.getElementById('gameOverScreen').style.display = 'none';
+                 document.getElementById('inGameUI').style.display = 'block';
+            }
+            async function endAstroJumper() { /* ... Astro Jumper end logic ... */
+                 if (!isGameRunning) return; // Prevent multiple calls
+                 isGameRunning = false;
+                 finalScoreElement.innerText = score;
+                 await saveHighScore('Astro Jumper', score); // Save score after game ends
+                 document.getElementById('uiLayer').classList.remove('pointer-events-passthrough');
+                 document.getElementById('uiLayer').style.backgroundColor = 'rgba(0,0,0,0.5)'; // Dim background
+                 document.getElementById('inGameUI').style.display = 'none';
+                 document.getElementById('gameOverScreen').style.display = 'flex';
+            }
+            function animateAstroJumper() { /* ... Astro Jumper animation loop ... */
+                 requestAnimationFrame(animateAstroJumper);
+
+                 if (isGameRunning) {
+                     world.step(1 / 60); // Update physics world
+
+                     if (player && playerBody) {
+                         player.position.copy(playerBody.position); // Sync Three.js mesh with Cannon.js body
+                         player.quaternion.copy(playerBody.quaternion);
+
+                         // Update score based on x position
+                         const newScore = Math.max(0, Math.floor(player.position.x));
+                         if (newScore > score) {
+                             score = newScore;
+                             scoreElement.innerText = score;
+                         }
+                          // Make camera follow player smoothly
+                         const targetCameraX = player.position.x + 5; // Offset camera slightly ahead
+                         const targetCameraY = player.position.y + 5; // Offset camera slightly above
+                         camera.position.x += (targetCameraX - camera.position.x) * 0.05; // Lerp for smooth follow
+                         camera.position.y += (targetCameraY - camera.position.y) * 0.05;
+                         camera.lookAt(player.position.x, player.position.y, player.position.z); // Always look at the player
+
+
+                         // Generate new platforms ahead and remove old ones behind
+                         if (player.position.x > nextPlatformX - 20) {
+                             generateNextPlatform();
+                         }
+                         if (platforms.length > 20) { // Limit number of platforms in scene
+                             scene.remove(platforms.shift());
+                             world.removeBody(platformBodies.shift());
+                         }
+
+                         // Check for game over condition (falling too low or going too high)
+                         if (player.position.y < -10 || player.position.y > 20) {
+                             endAstroJumper();
+                         }
+                     }
+                 } else {
+                     // Optionally, add logic for when game is not running (e.g., menu animations)
+                 }
+
+                 renderer.render(scene, camera); // Render the scene
             }
             playButton.addEventListener('click', startAstroJumper);
             restartButton.addEventListener('click', startAstroJumper);
-            gameContainer.addEventListener('click', playerJump);
-            shareAstroJumperScoreBtn.addEventListener('click', () => {
-                shareScore('Astro Jumper', score, 'points');
-            });
+            gameContainer.addEventListener('click', playerJump); // Jump on click/tap
             document.getElementById('astro-jumper-card').addEventListener('click', () => {
-                document.getElementById('featured-game').scrollIntoView({ behavior: 'smooth' });
+                 document.getElementById('featured-game').scrollIntoView({ behavior: 'smooth' }); // Scroll to game when card is clicked
             });
-            initAstroJumper();
+            initAstroJumper(); // Initialize the 3D game
+
 
             // #############################################
-            // ### CAR RACER (2D GAME) CODE            ###
+            // ### CAR RACER (2D GAME) CODE              ###
             // #############################################
-            const racerModal = document.getElementById('pixelRacerModal');
-            const playRacerBtn = document.getElementById('pixel-racer-card');
-            const closeRacerBtn = document.getElementById('closeRacerModal');
-            const racerCanvas = document.getElementById('racerGameCanvas');
-            const racerCtx = racerCanvas.getContext('2d');
-            const racerStartScreen = document.getElementById('racerStartScreen');
-            const racerInGameUI = document.getElementById('racerInGameUI');
-            const racerGameOverScreen = document.getElementById('racerGameOverScreen');
-            const racerStartButton = document.getElementById('racerStartButton');
-            const racerRestartButton = document.getElementById('racerRestartButton');
-            const racerScoreEl = document.getElementById('racerScore');
-            const racerFinalScoreEl = document.getElementById('racerFinalScore');
-            const shareRacerScoreBtn = document.getElementById('shareRacerScore');
-            
-            let racerRunning = false;
-            let racerScore = 0;
-            let animationFrameId;
-            let playerCar, obstacles, roadLines;
-            const keys = { ArrowLeft: false, ArrowRight: false };
+            /* ... Keep all existing Car Racer JS logic (openRacerModal, closeRacerModal, startRacerGame, etc.) ... */
+             const racerModal = document.getElementById('pixelRacerModal');
+             const playRacerBtn = document.getElementById('pixel-racer-card');
+             const closeRacerBtn = document.getElementById('closeRacerModal');
+             const racerCanvas = document.getElementById('racerGameCanvas');
+             const racerCtx = racerCanvas.getContext('2d');
+             const racerStartScreen = document.getElementById('racerStartScreen');
+             const racerInGameUI = document.getElementById('racerInGameUI');
+             const racerGameOverScreen = document.getElementById('racerGameOverScreen');
+             const racerStartButton = document.getElementById('racerStartButton');
+             const racerRestartButton = document.getElementById('racerRestartButton');
+             const racerScoreEl = document.getElementById('racerScore');
+             const racerFinalScoreEl = document.getElementById('racerFinalScore');
+             // shareRacerScoreBtn already defined
 
-            // --- Car Image Loading ---
-            const carImageSrcs = [
-                'https://i.ibb.co/N639DgRG/car-png-top-view-png-hatchback-car-top-view-png-clipart-1092.png', // Player Car
-                'https://www.seekpng.com/png/full/54-544318_car-top-view-png.png',
-                'https://www.seekpng.com/png/full/38-388934_28-collection-of-car-clipart-top-view-top.png',
-                'https://www.seekpng.com/png/full/54-545057_clipart-orange-rental-car-key-icon-royalty-free.png',
-                'https://www.seekpng.com/png/full/44-446913_45-top-view-of-car-clipart-images-green.png'
-            ];
-            const carImages = [];
-            let imagesLoaded = 0;
+             let racerRunning = false;
+             let racerScore = 0;
+             let animationFrameId;
+             let playerCar, obstacles, roadLines;
+             const keys = { ArrowLeft: false, ArrowRight: false };
 
-            racerStartButton.disabled = true;
-            racerStartButton.textContent = 'Loading...';
+             // --- Car Image Loading ---
+             const carImageSrcs = [ /* ... car image URLs ... */
+                 'https://i.ibb.co/N639DgRG/car-png-top-view-png-hatchback-car-top-view-png-clipart-1092.png',
+                 'https://www.seekpng.com/png/full/54-544318_car-top-view-png.png',
+                 'https://www.seekpng.com/png/full/38-388934_28-collection-of-car-clipart-top-view-top.png',
+                 'https://www.seekpng.com/png/full/54-545057_clipart-orange-rental-car-key-icon-royalty-free.png',
+                 'https://www.seekpng.com/png/full/44-446913_45-top-view-of-car-clipart-images-green.png'
+             ];
+             const carImages = [];
+             let imagesLoaded = 0;
 
-            carImageSrcs.forEach(src => {
-                const img = new Image();
-                img.src = src;
-                img.onload = () => {
-                    imagesLoaded++;
-                    if (imagesLoaded === carImageSrcs.length) {
+             racerStartButton.disabled = true;
+             racerStartButton.textContent = 'Loading...';
+
+             carImageSrcs.forEach(src => {
+                 const img = new Image();
+                 // Handle potential image loading errors
+                 img.onerror = () => {
+                     console.error(`Failed to load image: ${src}`);
+                     // Optionally display a fallback or stop game loading
+                 };
+                 img.onload = () => {
+                     imagesLoaded++;
+                     if (imagesLoaded === carImageSrcs.length) {
                          racerStartButton.disabled = false;
                          racerStartButton.textContent = 'Start Race';
-                    }
-                };
-                carImages.push(img);
-            });
-            
-            const playerCarImg = carImages[0];
-            const obstacleCarImgs = carImages.slice(1);
+                     }
+                 };
+                 img.src = src;
+                 carImages.push(img);
+             });
 
-            function openRacerModal() {
-                racerModal.classList.remove('invisible', 'opacity-0');
-                racerCanvas.width = racerCanvas.parentElement.clientWidth;
-                racerCanvas.height = racerCanvas.parentElement.clientHeight;
-                showRacerStartScreen();
-            }
-            function closeRacerModal() {
-                racerModal.classList.add('invisible', 'opacity-0');
-                stopRacerGame();
-            }
-            function showRacerStartScreen() {
+             const playerCarImg = carImages[0];
+             const obstacleCarImgs = carImages.slice(1);
+
+             function openRacerModal() { /* ... open modal logic ... */
+                 racerModal.classList.remove('invisible', 'opacity-0');
+                 // Delay canvas sizing slightly to ensure parent dimensions are stable
+                 requestAnimationFrame(() => {
+                    racerCanvas.width = racerCanvas.parentElement.clientWidth;
+                    racerCanvas.height = racerCanvas.parentElement.clientHeight;
+                    showRacerStartScreen(); // Draw initial screen after sizing
+                    draw(); // Draw initial state if needed
+                 });
+
+             }
+             function closeRacerModal() { /* ... close modal logic ... */
+                 racerModal.classList.add('invisible', 'opacity-0');
+                 stopRacerGame();
+             }
+             function showRacerStartScreen() { /* ... show start screen ... */
                 racerStartScreen.style.display = 'flex';
                 racerInGameUI.style.display = 'none';
                 racerGameOverScreen.style.display = 'none';
-            }
-            function startRacerGame() {
-                stopRacerGame();
-                racerRunning = true;
-                racerScore = 0;
-                const carWidth = 45;
-                const carHeight = 80;
-                playerCar = { x: racerCanvas.width / 2 - (carWidth/2), y: racerCanvas.height - (carHeight + 20), width: carWidth, height: carHeight, speed: 7, img: playerCarImg };
-                obstacles = [];
-                roadLines = [];
-                for (let i = 0; i < 8; i++) spawnObstacle();
-                for (let i = 0; i < 5; i++) roadLines.push({ y: i * (racerCanvas.height / 4) });
-                racerStartScreen.style.display = 'none';
-                racerGameOverScreen.style.display = 'none';
-                racerInGameUI.style.display = 'block';
-                gameLoop();
-            }
-            function stopRacerGame() {
-                racerRunning = false;
-                if (animationFrameId) {
-                    cancelAnimationFrame(animationFrameId);
-                    animationFrameId = null;
+                // Also ensure canvas is cleared and ready for start screen background if needed
+                if(racerCtx) {
+                    racerCtx.fillStyle = '#1f2937'; // bg-gray-800
+                    racerCtx.fillRect(0, 0, racerCanvas.width, racerCanvas.height);
                 }
-            }
-            async function endRacerGame() {
-                stopRacerGame();
-                const finalRacerScore = Math.floor(racerScore);
-                racerFinalScoreEl.textContent = finalRacerScore;
-                await saveHighScore('Car Racer', finalRacerScore);
-                racerGameOverScreen.style.display = 'flex';
-                racerInGameUI.style.display = 'none';
-            }
-            function spawnObstacle() {
-                const carWidth = 45;
-                const carHeight = 80;
-                const lastObstacleY = obstacles.length > 0 ? obstacles[obstacles.length - 1].y : -200;
-                
-                let speed = 3 + Math.random() * 2 + (racerScore / 50);
+             }
+             function startRacerGame() { /* ... start game logic ... */
+                 stopRacerGame(); // Ensure any previous loop is stopped
+                 racerRunning = true;
+                 racerScore = 0;
+                 racerScoreEl.textContent = '0'; // Reset score display
+                 const carWidth = Math.min(60, racerCanvas.width * 0.15); // Responsive car width
+                 const carHeight = carWidth * 1.6; // Maintain aspect ratio
 
-                obstacles.push({ 
-                    x: Math.random() * (racerCanvas.width - carWidth), 
-                    y: lastObstacleY - (Math.random() * 200 + 300), 
-                    width: carWidth, 
-                    height: carHeight, 
+                 playerCar = {
+                    x: racerCanvas.width / 2 - (carWidth / 2),
+                    y: racerCanvas.height - (carHeight + 20),
+                    width: carWidth,
+                    height: carHeight,
+                    speed: Math.max(5, racerCanvas.width * 0.015), // Responsive speed
+                    img: playerCarImg };
+                 obstacles = [];
+                 roadLines = [];
+                  // Initial obstacle spawn needs adjusted y based on canvas height
+                 for (let i = 0; i < Math.floor(racerCanvas.height / 200); i++) { // Spawn based on height
+                    spawnObstacle(-racerCanvas.height * (i + 1) * 0.5); // Start off-screen top
+                 }
+                 for (let i = 0; i < 5; i++) { roadLines.push({ y: i * (racerCanvas.height / 4) }); }
+
+                 racerStartScreen.style.display = 'none';
+                 racerGameOverScreen.style.display = 'none';
+                 racerInGameUI.style.display = 'block';
+                 gameLoop(); // Start the animation loop
+             }
+             function stopRacerGame() { /* ... stop game logic ... */
+                 racerRunning = false;
+                 if (animationFrameId) {
+                     cancelAnimationFrame(animationFrameId);
+                     animationFrameId = null;
+                 }
+             }
+             async function endRacerGame() { /* ... end game logic ... */
+                 if (!racerRunning) return; // Prevent multiple calls
+                 stopRacerGame();
+                 const finalRacerScore = Math.floor(racerScore);
+                 racerFinalScoreEl.textContent = finalRacerScore;
+                 await saveHighScore('Car Racer', finalRacerScore);
+                 racerGameOverScreen.style.display = 'flex';
+                 racerInGameUI.style.display = 'none';
+             }
+              function spawnObstacle(initialY = -200) { /* ... obstacle spawn logic ... */
+                const carWidth = playerCar ? playerCar.width : 45; // Use player car width if available
+                const carHeight = playerCar ? playerCar.height : 80;
+
+                // Ensure obstacles don't overlap horizontally too easily
+                let newX;
+                let overlap;
+                let attempts = 0;
+                const maxSpawnAttempts = 10;
+
+                do {
+                    overlap = false;
+                    newX = Math.random() * (racerCanvas.width - carWidth);
+                    for (const obs of obstacles) {
+                        // Check potential horizontal overlap more strictly
+                        if (Math.abs(newX - obs.x) < carWidth * 1.5) {
+                            overlap = true;
+                            break;
+                        }
+                    }
+                    attempts++;
+                } while (overlap && attempts < maxSpawnAttempts);
+
+
+                const lastObstacleY = obstacles.length > 0 ? obstacles[obstacles.length - 1].y : initialY - 300; // Use initialY or calculate based on last
+                let speed = Math.max(2, 3 + Math.random() * 2 + (racerScore / 50)); // Ensure minimum speed
+                speed = Math.min(speed, playerCar.speed * 1.5); // Limit max speed relative to player
+
+
+                obstacles.push({
+                    x: newX,
+                    y: Math.min(initialY, lastObstacleY - (Math.random() * (racerCanvas.height * 0.3) + carHeight * 2.5)), // Ensure sufficient vertical spacing
+                    width: carWidth,
+                    height: carHeight,
                     speed: speed,
                     img: obstacleCarImgs[Math.floor(Math.random() * obstacleCarImgs.length)]
                 });
-            }
-            function update() {
-                if (!racerRunning) return;
-                racerScore += 0.1;
-                racerScoreEl.textContent = Math.floor(racerScore);
-                if (keys.ArrowLeft && playerCar.x > 0) playerCar.x -= playerCar.speed;
-                if (keys.ArrowRight && playerCar.x < racerCanvas.width - playerCar.width) playerCar.x += playerCar.speed;
-                roadLines.forEach(line => { line.y += 4 + (racerScore / 100) ; if (line.y > racerCanvas.height) line.y = -40; });
-                obstacles.forEach((obs, index) => {
-                    obs.y += obs.speed;
-                    if (obs.y > racerCanvas.height) {
-                        obstacles.splice(index, 1);
-                        spawnObstacle();
-                    }
-                    if (playerCar.x < obs.x + obs.width && playerCar.x + playerCar.width > obs.x && playerCar.y < obs.y + obs.height && playerCar.y + playerCar.height > obs.y) {
-                        endRacerGame();
-                    }
-                });
-            }
-            function draw() {
-                racerCtx.fillStyle = '#374151';
-                racerCtx.fillRect(0, 0, racerCanvas.width, racerCanvas.height);
-                racerCtx.fillStyle = '#6b7280';
-                const laneWidth = racerCanvas.width / 3;
-                roadLines.forEach(line => {
-                    racerCtx.fillRect(laneWidth - 5, line.y, 10, 40);
-                    racerCtx.fillRect(laneWidth * 2 - 5, line.y, 10, 40);
-                });7
+             }
+             function update() { /* ... game update logic ... */
+                 if (!racerRunning) return;
+                 racerScore += 0.1; // Increment score over time
+                 racerScoreEl.textContent = Math.floor(racerScore);
 
-                // Draw player car image
-                racerCtx.drawImage(playerCar.img, playerCar.x, playerCar.y, playerCar.width, playerCar.height);
-                
-                // Draw obstacle car images
-                obstacles.forEach(obs => {
-                    racerCtx.drawImage(obs.img, obs.x, obs.y, obs.width, obs.height);
-                });
-            }
-            function gameLoop() {
-                update();
-                draw();
-                if (racerRunning) {
-                    animationFrameId = requestAnimationFrame(gameLoop);
-                }
-            }
-            playRacerBtn.addEventListener('click', openRacerModal);
-            closeRacerBtn.addEventListener('click', closeRacerModal);
-            racerStartButton.addEventListener('click', startRacerGame);
-            racerRestartButton.addEventListener('click', startRacerGame);
-            shareRacerScoreBtn.addEventListener('click', () => {
-                shareScore('Car Racer', Math.floor(racerScore), 'points');
-            });
-            window.addEventListener('keydown', (e) => {
-                if (racerModal.classList.contains('invisible')) return;
-                if (e.key in keys) { e.preventDefault(); keys[e.key] = true; }
-            });
-            window.addEventListener('keyup', (e) => {
-                if (racerModal.classList.contains('invisible')) return;
-                if (e.key in keys) { e.preventDefault(); keys[e.key] = false; }
-            });
-            function handleTouch(e) {
-                if (racerModal.classList.contains('invisible') || !racerRunning) return;
-                e.preventDefault();
-                const touchX = e.touches[0].clientX;
-                const racerCanvasRect = racerCanvas.getBoundingClientRect();
-                let targetX = touchX - racerCanvasRect.left - (playerCar.width / 2);
-                if (targetX < 0) targetX = 0;
-                if (targetX > racerCanvas.width - playerCar.width) targetX = racerCanvas.width - playerCar.width;
-                playerCar.x = targetX;
-            }
-            racerCanvas.addEventListener('touchstart', handleTouch, { passive: false });
-            racerCanvas.addEventListener('touchmove', handleTouch, { passive: false });
+                 // Player movement
+                 if (keys.ArrowLeft && playerCar.x > 0) playerCar.x -= playerCar.speed;
+                 if (keys.ArrowRight && playerCar.x < racerCanvas.width - playerCar.width) playerCar.x += playerCar.speed;
+
+                 // Move road lines
+                 const roadSpeed = Math.max(4, 4 + (racerScore / 100)); // Road lines speed up too
+                 roadLines.forEach(line => {
+                     line.y += roadSpeed;
+                     if (line.y > racerCanvas.height) line.y = -40; // Reset line to top
+                 });
+
+                 // Move obstacles and check collisions
+                 for (let i = obstacles.length - 1; i >= 0; i--) { // Iterate backwards for safe removal
+                     const obs = obstacles[i];
+                     obs.y += obs.speed; // Move obstacle down
+
+                     // Remove obstacle if it goes off screen bottom
+                     if (obs.y > racerCanvas.height) {
+                         obstacles.splice(i, 1);
+                         spawnObstacle(); // Spawn a new one
+                         continue; // Skip collision check for removed obstacle
+                     }
+
+                     // Collision detection (simple rectangle overlap)
+                     if (playerCar.x < obs.x + obs.width &&
+                         playerCar.x + playerCar.width > obs.x &&
+                         playerCar.y < obs.y + obs.height &&
+                         playerCar.y + playerCar.height > obs.y) {
+                         endRacerGame(); // Game over on collision
+                         return; // Stop update loop immediately after crash
+                     }
+                 }
+                 // Keep a minimum number of obstacles on screen
+                 const minObstacles = Math.max(3, Math.floor(racerCanvas.height / 250));
+                 while (obstacles.length < minObstacles) {
+                    spawnObstacle();
+                 }
+             }
+             function draw() { /* ... game draw logic ... */
+                 // Background (road)
+                 racerCtx.fillStyle = '#374151'; // gray-700
+                 racerCtx.fillRect(0, 0, racerCanvas.width, racerCanvas.height);
+
+                 // Road Lines
+                 racerCtx.fillStyle = '#9ca3af'; // gray-400
+                 const laneWidth = racerCanvas.width / 3;
+                 const lineDashHeight = 40;
+                 const lineDashWidth = 10;
+                 roadLines.forEach(line => {
+                     racerCtx.fillRect(laneWidth - lineDashWidth / 2, line.y, lineDashWidth, lineDashHeight);
+                     racerCtx.fillRect(laneWidth * 2 - lineDashWidth / 2, line.y, lineDashWidth, lineDashHeight);
+                 });
+
+                 // Draw player car image
+                 if (playerCar && playerCar.img && playerCar.img.complete) { // Check if image is loaded
+                    racerCtx.drawImage(playerCar.img, playerCar.x, playerCar.y, playerCar.width, playerCar.height);
+                 } else if (playerCar) { // Fallback drawing if image fails
+                     racerCtx.fillStyle = 'blue';
+                     racerCtx.fillRect(playerCar.x, playerCar.y, playerCar.width, playerCar.height);
+                 }
+
+
+                 // Draw obstacle car images
+                 obstacles.forEach(obs => {
+                    if (obs.img && obs.img.complete) {
+                         racerCtx.drawImage(obs.img, obs.x, obs.y, obs.width, obs.height);
+                    } else { // Fallback drawing
+                        racerCtx.fillStyle = 'red';
+                        racerCtx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                    }
+                 });
+             }
+             function gameLoop() { /* ... game loop logic ... */
+                 update();
+                 draw();
+                 if (racerRunning) {
+                     animationFrameId = requestAnimationFrame(gameLoop);
+                 }
+             }
+             playRacerBtn.addEventListener('click', openRacerModal);
+             closeRacerBtn.addEventListener('click', closeRacerModal);
+             racerStartButton.addEventListener('click', startRacerGame);
+             racerRestartButton.addEventListener('click', startRacerGame);
+             // shareRacerScoreBtn listener moved to global share function setup
+
+             window.addEventListener('keydown', (e) => {
+                 if (racerModal.classList.contains('invisible')) return; // Only handle keys if modal is visible
+                 if (e.key in keys) { e.preventDefault(); keys[e.key] = true; }
+             });
+             window.addEventListener('keyup', (e) => {
+                 if (racerModal.classList.contains('invisible')) return;
+                 if (e.key in keys) { e.preventDefault(); keys[e.key] = false; }
+             });
+
+             // Touch controls
+             let touchStartX = null;
+             let currentTouchX = null;
+
+             function handleTouchStart(e) {
+                 if (racerModal.classList.contains('invisible') || !racerRunning) return;
+                 touchStartX = e.touches[0].clientX;
+                 currentTouchX = touchStartX; // Initialize current touch position
+                 //e.preventDefault(); // Prevent default only if game is running? May interfere with scrolling elsewhere
+             }
+
+             function handleTouchMove(e) {
+                 if (racerModal.classList.contains('invisible') || !racerRunning || touchStartX === null) return;
+                 e.preventDefault(); // Prevent scrolling while dragging car
+                 currentTouchX = e.touches[0].clientX;
+                 const deltaX = currentTouchX - touchStartX;
+
+                 // Direct mapping based on touch position relative to canvas (more intuitive)
+                 const racerCanvasRect = racerCanvas.getBoundingClientRect();
+                 let targetX = currentTouchX - racerCanvasRect.left - (playerCar.width / 2);
+
+                 // Clamp targetX to canvas bounds
+                 targetX = Math.max(0, Math.min(racerCanvas.width - playerCar.width, targetX));
+
+                 // Smooth movement towards target (optional, can be direct)
+                 const moveSpeedFactor = 0.3; // Adjust for desired responsiveness
+                 playerCar.x += (targetX - playerCar.x) * moveSpeedFactor;
+
+                 // Clamp playerCar.x again after potential smoothing overshoot
+                 playerCar.x = Math.max(0, Math.min(racerCanvas.width - playerCar.width, playerCar.x));
+
+                 // Update touchStartX subtly to avoid large jumps if finger moves fast then stops
+                 // touchStartX += (currentTouchX - touchStartX) * 0.1;
+             }
+              function handleTouchEnd(e) {
+                  if (racerModal.classList.contains('invisible') || !racerRunning) return;
+                  touchStartX = null; // Reset touch start on release
+                  currentTouchX = null;
+              }
+
+             racerCanvas.addEventListener('touchstart', handleTouchStart, { passive: true }); // passive:true can improve scroll performance if preventDefault isn't always needed
+             racerCanvas.addEventListener('touchmove', handleTouchMove, { passive: false }); // Needs false if preventDefault is used
+             racerCanvas.addEventListener('touchend', handleTouchEnd, { passive: true });
+
 
             // #############################################
-            // ### TOWER DEFENSE (2D GAME) CODE        ###
+            // ### TOWER DEFENSE (2D GAME) CODE          ###
             // #############################################
-            
-            const tdModal = document.getElementById('towerDefenseModal');
-            const playTDButton = document.getElementById('tower-defense-card');
-            const closeTDButton = document.getElementById('closeTowerDefenseModal');
-            const tdCanvas = document.getElementById('towerDefenseCanvas');
-            const tdCtx = tdCanvas.getContext('2d');
-            const tdStartScreen = document.getElementById('tdStartScreen');
-            const tdInGameUI = document.getElementById('tdInGameUI');
-            const tdGameOverScreen = document.getElementById('tdGameOverScreen');
-            const tdStartButton = document.getElementById('tdStartButton');
-            const tdRestartButton = document.getElementById('tdRestartButton');
-            const tdHealthEl = document.getElementById('tdHealth');
-            const tdGoldEl = document.getElementById('tdGold');
-            const tdWaveEl = document.getElementById('tdWave');
-            const tdEndTitleEl = document.getElementById('tdEndTitle');
-            const tdFinalWaveEl = document.getElementById('tdFinalWave');
-            const shareTDScoreBtn = document.getElementById('shareTDScore');
-            const buyTurretButton = document.getElementById('buyTurretButton');
-            const nextWaveButton = document.getElementById('nextWaveButton');
-            let tdRunning = false;
-            let health, gold, wave;
-            let enemies = [];
-            let towers = [];
-            let projectiles = [];
-            let selectedTower = null;
-            let waveInProgress = false;
-            let mousePos = { x: 0, y: 0 };
-            let grid = [];
-            let TILE_SIZE = 50;
-            const GRID_COLS = 16;
-            const GRID_ROWS = 12;
-            const pathCoords = [ {x: 0, y: 5}, {x: 3, y: 5}, {x: 3, y: 2}, {x: 7, y: 2}, {x: 7, y: 8}, {x: 12, y: 8}, {x: 12, y: 4}, {x: 16, y: 4} ];
+            /* ... Keep all existing Tower Defense JS logic (openTDModal, closeTDModal, startTDGame, etc.) ... */
+            // Re-declare variables if needed within this scope or ensure they are accessible globally/module-scoped
+            // Make sure event listeners are correctly added/removed if modals are complex
 
-            function openTDModal() {
-                tdModal.classList.remove('invisible', 'opacity-0');
-                setupTDGrid();
-                tdStartScreen.style.display = 'block';
-                tdInGameUI.style.display = 'none';
-                tdGameOverScreen.style.display = 'none';
-            }
-            function closeTDModal() {
-                tdModal.classList.add('invisible', 'opacity-0');
-                stopTDGame();
-            }
-            function setupTDGrid() {
-                const parent = tdCanvas.parentElement;
-                const size = Math.min(parent.clientWidth, parent.clientHeight);
-                tdCanvas.width = size;
-                tdCanvas.height = size * (GRID_ROWS / GRID_COLS);
-                TILE_SIZE = tdCanvas.width / GRID_COLS;
-                grid = [];
-                for (let y = 0; y < GRID_ROWS; y++) { grid.push(Array(GRID_COLS).fill(0)); }
-                for (let i = 0; i < pathCoords.length - 1; i++) {
-                    let start = pathCoords[i];
-                    let end = pathCoords[i+1];
-                    if (start.x === end.x) {
-                        for (let y = Math.min(start.y, end.y); y <= Math.max(start.y, end.y); y++) { if (grid[y]) grid[y][start.x] = 1; }
-                    } else {
-                        for (let x = Math.min(start.x, end.x); x <= Math.max(start.x, end.x); x++) { if (grid[start.y]) grid[start.y][x] = 1; }
-                    }
-                }
-            }
-            function startTDGame() {
-                tdRunning = true;
-                health = 20;
-                gold = 250;
-                wave = 0;
-                enemies = [];
-                towers = [];
-                projectiles = [];
-                selectedTower = null;
-                waveInProgress = false;
-                setupTDGrid();
-                updateTDUI();
-                tdStartScreen.style.display = 'none';
-                tdGameOverScreen.style.display = 'none';
-                tdInGameUI.style.display = 'block';
-                nextWaveButton.style.display = 'block';
-                gameLoopTD();
-            }
-            function stopTDGame() { tdRunning = false; }
-            function updateTDUI() {
-                tdHealthEl.textContent = health;
-                tdGoldEl.textContent = gold;
-                tdWaveEl.textContent = wave;
-            }
-            function startNextWave() {
-                if (waveInProgress) return;
-                wave++;
-                waveInProgress = true;
-                nextWaveButton.style.display = 'none';
-                updateTDUI();
-                const enemyCount = wave * 5 + 5;
-                for (let i = 0; i < enemyCount; i++) {
-                    const enemyHealth = 50 + wave * 15;
-                    enemies.push({ x: -TILE_SIZE * i * 1.5, y: pathCoords[0].y * TILE_SIZE, speed: 1 + wave * 0.05, health: enemyHealth, maxHealth: enemyHealth, pathIndex: 0 });
-                }
-            }
-            function gameLoopTD() {
-                if (!tdRunning) return;
-                tdCtx.clearRect(0, 0, tdCanvas.width, tdCanvas.height);
-                drawTDGrid();
-                drawTDPath();
-                towers.forEach(t => { t.update(); t.draw(); });
-                projectiles.forEach((p, i) => { p.update(i); p.draw(); });
-                
-                for (let i = enemies.length - 1; i >= 0; i--) {
-                    const e = enemies[i];
-                    const status = updateEnemy(e);
-                    if (status === 'finished') {
-                        enemies.splice(i, 1);
-                        health--;
-                        updateTDUI();
-                        if (health <= 0) endGameTD(false);
-                    } else if (e.health <= 0) {
-                        enemies.splice(i, 1);
-                        gold += 10;
-                        updateTDUI();
-                    } else {
-                        drawEnemy(e);
-                    }
-                }
+            // Ensure unique variable names if copying directly (e.g., gameLoopTD vs gameLoop)
+             const tdModal = document.getElementById('towerDefenseModal');
+             const playTDButton = document.getElementById('tower-defense-card');
+             const closeTDButton = document.getElementById('closeTowerDefenseModal');
+             const tdCanvas = document.getElementById('towerDefenseCanvas');
+             const tdCtx = tdCanvas.getContext('2d');
+             const tdStartScreen = document.getElementById('tdStartScreen');
+             const tdInGameUI = document.getElementById('tdInGameUI');
+             const tdGameOverScreen = document.getElementById('tdGameOverScreen');
+             const tdStartButton = document.getElementById('tdStartButton');
+             const tdRestartButton = document.getElementById('tdRestartButton');
+             const tdHealthEl = document.getElementById('tdHealth');
+             const tdGoldEl = document.getElementById('tdGold');
+             const tdWaveEl = document.getElementById('tdWave');
+             const tdEndTitleEl = document.getElementById('tdEndTitle');
+             const tdFinalWaveEl = document.getElementById('tdFinalWave');
+             // shareTDScoreBtn defined above
+             const buyTurretButton = document.getElementById('buyTurretButton');
+             const nextWaveButton = document.getElementById('nextWaveButton');
 
-                if (waveInProgress && enemies.length === 0) {
-                    waveInProgress = false;
-                    nextWaveButton.style.display = 'block';
-                    if (wave >= 10) endGameTD(true);
-                }
-                if (selectedTower) drawPlacementPreview();
-                requestAnimationFrame(gameLoopTD);
-            }
-            function drawTDGrid() {
-                tdCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-                for (let i = 0; i < GRID_COLS; i++) {
+             let tdRunning = false;
+             let health, gold, wave;
+             let enemies = [];
+             let towers = [];
+             let projectiles = [];
+             let selectedTower = null;
+             let waveInProgress = false;
+             let mousePos = { x: 0, y: 0 };
+             let grid = []; // 0: buildable, 1: path, 2: tower
+             let TILE_SIZE = 50; // Will be recalculated
+             const GRID_COLS = 16;
+             const GRID_ROWS = 12;
+             // Path Coordinates in Grid units (col, row)
+             const pathCoords = [ {x: 0, y: 5}, {x: 3, y: 5}, {x: 3, y: 2}, {x: 7, y: 2}, {x: 7, y: 8}, {x: 12, y: 8}, {x: 12, y: 4}, {x: 16, y: 4} ];
+             let tdAnimationFrameId; // For stopping the loop
+
+             function openTDModal() { /* ... open modal logic ... */
+                 tdModal.classList.remove('invisible', 'opacity-0');
+                 setupTDGrid(); // Calculate sizes and create grid
+                 showTDStartScreen();
+                 // Initial draw might be needed here if start screen has graphics
+                 drawTDGrid();
+                 drawTDPath();
+             }
+             function closeTDModal() { /* ... close modal logic ... */
+                 tdModal.classList.add('invisible', 'opacity-0');
+                 stopTDGame();
+             }
+              function showTDStartScreen() {
+                 tdStartScreen.style.display = 'flex'; // Use flex for centering
+                 tdInGameUI.style.display = 'none';
+                 tdGameOverScreen.style.display = 'none';
+                 // Optionally clear canvas or draw a background
+                 if(tdCtx) {
+                    tdCtx.fillStyle = '#1f2937'; // bg-gray-800
+                    tdCtx.fillRect(0, 0, tdCanvas.width, tdCanvas.height);
+                    drawTDGrid();
+                    drawTDPath(); // Draw path on start screen too
+                 }
+             }
+             function setupTDGrid() { /* ... setup grid logic ... */
+                 const parent = tdCanvas.parentElement;
+                 // Calculate max possible size based on aspect ratio 4:3 (GRID_COLS:GRID_ROWS)
+                 const parentWidth = parent.clientWidth;
+                 const parentHeight = parent.clientHeight;
+
+                 if (parentWidth / GRID_COLS < parentHeight / GRID_ROWS) {
+                     // Width is the limiting factor
+                     tdCanvas.width = parentWidth;
+                     tdCanvas.height = parentWidth * (GRID_ROWS / GRID_COLS);
+                 } else {
+                     // Height is the limiting factor
+                     tdCanvas.height = parentHeight;
+                     tdCanvas.width = parentHeight * (GRID_COLS / GRID_ROWS);
+                 }
+
+                 TILE_SIZE = tdCanvas.width / GRID_COLS;
+
+                 // Initialize Grid
+                 grid = [];
+                 for (let y = 0; y < GRID_ROWS; y++) {
+                     grid.push(Array(GRID_COLS).fill(0)); // 0 = buildable initially
+                 }
+
+                 // Mark Path Tiles (1 = path)
+                 for (let i = 0; i < pathCoords.length - 1; i++) {
+                     let start = pathCoords[i];
+                     let end = pathCoords[i+1];
+                     // Draw horizontal or vertical lines on the grid
+                     if (start.x === end.x) { // Vertical segment
+                         for (let y = Math.min(start.y, end.y); y <= Math.max(start.y, end.y); y++) {
+                             if (grid[y] && grid[y][start.x] !== undefined) grid[y][start.x] = 1;
+                         }
+                     } else { // Horizontal segment
+                         for (let x = Math.min(start.x, end.x); x <= Math.max(start.x, end.x); x++) {
+                              if (grid[start.y] && grid[start.y][x] !== undefined) grid[start.y][x] = 1;
+                         }
+                     }
+                 }
+                 // Ensure the start and end points are marked as path
+                 if (grid[pathCoords[0].y]) grid[pathCoords[0].y][pathCoords[0].x] = 1;
+                 const lastPath = pathCoords[pathCoords.length - 1];
+                 if (grid[lastPath.y] && grid[lastPath.y][lastPath.x]) grid[lastPath.y][lastPath.x] = 1; // Mark end explicitly if needed
+             }
+             function startTDGame() { /* ... start game logic ... */
+                 stopTDGame(); // Stop previous loop if any
+                 tdRunning = true;
+                 health = 20;
+                 gold = 250;
+                 wave = 0;
+                 enemies = [];
+                 towers = [];
+                 projectiles = [];
+                 selectedTower = null;
+                 waveInProgress = false;
+                 setupTDGrid(); // Recalculate grid in case of resize
+                 updateTDUI();
+                 tdStartScreen.style.display = 'none';
+                 tdGameOverScreen.style.display = 'none';
+                 tdInGameUI.style.display = 'block'; // Show in-game UI elements
+                 nextWaveButton.style.display = 'block'; // Show 'Next Wave' button initially
+                 nextWaveButton.disabled = false;
+                 gameLoopTD(); // Start the game loop
+             }
+             function stopTDGame() { /* ... stop game logic ... */
+                 tdRunning = false;
+                 if (tdAnimationFrameId) {
+                    cancelAnimationFrame(tdAnimationFrameId);
+                    tdAnimationFrameId = null;
+                 }
+             }
+             function updateTDUI() { /* ... update UI elements ... */
+                 tdHealthEl.textContent = health;
+                 tdGoldEl.textContent = gold;
+                 tdWaveEl.textContent = wave;
+                 // Disable buy button if not enough gold
+                 buyTurretButton.disabled = gold < 100;
+                 buyTurretButton.classList.toggle('opacity-50', gold < 100);
+                 buyTurretButton.classList.toggle('cursor-not-allowed', gold < 100);
+             }
+             function startNextWave() { /* ... start next wave logic ... */
+                 if (waveInProgress || !tdRunning) return;
+                 wave++;
+                 waveInProgress = true;
+                 nextWaveButton.style.display = 'none'; // Hide button during wave
+                 updateTDUI();
+
+                 const enemyCount = wave * 5 + 5; // More enemies each wave
+                 const enemyBaseHealth = 50 + wave * 15; // Stronger enemies
+                 const enemySpeed = Math.min(3, 1 + wave * 0.05); // Faster enemies (capped)
+
+                 for (let i = 0; i < enemyCount; i++) {
+                     const enemyHealth = enemyBaseHealth + Math.random() * wave * 5; // Slight health variation
+                     // Spawn enemies off-screen left, staggered
+                     enemies.push({
+                         x: -TILE_SIZE * (i * 1.5 + 1), // Start further left and spaced out
+                         y: pathCoords[0].y * TILE_SIZE + (TILE_SIZE - TILE_SIZE * 0.6) / 2, // Center vertically on path tile
+                         width: TILE_SIZE * 0.6,
+                         height: TILE_SIZE * 0.6,
+                         speed: enemySpeed,
+                         health: enemyHealth,
+                         maxHealth: enemyHealth,
+                         pathIndex: 0 // Start at the beginning of the path
+                     });
+                 }
+             }
+             function gameLoopTD() { /* ... main game loop ... */
+                 if (!tdRunning) return;
+
+                 // Clear canvas
+                 tdCtx.fillStyle = '#1f2937'; // bg-gray-800
+                 tdCtx.fillRect(0, 0, tdCanvas.width, tdCanvas.height);
+
+                 // Draw background elements
+                 drawTDGrid();
+                 drawTDPath();
+
+                 // Update and Draw Towers
+                 towers.forEach(t => { t.update(); t.draw(); });
+
+                 // Update and Draw Projectiles
+                 projectiles.forEach((p, i) => { p.update(i); p.draw(); });
+                 projectiles = projectiles.filter(p => p.active); // Clean up inactive projectiles
+
+                 // Update and Draw Enemies
+                 for (let i = enemies.length - 1; i >= 0; i--) {
+                     const e = enemies[i];
+                     const status = updateEnemy(e);
+                     if (status === 'finished') { // Reached end
+                         enemies.splice(i, 1);
+                         health--;
+                         updateTDUI();
+                         if (health <= 0) {
+                             endGameTD(false); // Lose condition
+                             return; // Stop loop
+                         }
+                     } else if (e.health <= 0) { // Defeated
+                         enemies.splice(i, 1);
+                         gold += 10 + Math.floor(wave / 2); // More gold for later waves
+                         updateTDUI();
+                     } else {
+                         drawEnemy(e); // Draw if still alive
+                     }
+                 }
+
+                 // Check for wave end / win condition
+                 if (waveInProgress && enemies.length === 0) {
+                     waveInProgress = false;
+                     nextWaveButton.style.display = 'block'; // Show button for next wave
+                     gold += 50 + wave * 5; // Bonus gold between waves
+                     updateTDUI();
+                     if (wave >= 20) { // Example win condition: Survive 20 waves
+                         endGameTD(true);
+                         return; // Stop loop
+                     }
+                 }
+
+                 // Draw tower placement preview if a tower is selected
+                 if (selectedTower) drawPlacementPreview();
+
+                 tdAnimationFrameId = requestAnimationFrame(gameLoopTD); // Continue loop
+             }
+             function drawTDGrid() { /* ... draw grid lines ... */
+                tdCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)'; // More subtle grid
+                tdCtx.lineWidth = 1;
+                for (let i = 1; i < GRID_COLS; i++) { // Start from 1 to avoid drawing on edge
                     tdCtx.beginPath();
                     tdCtx.moveTo(i * TILE_SIZE, 0);
                     tdCtx.lineTo(i * TILE_SIZE, tdCanvas.height);
                     tdCtx.stroke();
                 }
-                for (let i = 0; i < GRID_ROWS; i++) {
+                for (let i = 1; i < GRID_ROWS; i++) {
                     tdCtx.beginPath();
                     tdCtx.moveTo(0, i * TILE_SIZE);
                     tdCtx.lineTo(tdCanvas.width, i * TILE_SIZE);
                     tdCtx.stroke();
                 }
-            }
-            function drawTDPath() {
-                tdCtx.fillStyle = '#374151';
-                for(let y=0; y < grid.length; y++) {
-                    for(let x=0; x < grid[y].length; x++) {
-                        if(grid[y][x] === 1) {
-                            tdCtx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                        }
+             }
+             function drawTDPath() { /* ... draw path tiles ... */
+                 tdCtx.fillStyle = '#4b5563'; // gray-600 for path
+                 for(let y=0; y < grid.length; y++) {
+                     for(let x=0; x < grid[y].length; x++) {
+                         if(grid[y][x] === 1) { // Path tile
+                             tdCtx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                         }
+                     }
+                 }
+             }
+             function drawEnemy(enemy) { /* ... draw enemy and health bar ... */
+                // Enemy body
+                tdCtx.fillStyle = '#dc2626'; // red-600
+                tdCtx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+
+                // Health bar background
+                tdCtx.fillStyle = '#4b5563'; // gray-600
+                const healthBarWidth = enemy.width;
+                const healthBarHeight = 5;
+                const healthBarY = enemy.y - healthBarHeight - 2; // Position above enemy
+                tdCtx.fillRect(enemy.x, healthBarY, healthBarWidth, healthBarHeight);
+
+                // Health bar foreground
+                tdCtx.fillStyle = '#16a34a'; // green-600
+                const currentHealthWidth = healthBarWidth * (enemy.health / enemy.maxHealth);
+                tdCtx.fillRect(enemy.x, healthBarY, currentHealthWidth, healthBarHeight);
+             }
+             function updateEnemy(enemy) { /* ... update enemy position along path ... */
+                 // Check if enemy reached the end (or is beyond the last point)
+                 if (enemy.pathIndex >= pathCoords.length - 1) {
+                     // Extra check: ensure it's actually off the right edge if path ends there
+                      if(enemy.x >= tdCanvas.width - enemy.width / 2) {
+                          return 'finished';
+                      }
+                 }
+
+                 const targetPoint = pathCoords[enemy.pathIndex + 1];
+                  if (!targetPoint) return 'finished'; // Safety check
+
+                 const targetX = targetPoint.x * TILE_SIZE + (TILE_SIZE - enemy.width) / 2; // Target center of the tile
+                 const targetY = targetPoint.y * TILE_SIZE + (TILE_SIZE - enemy.height) / 2;
+
+                 const dx = targetX - enemy.x;
+                 const dy = targetY - enemy.y;
+                 const distance = Math.sqrt(dx*dx + dy*dy);
+
+                 if (distance < enemy.speed) {
+                     // Snap to target and move to next path index
+                     enemy.x = targetX;
+                     enemy.y = targetY;
+                     enemy.pathIndex++;
+                      // Check again if the *new* index is the end
+                      if (enemy.pathIndex >= pathCoords.length - 1 && enemy.x >= tdCanvas.width - enemy.width / 2) {
+                           return 'finished';
+                      }
+
+                 } else {
+                     // Move towards target
+                     enemy.x += (dx / distance) * enemy.speed;
+                     enemy.y += (dy / distance) * enemy.speed;
+                 }
+                 return 'alive';
+             }
+             function createTower(gridX, gridY) { /* ... create tower object ... */
+                 if(gold < 100) return; // Double check cost
+
+                 const tower = {
+                     x: (gridX + 0.5) * TILE_SIZE,
+                     y: (gridY + 0.5) * TILE_SIZE,
+                     range: TILE_SIZE * 2.5,
+                     fireRate: 45, // Lower is faster (frames per shot)
+                     fireCooldown: 0, // Ticks down to 0 before firing
+                     damage: 25,
+                     projectileSpeed: 5,
+
+                     draw() {
+                         // Base
+                         tdCtx.fillStyle = '#6b7280'; // gray-500
+                         tdCtx.beginPath();
+                         tdCtx.arc(this.x, this.y, TILE_SIZE/3, 0, Math.PI * 2);
+                         tdCtx.fill();
+                         // Turret
+                         tdCtx.fillStyle = '#10b981'; // green-500
+                         tdCtx.beginPath();
+                         tdCtx.arc(this.x, this.y, TILE_SIZE/4, 0, Math.PI * 2);
+                         tdCtx.fill();
+                     },
+                     update() {
+                         this.fireCooldown = Math.max(0, this.fireCooldown - 1); // Decrement cooldown
+                         if (this.fireCooldown <= 0) {
+                             const target = this.findTarget();
+                             if (target) {
+                                 this.shoot(target);
+                                 this.fireCooldown = this.fireRate; // Reset cooldown
+                             }
+                         }
+                     },
+                     findTarget() {
+                         let closestEnemy = null;
+                         let minDistance = this.range * this.range; // Use squared distance for efficiency
+
+                         for (const enemy of enemies) {
+                              if (!enemy) continue;
+                             const dx = this.x - (enemy.x + enemy.width / 2);
+                             const dy = this.y - (enemy.y + enemy.height / 2);
+                             const distSq = dx*dx + dy*dy;
+                             if (distSq < minDistance) {
+                                 minDistance = distSq;
+                                 closestEnemy = enemy;
+                             }
+                         }
+                         return closestEnemy; // Returns the enemy object or null
+                     },
+                     shoot(target) {
+                         projectiles.push({
+                             x: this.x,
+                             y: this.y,
+                             target: target, // Reference to the enemy object
+                             speed: this.projectileSpeed,
+                             damage: this.damage,
+                             active: true, // Flag to mark for removal
+
+                             update(index) { // Pass index for easy removal
+                                  if (!this.active) return;
+                                 // Check if target still exists and is alive
+                                 if (!this.target || this.target.health <= 0 || !enemies.includes(this.target)) {
+                                     this.active = false; // Mark for removal if target is gone
+                                     return;
+                                 }
+
+                                 const targetCenterX = this.target.x + this.target.width / 2;
+                                 const targetCenterY = this.target.y + this.target.height / 2;
+                                 const dx = targetCenterX - this.x;
+                                 const dy = targetCenterY - this.y;
+                                 const dist = Math.sqrt(dx*dx + dy*dy);
+
+                                 if (dist < this.speed) { // Hit target
+                                     this.target.health -= this.damage;
+                                     this.active = false; // Mark for removal
+                                 } else { // Move towards target
+                                     this.x += (dx / dist) * this.speed;
+                                     this.y += (dy / dist) * this.speed;
+                                 }
+                             },
+                             draw() {
+                                 tdCtx.fillStyle = '#facc15'; // yellow-400
+                                 tdCtx.beginPath();
+                                 tdCtx.arc(this.x, this.y, 4, 0, Math.PI * 2); // Smaller projectile
+                                 tdCtx.fill();
+                             }
+                         });
+                     }
+                 };
+                 towers.push(tower);
+                 grid[gridY][gridX] = 2; // Mark grid cell as occupied by tower
+                 gold -= 100;
+                 updateTDUI();
+             }
+             function getMousePos(canvas, evt) { /* ... get mouse/touch position relative to canvas ... */
+                 const rect = canvas.getBoundingClientRect();
+                 const scaleX = canvas.width / rect.width;
+                 const scaleY = canvas.height / rect.height;
+                 let clientX, clientY;
+                 if (evt.touches && evt.touches.length > 0) {
+                    clientX = evt.touches[0].clientX;
+                    clientY = evt.touches[0].clientY;
+                 } else if (evt.changedTouches && evt.changedTouches.length > 0){
+                     clientX = evt.changedTouches[0].clientX;
+                     clientY = evt.changedTouches[0].clientY;
+                 }
+                  else {
+                    clientX = evt.clientX;
+                    clientY = evt.clientY;
+                 }
+
+                 if (clientX === undefined || clientY === undefined) return {x:0, y:0}; // Return default if no coords
+
+                 return {
+                     x: (clientX - rect.left) * scaleX,
+                     y: (clientY - rect.top) * scaleY
+                 };
+             }
+             function handleCanvasClick(e) { /* ... handle placing towers ... */
+                 if (!selectedTower || !tdRunning) return; // Only place if a tower type is selected and game is running
+
+                 const pos = getMousePos(tdCanvas, e);
+                 const gridX = Math.floor(pos.x / TILE_SIZE);
+                 const gridY = Math.floor(pos.y / TILE_SIZE);
+
+                 // Check bounds and if cell is buildable (grid value is 0)
+                 if (gridY >= 0 && gridY < GRID_ROWS && gridX >= 0 && gridX < GRID_COLS && grid[gridY][gridX] === 0) {
+                     if (selectedTower === 'turret' && gold >= 100) {
+                         createTower(gridX, gridY);
+                         selectedTower = null; // Deselect after placing
+                         buyTurretButton.classList.remove('border-green-400'); // Remove selection highlight
+                         buyTurretButton.classList.add('border-transparent');
+                     }
+                     // Add other tower types here with 'else if'
+                 } else {
+                      // Optionally provide feedback for invalid placement (e.g., shake effect, sound)
+                      console.log("Cannot build here.");
+                      selectedTower = null; // Deselect on invalid click too
+                      buyTurretButton.classList.remove('border-green-400');
+                      buyTurretButton.classList.add('border-transparent');
+                 }
+             }
+             function drawPlacementPreview() { /* ... draw tower range and placement indicator ... */
+                 const gridX = Math.floor(mousePos.x / TILE_SIZE);
+                 const gridY = Math.floor(mousePos.y / TILE_SIZE);
+
+                 // Check bounds before accessing grid
+                 if (gridY < 0 || gridY >= GRID_ROWS || gridX < 0 || gridX >= GRID_COLS) return;
+
+
+                 const centerX = (gridX + 0.5) * TILE_SIZE;
+                 const centerY = (gridY + 0.5) * TILE_SIZE;
+
+                 let isValidPlacement = grid[gridY][gridX] === 0; // Check if buildable
+                 let towerRange = TILE_SIZE * 2.5; // Example range for turret
+
+                 // Draw Range Circle
+                 tdCtx.globalAlpha = 0.3; // Make range semi-transparent
+                 tdCtx.fillStyle = isValidPlacement ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'; // green or red based on validity
+                 tdCtx.beginPath();
+                 tdCtx.arc(centerX, centerY, towerRange, 0, Math.PI * 2);
+                 tdCtx.fill();
+                 tdCtx.globalAlpha = 1.0; // Reset alpha
+
+                 // Draw Tower Preview
+                 tdCtx.fillStyle = '#10b981'; // green-500 for preview
+                 tdCtx.beginPath();
+                 tdCtx.arc(centerX, centerY, TILE_SIZE/3, 0, Math.PI * 2);
+                 tdCtx.fill();
+
+                 // Draw border indicating validity
+                 tdCtx.strokeStyle = isValidPlacement ? '#10b981' : '#ef4444'; // green or red border
+                 tdCtx.lineWidth = 2;
+                 tdCtx.strokeRect(gridX * TILE_SIZE, gridY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                 tdCtx.lineWidth = 1; // Reset line width
+             }
+             async function endGameTD(win) { /* ... end game logic ... */
+                 if (!tdRunning) return; // Prevent multiple calls
+                 stopTDGame();
+                 const finalWave = wave; // Capture final wave count
+                 await saveHighScore('Tower Defense', finalWave);
+                 tdInGameUI.style.display = 'none';
+                 tdGameOverScreen.style.display = 'flex';
+                 tdEndTitleEl.textContent = win ? "VICTORY!" : "DEFEAT!";
+                 tdFinalWaveEl.textContent = finalWave;
+                 nextWaveButton.style.display = 'none'; // Ensure next wave button is hidden
+             }
+             playTDButton.addEventListener('click', openTDModal);
+             closeTDButton.addEventListener('click', closeTDModal);
+             tdStartButton.addEventListener('click', startTDGame);
+             tdRestartButton.addEventListener('click', startTDGame);
+             // shareTDScoreBtn listener moved to global share function setup
+             nextWaveButton.addEventListener('click', startNextWave);
+
+             buyTurretButton.addEventListener('click', () => {
+                 if (gold >= 100) {
+                    selectedTower = (selectedTower === 'turret' ? null : 'turret'); // Toggle selection
+                     // Visual feedback for selection
+                     buyTurretButton.classList.toggle('border-green-400', selectedTower === 'turret');
+                     buyTurretButton.classList.toggle('border-transparent', selectedTower !== 'turret');
+                 } else {
+                     selectedTower = null; // Cannot select if not enough gold
+                     buyTurretButton.classList.remove('border-green-400');
+                     buyTurretButton.classList.add('border-transparent');
+                 }
+             });
+
+             // Update mouse position for placement preview
+             tdCanvas.addEventListener('mousemove', e => { if(selectedTower) mousePos = getMousePos(tdCanvas, e); });
+             tdCanvas.addEventListener('touchmove', e => { if(selectedTower) {mousePos = getMousePos(tdCanvas, e); e.preventDefault();} }, { passive: false }); // Prevent scroll while placing
+
+             // Handle placement click/tap
+             tdCanvas.addEventListener('click', handleCanvasClick);
+             tdCanvas.addEventListener('touchend', e => {
+                 // Touchend can be complex, sometimes fires after move.
+                 // Only trigger placement if it seems like a distinct tap after selection.
+                  if (selectedTower) {
+                    // Check if the touch end is reasonably close to the last touch move position
+                    const endPos = getMousePos(tdCanvas, e);
+                    const distMoved = Math.sqrt(Math.pow(endPos.x - mousePos.x, 2) + Math.pow(endPos.y - mousePos.y, 2));
+                    if (distMoved < TILE_SIZE / 2) { // Only place if finger didn't move much since last 'move'
+                         handleCanvasClick(e);
+                    } else {
+                        // If finger moved significantly, update preview position one last time
+                        mousePos = endPos;
                     }
-                }
-            }
-            function drawEnemy(enemy) {
-                tdCtx.fillStyle = '#ef4444';
-                tdCtx.fillRect(enemy.x, enemy.y, TILE_SIZE * 0.6, TILE_SIZE * 0.6);
-                tdCtx.fillStyle = '#4b5563';
-                tdCtx.fillRect(enemy.x, enemy.y - 10, TILE_SIZE * 0.6, 5);
-                tdCtx.fillStyle = '#22c55e';
-                tdCtx.fillRect(enemy.x, enemy.y - 10, TILE_SIZE * 0.6 * (enemy.health / enemy.maxHealth), 5);
-            }
-            function updateEnemy(enemy) {
-                if (enemy.pathIndex >= pathCoords.length - 1) {
-                    return 'finished';
-                }
-                const endPoint = pathCoords[enemy.pathIndex + 1];
-                const targetX = endPoint.x * TILE_SIZE;
-                const targetY = endPoint.y * TILE_SIZE;
-                const dx = targetX - enemy.x;
-                const dy = targetY - enemy.y;
-                const distance = Math.sqrt(dx*dx + dy*dy);
-                if (distance < enemy.speed) {
-                    enemy.pathIndex++;
-                } else {
-                    enemy.x += (dx / distance) * enemy.speed;
-                    enemy.y += (dy / distance) * enemy.speed;
-                }
-                return 'alive';
-            }
-            function createTower(gridX, gridY) {
-                const tower = {
-                    x: (gridX + 0.5) * TILE_SIZE, y: (gridY + 0.5) * TILE_SIZE, range: TILE_SIZE * 2.5, fireRate: 45, fireCooldown: 0,
-                    draw() {
-                        tdCtx.fillStyle = '#10b981';
-                        tdCtx.beginPath();
-                        tdCtx.arc(this.x, this.y, TILE_SIZE/3, 0, Math.PI * 2);
-                        tdCtx.fill();
-                    },
-                    update() {
-                        this.fireCooldown--;
-                        if (this.fireCooldown <= 0) {
-                            const target = this.findTarget();
-                            if (target) { this.shoot(target); this.fireCooldown = this.fireRate; }
-                        }
-                    },
-                    findTarget() {
-                        for (const enemy of enemies) {
-                            const dx = this.x - (enemy.x + (TILE_SIZE * 0.3));
-                            const dy = this.y - (enemy.y + (TILE_SIZE * 0.3));
-                            if (Math.sqrt(dx*dx + dy*dy) < this.range) return enemy;
-                        }
-                        return null;
-                    },
-                    shoot(target) {
-                        projectiles.push({
-                            x: this.x, y: this.y, target: target, speed: 5,
-                            update(i) {
-                                if(!this.target || this.target.health <= 0) { projectiles.splice(i, 1); return; }
-                                const dx = (this.target.x + TILE_SIZE * 0.3) - this.x;
-                                const dy = (this.target.y + TILE_SIZE * 0.3) - this.y;
-                                const dist = Math.sqrt(dx*dx + dy*dy);
-                                if (dist < this.speed) {
-                                    this.target.health -= 25;
-                                    projectiles.splice(i, 1);
-                                } else {
-                                    this.x += (dx/dist) * this.speed;
-                                    this.y += (dy/dist) * this.speed;
-                                }
-                            },
-                            draw() {
-                                tdCtx.fillStyle = '#facc15';
-                                tdCtx.beginPath();
-                                tdCtx.arc(this.x, this.y, 5, 0, Math.PI * 2);
-                                tdCtx.fill();
-                            }
-                        });
-                    }
-                };
-                towers.push(tower);
-                grid[gridY][gridX] = 2;
-            }
-            function getMousePos(canvas, evt) {
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                const clientX = evt.clientX || (evt.touches && evt.touches[0].clientX);
-                const clientY = evt.clientY || (evt.touches && evt.touches[0].clientY);
-                if (clientX === undefined) return {x:0, y:0};
-                return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
-            }
-            function handleCanvasClick(e) {
-                if (!selectedTower) return;
-                const pos = getMousePos(tdCanvas, e);
-                const gridX = Math.floor(pos.x / TILE_SIZE);
-                const gridY = Math.floor(pos.y / TILE_SIZE);
-                if (grid[gridY] && grid[gridY][gridX] === 0) {
-                    createTower(gridX, gridY);
-                    gold -= 100;
-                    updateTDUI();
-                    selectedTower = null;
-                }
-            }
-            function drawPlacementPreview() {
-                const gridX = Math.floor(mousePos.x / TILE_SIZE);
-                const gridY = Math.floor(mousePos.y / TILE_SIZE);
-                const centerX = (gridX + 0.5) * TILE_SIZE;
-                const centerY = (gridY + 0.5) * TILE_SIZE;
-                let isValidPlacement = false;
-                if(grid[gridY] && grid[gridY][gridX] === 0) { isValidPlacement = true; }
-                tdCtx.fillStyle = isValidPlacement ? 'rgba(0, 255, 0, 0.3)' : 'rgba(255, 0, 0, 0.3)';
-                tdCtx.beginPath();
-                tdCtx.arc(centerX, centerY, TILE_SIZE * 2.5, 0, Math.PI * 2);
-                tdCtx.fill();
-                tdCtx.fillStyle = '#16a34a';
-                tdCtx.beginPath();
-                tdCtx.arc(centerX, centerY, TILE_SIZE/3, 0, Math.PI * 2);
-                tdCtx.fill();
-            }
-            async function endGameTD(win) {
-                stopTDGame();
-                await saveHighScore('Tower Defense', wave);
-                tdInGameUI.style.display = 'none';
-                tdGameOverScreen.style.display = 'flex';
-                tdEndTitleEl.textContent = win ? "VICTORY!" : "DEFEAT!";
-                tdFinalWaveEl.textContent = wave;
-            }
-            playTDButton.addEventListener('click', openTDModal);
-            closeTDButton.addEventListener('click', closeTDModal);
-            tdStartButton.addEventListener('click', startTDGame);
-            tdRestartButton.addEventListener('click', startTDGame);
-            shareTDScoreBtn.addEventListener('click', () => {
-                shareScore('Tower Defense', wave, 'waves');
-            });
-            nextWaveButton.addEventListener('click', startNextWave);
-            buyTurretButton.addEventListener('click', () => { if (gold >= 100) selectedTower = 'turret'; });
-            tdCanvas.addEventListener('mousemove', e => { mousePos = getMousePos(tdCanvas, e); });
-            tdCanvas.addEventListener('touchmove', e => { mousePos = getMousePos(tdCanvas, e); });
-            tdCanvas.addEventListener('click', handleCanvasClick);
-            tdCanvas.addEventListener('touchend', e => { if (selectedTower) { handleCanvasClick(e); e.preventDefault(); } });
-            
+                    e.preventDefault();
+                 }
+             });
+
+
             // #############################################
-            // ### TIC-TAC-TOE (2D GAME) CODE          ###
+            // ### TIC-TAC-TOE (2D GAME) CODE            ###
             // #############################################
-            const ticTacToeModal = document.getElementById('ticTacToeModal');
-            const playTTTBtn = document.getElementById('tic-tac-toe-card');
-            const closeTTTBtn = document.getElementById('closeTicTacToeModal');
-            let tttInitialized = false;
+            /* ... Keep all existing Tic Tac Toe JS logic (openTTTModal, closeTTTModal, initTicTacToe, etc.) ... */
+             const ticTacToeModal = document.getElementById('ticTacToeModal');
+             const playTTTBtn = document.getElementById('tic-tac-toe-card');
+             const closeTTTBtn = document.getElementById('closeTicTacToeModal');
+             let tttInitialized = false;
 
-            function openTTTModal() {
-                ticTacToeModal.classList.remove('invisible', 'opacity-0');
-                if (!tttInitialized) {
-                    initTicTacToe();
-                    tttInitialized = true;
-                }
-            }
+             function openTTTModal() { /* ... open modal logic ... */
+                 ticTacToeModal.classList.remove('invisible', 'opacity-0');
+                 if (!tttInitialized) {
+                     initTicTacToe();
+                     tttInitialized = true;
+                 } else {
+                     // If already initialized, maybe just reset the board? Or handleRestartGame() fully?
+                     // Let's call restart fully to reset scores too when opening modal
+                     const restartFunc = document.getElementById('ttt-restart-button').onclick; // Get the restart handler if attached
+                     if (restartFunc) restartFunc();
+                 }
+             }
 
-            function closeTTTModal() {
-                ticTacToeModal.classList.add('invisible', 'opacity-0');
-            }
-            
-            playTTTBtn.addEventListener('click', openTTTModal);
-            closeTTTBtn.addEventListener('click', closeTTTModal);
+             function closeTTTModal() { /* ... close modal logic ... */
+                 ticTacToeModal.classList.add('invisible', 'opacity-0');
+                 // No game loop to stop, but reset might be desired if closed mid-game
+             }
 
-            function initTicTacToe() {
-                const statusDisplay = document.getElementById('ttt-status');
-                const cells = document.querySelectorAll('.ttt-cell');
-                const restartButton = document.getElementById('ttt-restart-button');
-                const nextRoundButton = document.getElementById('ttt-next-round-button');
-                const scoreXDisplay = document.getElementById('ttt-score-x');
-                const scoreODisplay = document.getElementById('ttt-score-o');
+             playTTTBtn.addEventListener('click', openTTTModal);
+             closeTTTBtn.addEventListener('click', closeTTTModal);
 
-                let gameActive = true;
-                let startingPlayer = 'X';
-                let currentPlayer = 'X';
-                let gameState = ["", "", "", "", "", "", "", "", ""];
-                let scoreX = 0;
-                let scoreO = 0;
+             function initTicTacToe() { /* ... TTT game logic ... */
+                 const statusDisplay = document.getElementById('ttt-status');
+                 const cells = document.querySelectorAll('.ttt-cell');
+                 const restartButtonTTT = document.getElementById('ttt-restart-button'); // Renamed to avoid conflict
+                 const nextRoundButtonTTT = document.getElementById('ttt-next-round-button'); // Renamed
+                 const scoreXDisplay = document.getElementById('ttt-score-x');
+                 const scoreODisplay = document.getElementById('ttt-score-o');
 
-                const winningConditions = [
-                    [0, 1, 2], [3, 4, 5], [6, 7, 8],
-                    [0, 3, 6], [1, 4, 7], [2, 5, 8],
-                    [0, 4, 8], [2, 4, 6]
-                ];
+                 let gameActive = true;
+                 let startingPlayer = 'X';
+                 let currentPlayer = 'X';
+                 let gameState = ["", "", "", "", "", "", "", "", ""];
+                 let scoreX = 0;
+                 let scoreO = 0;
 
-                const winningMessage = () => `Player ${currentPlayer} wins! 🎉`;
-                const drawMessage = () => `It's a draw! 🤝`;
-                const currentPlayerTurn = () => `Player ${currentPlayer}'s turn`;
+                 const winningConditions = [ /* ... winning conditions ... */
+                    [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]
+                 ];
 
-                function handleCellClick(event) {
-                    const clickedCell = event.target;
-                    const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
-                    if (gameState[clickedCellIndex] !== "" || !gameActive) return;
-                    
-                    handleCellPlayed(clickedCell, clickedCellIndex);
-                    handleResultValidation();
-                }
+                 const winningMessage = () => `Player ${currentPlayer} wins! 🎉`;
+                 const drawMessage = () => `It's a draw! 🤝`;
+                 const currentPlayerTurn = () => `Player ${currentPlayer}'s turn`;
 
-                function handleCellPlayed(clickedCell, clickedCellIndex) {
-                    gameState[clickedCellIndex] = currentPlayer;
-                    clickedCell.textContent = currentPlayer;
-                    clickedCell.classList.add(currentPlayer === 'X' ? 'text-red-500' : 'text-blue-400');
-                }
+                 function handleCellClick(event) { /* ... cell click logic ... */
+                     const clickedCell = event.target;
+                     const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+                     if (gameState[clickedCellIndex] !== "" || !gameActive) return;
 
-                function handleResultValidation() {
-                    let roundWon = false;
-                    let winningLine = [];
-                    for (const winCondition of winningConditions) {
-                        const a = gameState[winCondition[0]];
-                        const b = gameState[winCondition[1]];
-                        const c = gameState[winCondition[2]];
-                        if (a === '' || b === '' || c === '') continue;
-                        if (a === b && b === c) {
-                            roundWon = true;
-                            winningLine = winCondition;
-                            break;
-                        }
-                    }
+                     handleCellPlayed(clickedCell, clickedCellIndex);
+                     handleResultValidation();
+                 }
 
-                    if (roundWon) {
-                        statusDisplay.textContent = winningMessage();
-                        gameActive = false;
-                        if (currentPlayer === 'X') {
-                            scoreX++;
-                            scoreXDisplay.textContent = scoreX;
-                        } else {
-                            scoreO++;
-                            scoreODisplay.textContent = scoreO;
-                        }
-                        winningLine.forEach(index => cells[index].classList.add('winning-cell'));
-                        nextRoundButton.classList.remove('hidden');
-                        return;
-                    }
+                 function handleCellPlayed(clickedCell, clickedCellIndex) { /* ... update cell/state ... */
+                     gameState[clickedCellIndex] = currentPlayer;
+                     clickedCell.textContent = currentPlayer;
+                     clickedCell.classList.add(currentPlayer === 'X' ? 'text-red-500' : 'text-blue-400');
+                 }
 
-                    if (!gameState.includes("")) {
-                        statusDisplay.textContent = drawMessage();
-                        gameActive = false;
-                        nextRoundButton.classList.remove('hidden');
-                        return;
-                    }
-                    handlePlayerChange();
-                }
+                 function handleResultValidation() { /* ... check win/draw ... */
+                     let roundWon = false;
+                     let winningLine = [];
+                     for (const winCondition of winningConditions) {
+                         const a = gameState[winCondition[0]];
+                         const b = gameState[winCondition[1]];
+                         const c = gameState[winCondition[2]];
+                         if (a === '' || b === '' || c === '') continue;
+                         if (a === b && b === c) {
+                             roundWon = true;
+                             winningLine = winCondition;
+                             break;
+                         }
+                     }
 
-                function handlePlayerChange() {
-                    currentPlayer = currentPlayer === "X" ? "O" : "X";
-                    statusDisplay.textContent = currentPlayerTurn();
-                }
-                
-                function startNextRound() {
-                    gameActive = true;
-                    startingPlayer = startingPlayer === 'X' ? 'O' : 'X';
-                    currentPlayer = startingPlayer;
-                    gameState = ["", "", "", "", "", "", "", "", ""];
-                    statusDisplay.textContent = currentPlayerTurn();
-                    cells.forEach(cell => {
-                        cell.textContent = "";
-                        cell.classList.remove('text-red-500', 'text-blue-400', 'winning-cell');
-                    });
-                    nextRoundButton.classList.add('hidden');
-                }
+                     if (roundWon) {
+                         statusDisplay.textContent = winningMessage();
+                         gameActive = false;
+                         if (currentPlayer === 'X') { scoreX++; scoreXDisplay.textContent = scoreX; }
+                         else { scoreO++; scoreODisplay.textContent = scoreO; }
+                         winningLine.forEach(index => cells[index].classList.add('winning-cell'));
+                         nextRoundButtonTTT.classList.remove('hidden');
+                         return;
+                     }
 
-                function handleRestartGame() {
-                    scoreX = 0;
-                    scoreO = 0;
-                    scoreXDisplay.textContent = '0';
-                    scoreODisplay.textContent = '0';
-                    startingPlayer = 'X';
-                    startNextRound();
-                }
+                     if (!gameState.includes("")) {
+                         statusDisplay.textContent = drawMessage();
+                         gameActive = false;
+                         nextRoundButtonTTT.classList.remove('hidden');
+                         return;
+                     }
 
-                cells.forEach(cell => cell.addEventListener('click', handleCellClick));
-                nextRoundButton.addEventListener('click', startNextRound);
-                restartButton.addEventListener('click', handleRestartGame);
+                     handlePlayerChange();
+                 }
 
-                statusDisplay.textContent = currentPlayerTurn();
-            }
+                 function handlePlayerChange() { /* ... switch player ... */
+                     currentPlayer = currentPlayer === "X" ? "O" : "X";
+                     statusDisplay.textContent = currentPlayerTurn();
+                 }
+
+                 function startNextRound() { /* ... start next round ... */
+                     gameActive = true;
+                     startingPlayer = startingPlayer === 'X' ? 'O' : 'X'; // Alternate starting player
+                     currentPlayer = startingPlayer;
+                     gameState = ["", "", "", "", "", "", "", "", ""];
+                     statusDisplay.textContent = currentPlayerTurn();
+                     cells.forEach(cell => {
+                         cell.textContent = "";
+                         cell.classList.remove('text-red-500', 'text-blue-400', 'winning-cell');
+                     });
+                     nextRoundButtonTTT.classList.add('hidden');
+                 }
+
+                 function handleRestartGame() { /* ... restart game (reset scores) ... */
+                     scoreX = 0;
+                     scoreO = 0;
+                     scoreXDisplay.textContent = '0';
+                     scoreODisplay.textContent = '0';
+                     startingPlayer = 'X'; // Reset starting player
+                     startNextRound(); // Start the first round again
+                 }
+
+                 // Attach handlers
+                 cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+                 nextRoundButtonTTT.addEventListener('click', startNextRound);
+                 restartButtonTTT.addEventListener('click', handleRestartGame);
+                  // Also make it the onclick for simpler retrieval if needed elsewhere
+                 restartButtonTTT.onclick = handleRestartGame;
+
+
+                 // Initial status message
+                 statusDisplay.textContent = currentPlayerTurn();
+             }
+
 
             // #############################################
-            // ### MEMORY MATCH (2D GAME) CODE         ###
+            // ### MEMORY MATCH (2D GAME) CODE           ###
             // #############################################
-            const memoryMatchModal = document.getElementById('memoryMatchModal');
-            const memoryMatchWinModal = document.getElementById('memoryMatchWinModal');
-            const playMemoryMatchBtn = document.getElementById('memory-match-card');
-            const closeMemoryMatchBtn = document.getElementById('closeMemoryMatchModal');
-            const shareMemoryScoreBtn = document.getElementById('shareMemoryScore');
-            let memoryMatchInitialized = false;
+            /* ... Keep all existing Memory Match JS logic (openMemoryMatchModal, closeMemoryMatchModal, initMemoryMatch, etc.) ... */
+             const memoryMatchModal = document.getElementById('memoryMatchModal');
+             const memoryMatchWinModal = document.getElementById('memoryMatchWinModal');
+             const playMemoryMatchBtn = document.getElementById('memory-match-card');
+             const closeMemoryMatchBtn = document.getElementById('closeMemoryMatchModal');
+             // shareMemoryScoreBtn defined above
+             let memoryMatchInitialized = false;
 
-            function openMemoryMatchModal() {
-                memoryMatchModal.classList.remove('invisible', 'opacity-0');
-                if (!memoryMatchInitialized) {
-                    initMemoryMatch();
-                    memoryMatchInitialized = true;
-                }
-            }
+             function openMemoryMatchModal() { /* ... open modal logic ... */
+                 memoryMatchModal.classList.remove('invisible', 'opacity-0');
+                 if (!memoryMatchInitialized) {
+                     initMemoryMatch();
+                     memoryMatchInitialized = true;
+                 } else {
+                     // If initialized, just restart the game board
+                    const restartFunc = document.getElementById('memory-restart-button').onclick;
+                    if(restartFunc) restartFunc();
+                 }
+             }
 
-            function closeMemoryMatchModal() {
-                memoryMatchModal.classList.add('invisible', 'opacity-0');
-            }
-            
-            playMemoryMatchBtn.addEventListener('click', openMemoryMatchModal);
-            closeMemoryMatchBtn.addEventListener('click', closeMemoryMatchModal);
+             function closeMemoryMatchModal() { /* ... close modal logic ... */
+                 memoryMatchModal.classList.add('invisible', 'opacity-0');
+                 memoryMatchWinModal.classList.add('hidden'); // Ensure win modal is also hidden
+             }
 
-            function initMemoryMatch() {
-                const gameBoard = document.getElementById('memory-game-board');
-                const movesCountSpan = document.getElementById('moves-count');
-                const restartButton = document.getElementById('memory-restart-button');
-                const restartButtonWin = document.getElementById('memoryRestartButtonWin');
-                const memoryFinalMovesEl = document.getElementById('memoryFinalMoves');
-                const cardSymbols = ['🚀', '🔥', '⭐', '🎉', '💎', '💯', '👾', '🏆'];
-                let cards = [...cardSymbols, ...cardSymbols];
+             playMemoryMatchBtn.addEventListener('click', openMemoryMatchModal);
+             closeMemoryMatchBtn.addEventListener('click', closeMemoryMatchModal);
 
-                let flippedCards = [];
-                let matchedPairs = 0;
-                let moves = 0;
-                let lockBoard = false;
+             function initMemoryMatch() { /* ... memory match game logic ... */
+                 const gameBoard = document.getElementById('memory-game-board');
+                 const movesCountSpan = document.getElementById('moves-count');
+                 const restartButtonMM = document.getElementById('memory-restart-button'); // Renamed
+                 const restartButtonWinMM = document.getElementById('memoryRestartButtonWin'); // Renamed
+                 const memoryFinalMovesEl = document.getElementById('memoryFinalMoves');
+                 const cardSymbols = ['🚀', '🔥', '⭐', '🎉', '💎', '💯', '👾', '🏆']; // 8 pairs = 16 cards
+                 let cards = [...cardSymbols, ...cardSymbols];
 
-                function shuffle(array) {
+                 let flippedCards = [];
+                 let matchedPairs = 0;
+                 let moves = 0;
+                 let lockBoard = false; // Prevent clicking during animation/check
+
+                 function shuffle(array) { /* ... shuffle array ... */
                     for (let i = array.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
                         [array[i], array[j]] = [array[j], array[i]];
                     }
-                }
+                 }
 
-                function createBoard() {
-                    shuffle(cards);
-                    gameBoard.innerHTML = '';
-                    cards.forEach(symbol => {
-                        const cardElement = document.createElement('div');
-                        cardElement.classList.add('memory-card', 'h-24');
-                        cardElement.dataset.symbol = symbol;
+                 function createBoard() { /* ... create card elements ... */
+                     shuffle(cards);
+                     gameBoard.innerHTML = ''; // Clear previous board
+                     cards.forEach(symbol => {
+                         const cardElement = document.createElement('div');
+                         cardElement.classList.add('memory-card', 'h-20', 'sm:h-24'); // Adjusted height
+                         cardElement.dataset.symbol = symbol;
 
-                        cardElement.innerHTML = `
-                            <div class="memory-card-face memory-card-front"></div>
-                            <div class="memory-card-face memory-card-back">${symbol}</div>
-                        `;
+                         cardElement.innerHTML = `
+                             <div class="memory-card-face memory-card-front"></div>
+                             <div class="memory-card-face memory-card-back">${symbol}</div>
+                         `;
 
-                        cardElement.addEventListener('click', handleCardClick);
-                        gameBoard.appendChild(cardElement);
-                    });
-                }
+                         cardElement.addEventListener('click', handleCardClick);
+                         gameBoard.appendChild(cardElement);
+                     });
+                 }
 
-                function handleCardClick(event) {
-                    const clickedCard = event.currentTarget;
-                    if (lockBoard || clickedCard.classList.contains('is-flipped')) return;
+                 function handleCardClick(event) { /* ... handle card click ... */
+                     const clickedCard = event.currentTarget;
+                     // Ignore click if board locked, card already flipped, or card already matched
+                     if (lockBoard || clickedCard.classList.contains('is-flipped') || clickedCard.classList.contains('matched')) return;
 
-                    flipCard(clickedCard);
+                     flipCard(clickedCard);
 
-                    if (flippedCards.length < 2) {
-                        flippedCards.push(clickedCard);
-                    }
+                     if (flippedCards.length < 2) {
+                         flippedCards.push(clickedCard);
+                     }
 
-                    if (flippedCards.length === 2) {
-                        incrementMoves();
-                        checkForMatch();
-                    }
-                }
+                     if (flippedCards.length === 2) {
+                         incrementMoves();
+                         checkForMatch();
+                     }
+                 }
 
-                function flipCard(card) {
-                    card.classList.add('is-flipped');
-                }
-                
-                function unflipCards() {
-                    lockBoard = true;
-                    setTimeout(() => {
-                        flippedCards.forEach(card => card.classList.remove('is-flipped'));
-                        resetFlippedCards();
-                    }, 1000);
-                }
+                 function flipCard(card) { /* ... flip card visually ... */
+                     card.classList.add('is-flipped');
+                 }
 
-                function checkForMatch() {
-                    const [card1, card2] = flippedCards;
-                    const isMatch = card1.dataset.symbol === card2.dataset.symbol;
+                 function unflipCards() { /* ... unflip non-matching cards ... */
+                     lockBoard = true; // Lock board during unflip animation
+                     setTimeout(() => {
+                         flippedCards.forEach(card => card.classList.remove('is-flipped'));
+                         resetFlippedCards(); // Unlocks board after timeout
+                     }, 1000); // Wait 1 second before flipping back
+                 }
 
-                    if (isMatch) {
-                        disableMatchedCards();
-                    } else {
-                        unflipCards();
-                    }
-                }
-                
-                async function disableMatchedCards() {
-                    flippedCards.forEach(card => {
-                        card.removeEventListener('click', handleCardClick);
-                        card.classList.add('matched');
-                    });
-                    matchedPairs++;
-                    resetFlippedCards();
+                 function checkForMatch() { /* ... check if flipped cards match ... */
+                     const [card1, card2] = flippedCards;
+                     const isMatch = card1.dataset.symbol === card2.dataset.symbol;
 
-                    if (matchedPairs === cardSymbols.length) {
-                       await saveHighScore('Memory Match', moves, 'asc');
-                       memoryFinalMovesEl.textContent = moves;
-                       setTimeout(() => {
-                           memoryMatchWinModal.classList.remove('hidden');
-                       }, 500);
-                    }
-                }
-                
-                function resetFlippedCards() {
-                    flippedCards = [];
-                    lockBoard = false;
-                }
+                     if (isMatch) {
+                         disableMatchedCards();
+                     } else {
+                         unflipCards();
+                     }
+                 }
 
-                function incrementMoves() {
-                    moves++;
-                    movesCountSpan.textContent = moves;
-                }
-                
-                function restartGame() {
-                    moves = 0;
-                    matchedPairs = 0;
-                    movesCountSpan.textContent = '0';
-                    resetFlippedCards();
-                    createBoard();
-                    memoryMatchWinModal.classList.add('hidden');
-                }
+                 async function disableMatchedCards() { /* ... handle matched cards ... */
+                     flippedCards.forEach(card => {
+                         card.removeEventListener('click', handleCardClick); // Disable clicks on matched cards
+                         card.classList.add('matched'); // Add style for matched cards
+                     });
+                     matchedPairs++;
+                     resetFlippedCards(); // Unlocks board
 
-                restartButton.addEventListener('click', restartGame);
-                restartButtonWin.addEventListener('click', restartGame);
-                shareMemoryScoreBtn.addEventListener('click', () => {
-                    shareScore('Memory Match', moves, 'moves');
-                });
-                createBoard();
-            }
+                     if (matchedPairs === cardSymbols.length) { // All pairs found
+                         await saveHighScore('Memory Match', moves, 'asc'); // Save score (lower is better)
+                         memoryFinalMovesEl.textContent = moves;
+                         setTimeout(() => {
+                             memoryMatchWinModal.classList.remove('hidden'); // Show win modal
+                         }, 500); // Short delay before showing win modal
+                     }
+                 }
+
+                 function resetFlippedCards() { /* ... reset flipped card tracking ... */
+                     flippedCards = [];
+                     lockBoard = false; // Unlock board
+                 }
+
+                 function incrementMoves() { /* ... increment move counter ... */
+                     moves++;
+                     movesCountSpan.textContent = moves;
+                 }
+
+                 function restartGame() { /* ... restart game function ... */
+                     moves = 0;
+                     matchedPairs = 0;
+                     movesCountSpan.textContent = '0';
+                     resetFlippedCards(); // Ensure board is unlocked
+                     createBoard(); // Create a new shuffled board
+                     memoryMatchWinModal.classList.add('hidden'); // Hide win modal if it was open
+                 }
+
+                 // Attach handlers
+                 restartButtonMM.addEventListener('click', restartGame);
+                 restartButtonWinMM.addEventListener('click', restartGame);
+                 restartButtonMM.onclick = restartGame; // For simpler access if needed
+                 // shareMemoryScoreBtn listener moved to global share function setup
+
+                 // Initial setup
+                 createBoard();
+             }
 
 
+            // #############################################
+            // ### WINDOW RESIZE HANDLING                ###
+            // #############################################
             window.addEventListener('resize', () => {
-                camera.aspect = gameContainer.clientWidth / gameContainer.clientHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(gameContainer.clientWidth, gameContainer.clientHeight);
-                if(racerCanvas) {
-                    racerCanvas.width = racerCanvas.parentElement.clientWidth;
-                    racerCanvas.height = racerCanvas.parentElement.clientHeight;
+                // Resize 3D canvas and update camera
+                if (renderer && camera && gameContainer) {
+                    camera.aspect = gameContainer.clientWidth / gameContainer.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(gameContainer.clientWidth, gameContainer.clientHeight);
                 }
-                if(tdCanvas) {
-                    setupTDGrid();
+                 // Resize 2D Racer canvas if modal is open (or always if needed)
+                if(racerCanvas && !racerModal.classList.contains('invisible')) {
+                     racerCanvas.width = racerCanvas.parentElement.clientWidth;
+                     racerCanvas.height = racerCanvas.parentElement.clientHeight;
+                     // Optionally redraw current state if game wasn't running or reset/redraw elements
+                     if (playerCar) { // Adjust player car position relative to new width?
+                        playerCar.x = Math.max(0, Math.min(racerCanvas.width - playerCar.width, playerCar.x));
+                     }
+                     if(!racerRunning) draw(); // Redraw if paused/stopped
+                }
+                // Resize 2D Tower Defense canvas and recalculate grid
+                if(tdCanvas && !tdModal.classList.contains('invisible')) {
+                     setupTDGrid();
+                     // Redraw current state if game is running or paused
+                     if (!tdRunning) { // If game not active, redraw static elements
+                        tdCtx.fillStyle = '#1f2937';
+                        tdCtx.fillRect(0, 0, tdCanvas.width, tdCanvas.height);
+                        drawTDGrid();
+                        drawTDPath();
+                        towers.forEach(t => t.draw()); // Redraw existing towers
+                     }
+                      // If game IS running, the game loop will handle redraw on next frame
                 }
             });
-        });
+
+        }); // End DOMContentLoaded
     </script>
 </body>
 </html>
+
