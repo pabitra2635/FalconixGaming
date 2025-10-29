@@ -52,9 +52,11 @@
         <nav class="container mx-auto px-4 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
-                 <div class="flex items-center space-x-4">
+                 <div class="flex items-center space-x-4 text-right">
                      <!-- Display user info if logged in -->
                      <div id="user-status" class="text-sm text-gray-300">Checking status...</div>
+                     <!-- Link back to games moved here for better alignment -->
+                     <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors flex-shrink-0">Back to Games</a>
                  </div>
             </div>
         </nav>
@@ -124,7 +126,7 @@
         import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("Leaderboard Page: DOM Loaded. Initializing Firebase..."); // Debug log
+            console.log("Leaderboard Page: DOM Loaded. Initializing Firebase...");
 
             // #############################################
             // ### FIREBASE SETUP                      ###
@@ -147,9 +149,9 @@
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-                console.log("Leaderboard Page: Firebase initialized successfully."); // Debug log
+                console.log("Leaderboard Page: Firebase initialized successfully.");
             } catch (error) {
-                console.error("Leaderboard Page: Firebase initialization failed:", error); // Error log
+                console.error("Leaderboard Page: Firebase initialization failed:", error);
                 const errorDisplayInit = document.getElementById('global-leaderboard-error');
                 errorDisplayInit.innerHTML = `<p>Failed to connect to Firebase services. Please check connection/configuration.</p>`;
                 errorDisplayInit.style.display = 'block';
@@ -170,7 +172,7 @@
 
             // --- Function to Display Global Leaderboards (Dynamically from /highscores) ---
             const displayGlobalLeaderboards = async (currentUser) => {
-                console.log("Leaderboard Page: displayGlobalLeaderboards called. User:", currentUser ? currentUser.uid : 'null'); // Debug log
+                console.log("Leaderboard Page: displayGlobalLeaderboards called. User:", currentUser ? currentUser.uid : 'null');
                 loadingIndicator.style.display = 'block';
                 globalLeaderboardContent.style.display = 'none';
                 errorDisplay.style.display = 'none';
@@ -188,15 +190,16 @@
 
                 try {
                     const highscoresCol = collection(db, "highscores");
-                    console.log("Leaderboard Page: Fetching documents from /highscores..."); // Debug log
+                    console.log("Leaderboard Page: Fetching documents from /highscores...");
                     snapshot = await getDocs(highscoresCol);
-                    console.log("Leaderboard Page: Fetched snapshot. Empty:", snapshot.empty, "Size:", snapshot.size); // Debug log
+                    console.log("Leaderboard Page: Fetched snapshot. Empty:", snapshot.empty, "Size:", snapshot.size);
 
                     if (!snapshot.empty) {
                         snapshot.forEach(doc => {
                             const userData = doc.data();
                             const userId = doc.id;
-                            const playerName = userData.playerName || `User ${userId.substring(0, 6)}...`;
+                            // *** UPDATED: Fallback to truncated ID without "User " prefix ***
+                            const playerName = userData.playerName || `${userId.substring(0, 6)}...`; // Use ID directly as fallback
 
                             games.forEach(game => {
                                 if (userData[game] !== undefined && typeof userData[game] === 'number') {
@@ -207,7 +210,7 @@
                         });
                     }
 
-                    console.log("Leaderboard Page: Aggregated scores:", allScoresByGame); // Debug log
+                    console.log("Leaderboard Page: Aggregated scores:", allScoresByGame);
 
                     // Process and display scores
                     games.forEach(game => {
@@ -245,7 +248,7 @@
                     });
 
                 } catch (error) {
-                    console.error("Leaderboard Page: Error fetching or processing high scores: ", error); // *** More detailed Error log ***
+                    console.error("Leaderboard Page: Error fetching or processing high scores: ", error);
                     console.error("Error Name:", error.name);
                     console.error("Error Code:", error.code);
                     console.error("Error Message:", error.message);
@@ -264,15 +267,14 @@
                     } else {
                          noScoresMessage.style.display = 'block';
                     }
-                     console.log("Leaderboard Page: displayGlobalLeaderboards finished."); // Debug log
+                     console.log("Leaderboard Page: displayGlobalLeaderboards finished.");
                 }
             };
 
              // *** Authentication Check ***
-             console.log("Leaderboard Page: Setting up onAuthStateChanged listener..."); // Debug log
-             const unsubscribe = onAuthStateChanged(auth, (user) => { // Store the unsubscribe function
-                 console.log("Leaderboard Page: onAuthStateChanged triggered. User:", user ? user.uid : 'null', "User Object:", user); // *** Log the whole user object ***
-                 // Hide all content sections initially
+             console.log("Leaderboard Page: Setting up onAuthStateChanged listener...");
+             const unsubscribe = onAuthStateChanged(auth, (user) => {
+                 console.log("Leaderboard Page: onAuthStateChanged triggered. User:", user ? user.uid : 'null', "User Object:", user);
                  loadingIndicator.style.display = 'none';
                  globalLeaderboardContent.style.display = 'none';
                  errorDisplay.style.display = 'none';
@@ -282,14 +284,15 @@
                  try {
                      if (user) {
                          // User is signed in
-                         console.log("Leaderboard Page: User is signed in:", user.displayName, user.uid); // Debug log
-                         userStatusEl.textContent = `${user.displayName || 'User'}`;
+                         console.log("Leaderboard Page: User is signed in:", user.displayName, user.uid);
+                         // *** UPDATED: Show User ID in the header ***
+                         userStatusEl.innerHTML = `Logged in as: ${user.displayName || 'User'} <br> <span class="text-xs text-gray-400 break-all">ID: ${user.uid}</span>`; // Display name and ID
                          userStatusEl.classList.remove('text-red-400');
                          userStatusEl.classList.add('text-green-400');
                          displayGlobalLeaderboards(user); // Fetch and display leaderboards
                      } else {
                          // User is signed out
-                         console.log("Leaderboard Page: User is signed out."); // Debug log
+                         console.log("Leaderboard Page: User is signed out.");
                          userStatusEl.textContent = 'Not logged in';
                          userStatusEl.classList.remove('text-green-400');
                          userStatusEl.classList.add('text-red-400');
@@ -301,27 +304,19 @@
                      errorDisplay.style.display = 'block';
                  }
              }, (error) => {
-                  console.error("Leaderboard Page: Error in onAuthStateChanged listener:", error); // Error log for the listener
+                  console.error("Leaderboard Page: Error in onAuthStateChanged listener:", error);
                   userStatusEl.textContent = 'Auth Error';
                   userStatusEl.classList.add('text-red-400');
                   errorDisplay.innerHTML = '<p>Could not check authentication status. Please refresh the page.</p>';
                   errorDisplay.style.display = 'block';
-                  // Hide other sections on auth error
                   loadingIndicator.style.display = 'none';
                   globalLeaderboardContent.style.display = 'none';
                   noScoresMessage.style.display = 'none';
                   loginPrompt.style.display = 'none';
              });
 
-             // Optional: Detach listener when the user navigates away (if needed, less critical for simple pages)
-             // window.addEventListener('beforeunload', () => {
-             //     if (unsubscribe) {
-             //         console.log("Leaderboard Page: Unsubscribing from auth changes.");
-             //         unsubscribe();
-             //     }
-             // });
-
         }); // End DOMContentLoaded
     </script>
 </body>
 </html>
+
