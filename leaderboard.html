@@ -62,7 +62,7 @@
     <!-- Main Content: Leaderboards Section -->
     <main class="flex-grow py-16 sm:py-24 bg-gray-800/50">
         <section id="leaderboards" class="container mx-auto px-4 lg:px-8">
-            <h1 class="text-4xl font-black-ops text-center mb-12">Global Leaderboards</h1>
+            <h1 class="text-4xl font-black-ops text-center mb-12">Global Leaderboards (Top 5)</h1> {/* Updated Title */}
 
             <!-- Loading Indicator -->
             <div id="loading-indicator" class="text-center">
@@ -206,7 +206,8 @@
                                 <ol class="space-y-3">`;
 
                         if (scores.length > 0) {
-                            scores.slice(0, 10).forEach((entry, index) => { // Take top 10
+                            // *** UPDATED: Slice to get top 5 instead of top 10 ***
+                            scores.slice(0, 5).forEach((entry, index) => { // Take top 5
                                 leaderboardHTML += `
                                     <li class="flex items-center justify-between text-lg">
                                         <span class="flex items-center min-w-0"> {/* Allow shrinking */}
