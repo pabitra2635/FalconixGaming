@@ -51,10 +51,12 @@
     <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
         <nav class="container mx-auto px-4 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <!-- Link back to the main site -->
                 <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
-                 <!-- Link back to the main portal -->
-                 <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors">Back to Games</a>
+                 <div class="flex items-center space-x-4">
+                     {/* Display user info if logged in */}
+                     <div id="user-status" class="text-sm text-gray-300">Checking status...</div>
+                     <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors">Back to Games</a>
+                 </div>
             </div>
         </nav>
     </header>
@@ -62,24 +64,37 @@
     <!-- Main Content: Leaderboards Section -->
     <main class="flex-grow py-16 sm:py-24 bg-gray-800/50">
         <section id="leaderboards" class="container mx-auto px-4 lg:px-8">
-            <h1 class="text-4xl font-black-ops text-center mb-12">Global Leaderboards (Top 5)</h1> {/* Updated Title */}
+            <h1 class="text-4xl font-black-ops text-center mb-12">Global Leaderboards (Top 5)</h1>
 
-            <!-- Loading Indicator -->
-            <div id="loading-indicator" class="text-center">
+            {/* Login Prompt - Initially hidden */}
+            <div id="login-prompt" class="hidden text-center text-gray-300 glassmorphism p-8 rounded-lg max-w-md mx-auto">
+                <p class="text-xl mb-4">Please log in to view the Global Leaderboards.</p>
+                {/* Link to main page with query param to suggest login */}
+                <a href="index.html?login=true" class="inline-block px-6 py-3 font-semibold text-white bg-sky-500 rounded-lg shadow-md hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 transition-colors duration-300">
+                    Login on Main Page
+                </a>
+                 <p class="text-sm mt-4 text-gray-400">(Navigate back to this page after logging in)</p>
+            </div>
+
+            {/* Loading Indicator - Initially hidden */}
+            <div id="loading-indicator" class="hidden text-center">
                 <div class="loader"></div>
                 <p class="text-gray-400">Loading top scores...</p>
             </div>
 
-            <!-- Global Leaderboard Content -->
+            {/* Global Leaderboard Content - Initially hidden */}
             <div id="global-leaderboard-content" class="hidden">
                  <div id="global-leaderboard-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-                    <!-- Global leaderboard tables will be injected here by JavaScript -->
+                    {/* Leaderboard cards injected here */}
                 </div>
             </div>
+
+            {/* Error Display - Initially hidden */}
             <div id="global-leaderboard-error" class="hidden text-center text-red-400 mt-8">
-                {/* Error message set dynamically */}
-                <p>Could not load leaderboards. Please ensure Firestore rules allow public list access on the 'highscores' collection, or try again later.</p>
+                <p>Could not load leaderboards. Please try again later.</p>
             </div>
+
+            {/* No Scores Message - Initially hidden */}
             <div id="no-scores-message" class="hidden text-center text-gray-400 mt-8">
                 <p>No high scores recorded yet for any games.</p>
             </div>
@@ -99,16 +114,18 @@
     {
         "imports": {
             "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
-            "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
+            "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js",
+             "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js" // *** Added Auth import ***
         }
     }
     </script>
     <script type="module">
         import { initializeApp } from 'firebase/app';
-        // *** UPDATED: Import necessary Firestore functions ***
-        import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore'; // Added collection, getDocs
+        import { getFirestore, collection, getDocs } from 'firebase/firestore';
+        // *** Added Auth imports ***
+        import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => { // Removed async from here
 
             // #############################################
             // ### FIREBASE SETUP                      ###
@@ -125,6 +142,7 @@
 
             const app = initializeApp(firebaseConfig);
             const db = getFirestore(app);
+            const auth = getAuth(app); // *** Initialize Auth ***
 
             // --- UI Elements ---
             const globalLeaderboardGrid = document.getElementById('global-leaderboard-grid');
@@ -132,127 +150,130 @@
             const globalLeaderboardContent = document.getElementById('global-leaderboard-content');
             const errorDisplay = document.getElementById('global-leaderboard-error');
             const noScoresMessage = document.getElementById('no-scores-message');
+            const loginPrompt = document.getElementById('login-prompt');
+            const userStatusEl = document.getElementById('user-status');
 
             // --- Function to Display Global Leaderboards (Dynamically from /highscores) ---
-            const displayGlobalLeaderboards = async () => {
+            const displayGlobalLeaderboards = async (currentUser) => { // Accept user object
                 loadingIndicator.style.display = 'block';
                 globalLeaderboardContent.style.display = 'none';
                 errorDisplay.style.display = 'none';
                 noScoresMessage.style.display = 'none';
+                loginPrompt.style.display = 'none'; // Ensure login prompt is hidden when fetching
                 globalLeaderboardGrid.innerHTML = '';
 
                 const games = ["Astro Jumper", "Car Racer", "Tower Defense", "Memory Match"];
-                // Object to hold aggregated scores for each game
                 const allScoresByGame = {};
-                games.forEach(game => allScoresByGame[game] = []); // Initialize with empty arrays
+                games.forEach(game => allScoresByGame[game] = []);
 
                 let fetchError = false;
                 let hasAnyScores = false;
-                let snapshot = null; // To check if snapshot was empty later
+                let snapshot = null; // Declare snapshot variable
 
                 try {
-                    // *** UPDATED: Fetch all documents from the 'highscores' collection ***
                     const highscoresCol = collection(db, "highscores");
-                    snapshot = await getDocs(highscoresCol);
+                    snapshot = await getDocs(highscoresCol); // Assign snapshot here
 
                     if (snapshot.empty) {
                         console.log("No high score documents found.");
-                        // Message will be shown in finally block
+                        // Message shown in finally block
                     } else {
                         snapshot.forEach(doc => {
                             const userData = doc.data();
                             const userId = doc.id;
-                            // *** Use playerName from data if available, otherwise fallback ***
                             const playerName = userData.playerName || `User ${userId.substring(0, 6)}...`;
 
-                            // Go through each game and add the score if it exists for this user
                             games.forEach(game => {
                                 if (userData[game] !== undefined && typeof userData[game] === 'number') {
-                                    allScoresByGame[game].push({
-                                        score: userData[game],
-                                        playerName: playerName,
-                                        userId: userId // Include userId for potential future use (like highlighting)
-                                    });
-                                    hasAnyScores = true; // Mark that we found at least one score
+                                    allScoresByGame[game].push({ score: userData[game], playerName: playerName, userId: userId });
+                                    hasAnyScores = true;
                                 }
                             });
                         });
                     }
 
-                    // Process and display scores for each game
+                    // Process and display scores
                     games.forEach(game => {
                         const scores = allScoresByGame[game];
                         let scoreLabel = 'Points';
-                        let sortOrder = 'desc'; // Default: higher is better
+                        let sortOrder = 'desc';
 
                         if (game === 'Tower Defense') scoreLabel = 'Waves';
-                        if (game === 'Memory Match') {
-                            scoreLabel = 'Moves';
-                            sortOrder = 'asc'; // Lower is better for Memory Match
-                        }
+                        if (game === 'Memory Match') { scoreLabel = 'Moves'; sortOrder = 'asc'; }
 
-                        // Sort the scores for the current game
                         scores.sort((a, b) => {
-                            // Basic validation inside sort
                             if (typeof a.score !== 'number') return 1;
                             if (typeof b.score !== 'number') return -1;
                             return (sortOrder === 'asc') ? a.score - b.score : b.score - a.score;
                         });
 
-                        // Build HTML for this game's leaderboard
-                        let leaderboardHTML = `
-                            <div class="glassmorphism p-6 rounded-xl">
-                                <h3 class="text-2xl font-bold text-center text-indigo-300 mb-4">${game}</h3>
-                                <ol class="space-y-3">`;
-
+                        let leaderboardHTML = `<div class="glassmorphism p-6 rounded-xl"><h3 class="text-2xl font-bold text-center text-indigo-300 mb-4">${game}</h3><ol class="space-y-3">`;
                         if (scores.length > 0) {
-                            // *** UPDATED: Slice to get top 5 instead of top 10 ***
-                            scores.slice(0, 5).forEach((entry, index) => { // Take top 5
+                            scores.slice(0, 5).forEach((entry, index) => { // Show Top 5
+                                const isCurrentUser = currentUser && entry.userId === currentUser.uid; // Check if it's the logged-in user's score
                                 leaderboardHTML += `
-                                    <li class="flex items-center justify-between text-lg">
-                                        <span class="flex items-center min-w-0"> {/* Allow shrinking */}
+                                    <li class="flex items-center justify-between text-lg ${isCurrentUser ? 'bg-sky-900/50 rounded px-2 py-1' : ''}">
+                                        <span class="flex items-center min-w-0">
                                             <span class="font-bold text-gray-400 w-8 flex-shrink-0">${index + 1}.</span>
-                                            {/* Display playerName */}
-                                            <span class="text-white truncate" title="${entry.playerName}">${entry.playerName}</span>
+                                            <span class="text-white truncate" title="${entry.playerName}">${entry.playerName} ${isCurrentUser ? '(You)' : ''}</span>
                                         </span>
                                         <span class="font-bold text-sky-400 flex-shrink-0 ml-2">${entry.score} ${scoreLabel}</span>
                                     </li>`;
                             });
                         } else {
-                            // Show message if *this specific game* has no scores, even if others do
                             leaderboardHTML += `<li class="text-center text-gray-400">No scores yet for this game.</li>`;
                         }
-
                         leaderboardHTML += `</ol></div>`;
                         globalLeaderboardGrid.innerHTML += leaderboardHTML;
                     });
 
-
                 } catch (error) {
                     console.error("Error fetching or processing high scores: ", error);
-                    fetchError = true; // Mark that an error occurred
-                     // Provide more specific feedback based on the error
+                    fetchError = true;
                      if (error.code === 'permission-denied') {
-                         errorDisplay.innerHTML = `<p>Could not load leaderboards due to permissions. Please ensure Firestore rules allow public list access on the 'highscores' collection.</p>`;
+                         // Update error message for clarity when auth is required
+                         errorDisplay.innerHTML = `<p>Could not load leaderboards due to permissions. Please ensure you are logged in and Firestore rules allow list access for authenticated users on the 'highscores' collection.</p>`;
                      } else {
-                         errorDisplay.innerHTML = `<p>Could not load leaderboards. An unexpected error occurred. Please try again later.</p>`;
+                         errorDisplay.innerHTML = `<p>Could not load leaderboards. An unexpected error occurred.</p>`;
                      }
                 } finally {
-                    loadingIndicator.style.display = 'none'; // Hide loading indicator
+                    loadingIndicator.style.display = 'none';
                     if (fetchError) {
-                        errorDisplay.style.display = 'block'; // Show error message
+                        errorDisplay.style.display = 'block';
                     } else if (hasAnyScores) {
-                         globalLeaderboardContent.style.display = 'block'; // Show leaderboard content only if scores were found
+                         globalLeaderboardContent.style.display = 'block';
                     } else {
                         // Show "no scores" message if snapshot was empty OR if it wasn't empty but contained no game scores
-                        noScoresMessage.style.display = 'block';
+                         noScoresMessage.style.display = 'block';
                     }
                 }
             };
 
-            // Initial call to display leaderboards when the page loads
-            displayGlobalLeaderboards();
-        });
+             // *** Authentication Check ***
+             onAuthStateChanged(auth, (user) => {
+                 // Hide all content sections initially
+                 loadingIndicator.style.display = 'none';
+                 globalLeaderboardContent.style.display = 'none';
+                 errorDisplay.style.display = 'none';
+                 noScoresMessage.style.display = 'none';
+                 loginPrompt.style.display = 'none';
+
+                 if (user) {
+                     // User is signed in
+                     userStatusEl.textContent = `Logged in as: ${user.displayName || 'User'}`;
+                     userStatusEl.classList.remove('text-red-400'); // Ensure correct color
+                     userStatusEl.classList.add('text-green-400');
+                     displayGlobalLeaderboards(user); // Fetch and display leaderboards, passing the user object
+                 } else {
+                     // User is signed out
+                     userStatusEl.textContent = 'Not logged in';
+                     userStatusEl.classList.remove('text-green-400'); // Ensure correct color
+                     userStatusEl.classList.add('text-red-400');
+                     loginPrompt.style.display = 'block'; // Show the login prompt message
+                 }
+             });
+
+        }); // End DOMContentLoaded
     </script>
 </body>
 </html>
