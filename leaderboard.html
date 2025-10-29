@@ -47,15 +47,19 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
+    <!-- *** NEW SECTION: User ID Display *** -->
+    <div id="user-id-display" class="bg-gray-900 text-gray-400 text-xs text-center py-1 px-4 break-all hidden">
+        <!-- User ID will be injected here -->
+    </div>
+
     <!-- Header -->
     <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
         <nav class="container mx-auto px-4 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
                  <div class="flex items-center space-x-4 text-right">
-                     <!-- Display user info if logged in -->
+                     <!-- Display user status (name or 'Not logged in') -->
                      <div id="user-status" class="text-sm text-gray-300">Checking status...</div>
-                     <!-- Link back to games moved here for better alignment -->
                      <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors flex-shrink-0">Back to Games</a>
                  </div>
             </div>
@@ -158,6 +162,7 @@
                 document.getElementById('loading-indicator').style.display = 'none';
                  document.getElementById('user-status').textContent = 'Error initializing';
                  document.getElementById('user-status').classList.add('text-red-400');
+                 document.getElementById('user-id-display').style.display = 'none'; // Hide ID display on init error
                 return;
             }
 
@@ -169,6 +174,7 @@
             const noScoresMessage = document.getElementById('no-scores-message');
             const loginPrompt = document.getElementById('login-prompt');
             const userStatusEl = document.getElementById('user-status');
+            const userIdDisplayEl = document.getElementById('user-id-display'); // *** Get the new element ***
 
             // --- Function to Display Global Leaderboards (Dynamically from /highscores) ---
             const displayGlobalLeaderboards = async (currentUser) => {
@@ -198,8 +204,7 @@
                         snapshot.forEach(doc => {
                             const userData = doc.data();
                             const userId = doc.id;
-                            // *** UPDATED: Fallback to truncated ID without "User " prefix ***
-                            const playerName = userData.playerName || `${userId.substring(0, 6)}...`; // Use ID directly as fallback
+                            const playerName = userData.playerName || `${userId.substring(0, 6)}...`;
 
                             games.forEach(game => {
                                 if (userData[game] !== undefined && typeof userData[game] === 'number') {
@@ -280,13 +285,16 @@
                  errorDisplay.style.display = 'none';
                  noScoresMessage.style.display = 'none';
                  loginPrompt.style.display = 'none';
+                 userIdDisplayEl.style.display = 'none'; // Hide user ID element initially
 
                  try {
                      if (user) {
                          // User is signed in
                          console.log("Leaderboard Page: User is signed in:", user.displayName, user.uid);
-                         // *** UPDATED: Show User ID in the header ***
-                         userStatusEl.innerHTML = `Logged in as: ${user.displayName || 'User'} <br> <span class="text-xs text-gray-400 break-all">ID: ${user.uid}</span>`; // Display name and ID
+                         // *** UPDATED: Show User Name in header status, ID above header ***
+                         userStatusEl.textContent = `Logged in as: ${user.displayName || 'User'}`; // Display name in header
+                         userIdDisplayEl.textContent = `Your ID: ${user.uid}`; // Display ID above header
+                         userIdDisplayEl.style.display = 'block'; // Show the ID element
                          userStatusEl.classList.remove('text-red-400');
                          userStatusEl.classList.add('text-green-400');
                          displayGlobalLeaderboards(user); // Fetch and display leaderboards
@@ -294,6 +302,8 @@
                          // User is signed out
                          console.log("Leaderboard Page: User is signed out.");
                          userStatusEl.textContent = 'Not logged in';
+                         userIdDisplayEl.textContent = ''; // Clear ID display
+                         userIdDisplayEl.style.display = 'none'; // Hide ID display
                          userStatusEl.classList.remove('text-green-400');
                          userStatusEl.classList.add('text-red-400');
                          loginPrompt.style.display = 'block'; // Show the login prompt message
@@ -306,6 +316,7 @@
              }, (error) => {
                   console.error("Leaderboard Page: Error in onAuthStateChanged listener:", error);
                   userStatusEl.textContent = 'Auth Error';
+                  userIdDisplayEl.style.display = 'none'; // Hide ID display on auth error
                   userStatusEl.classList.add('text-red-400');
                   errorDisplay.innerHTML = '<p>Could not check authentication status. Please refresh the page.</p>';
                   errorDisplay.style.display = 'block';
