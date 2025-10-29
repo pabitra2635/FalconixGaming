@@ -51,9 +51,9 @@
     <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
         <nav class="container mx-auto px-4 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <!-- You might want to link back to the main site -->
+                <!-- Link back to the main site -->
                 <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
-                 <!-- Optional: Link back to the main portal if this is hosted separately -->
+                 <!-- Link back to the main portal -->
                  <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors">Back to Games</a>
             </div>
         </nav>
@@ -77,7 +77,10 @@
                 </div>
             </div>
             <div id="global-leaderboard-error" class="hidden text-center text-red-400 mt-8">
-                <p>Could not load leaderboards. Please try again later.</p>
+                <p>Could not load leaderboards. Please ensure Firestore rules allow public reads on the 'highscores' collection, or try again later.</p>
+            </div>
+             <div id="no-scores-message" class="hidden text-center text-gray-400 mt-8">
+                <p>No high scores recorded yet for any games.</p>
             </div>
         </section>
     </main>
@@ -101,15 +104,14 @@
     </script>
     <script type="module">
         import { initializeApp } from 'firebase/app';
-        import { getFirestore, doc, getDoc } from 'firebase/firestore';
+        // Import necessary Firestore functions
+        import { getFirestore, collection, getDocs } from 'firebase/firestore';
 
         document.addEventListener('DOMContentLoaded', async () => {
 
             // #############################################
             // ### FIREBASE SETUP                      ###
             // #############################################
-
-            // IMPORTANT: Use the exact same Firebase config as your main site
             const firebaseConfig = {
                 apiKey: "AIzaSyD02ui4dhTuGLz-Ff1af36ERdqqsn4iIeU",
                 authDomain: "falconixgaming-46210.firebaseapp.com",
@@ -128,77 +130,120 @@
             const loadingIndicator = document.getElementById('loading-indicator');
             const globalLeaderboardContent = document.getElementById('global-leaderboard-content');
             const errorDisplay = document.getElementById('global-leaderboard-error');
+            const noScoresMessage = document.getElementById('no-scores-message');
 
             // --- Function to Display Global Leaderboards ---
             const displayGlobalLeaderboards = async () => {
-                loadingIndicator.style.display = 'block'; // Show loading indicator
+                loadingIndicator.style.display = 'block';
                 globalLeaderboardContent.style.display = 'none';
                 errorDisplay.style.display = 'none';
-                globalLeaderboardGrid.innerHTML = ''; // Clear previous content
+                noScoresMessage.style.display = 'none';
+                globalLeaderboardGrid.innerHTML = '';
 
-                 const games = ["Astro Jumper", "Car Racer", "Tower Defense", "Memory Match"];
-                 let fetchError = false;
+                const games = ["Astro Jumper", "Car Racer", "Tower Defense", "Memory Match"];
+                // Object to hold aggregated scores for each game
+                const allScoresByGame = {};
+                games.forEach(game => allScoresByGame[game] = []); // Initialize with empty arrays
 
-                 try {
-                     for (const game of games) {
-                         const leaderboardRef = doc(db, "global_leaderboards", game);
-                         const docSnap = await getDoc(leaderboardRef);
-                         // Check if document exists and has the 'scores' field which is an array
-                         const scores = (docSnap.exists() && Array.isArray(docSnap.data().scores)) ? docSnap.data().scores : [];
+                let fetchError = false;
+                let hasAnyScores = false;
 
-                         // Determine score label based on game type
-                         let scoreLabel = 'Points';
-                         if (game === 'Tower Defense') scoreLabel = 'Waves';
-                         if (game === 'Memory Match') scoreLabel = 'Moves';
+                try {
+                    // Fetch all documents from the 'highscores' collection
+                    const highscoresCol = collection(db, "highscores");
+                    const snapshot = await getDocs(highscoresCol);
 
-                         // Start building HTML for the game's leaderboard card
-                         let leaderboardHTML = `
+                    if (snapshot.empty) {
+                        console.log("No high score documents found.");
+                        noScoresMessage.style.display = 'block'; // Show no scores message if collection is empty
+                    } else {
+                        snapshot.forEach(doc => {
+                            const userData = doc.data();
+                            const userId = doc.id; // Or ideally get a playerName if stored
+
+                            // Go through each game and add the score if it exists for this user
+                            games.forEach(game => {
+                                if (userData[game] !== undefined && typeof userData[game] === 'number') {
+                                    // Store score along with user identifier (using userId for now)
+                                    // NOTE: Storing playerName here would require it to be in the highscores document
+                                    allScoresByGame[game].push({ score: userData[game], playerName: `User ${userId.substring(0, 6)}...` }); // Using partial userId as placeholder
+                                    hasAnyScores = true; // Mark that we found at least one score
+                                }
+                            });
+                        });
+                    }
+
+                    if(!hasAnyScores && !snapshot.empty){
+                         // If we looped through documents but found no game scores
+                         noScoresMessage.style.display = 'block';
+                    }
+
+
+                    // Process and display scores for each game
+                    games.forEach(game => {
+                        const scores = allScoresByGame[game];
+                        let scoreLabel = 'Points';
+                        let sortOrder = 'desc'; // Default: higher is better
+
+                        if (game === 'Tower Defense') scoreLabel = 'Waves';
+                        if (game === 'Memory Match') {
+                            scoreLabel = 'Moves';
+                            sortOrder = 'asc'; // Lower is better for Memory Match
+                        }
+
+                        // Sort the scores for the current game
+                        scores.sort((a, b) => {
+                            if (sortOrder === 'asc') {
+                                return a.score - b.score;
+                            } else {
+                                return b.score - a.score; // Descending
+                            }
+                        });
+
+                        // Build HTML for this game's leaderboard
+                        let leaderboardHTML = `
                             <div class="glassmorphism p-6 rounded-xl">
                                 <h3 class="text-2xl font-bold text-center text-indigo-300 mb-4">${game}</h3>
                                 <ol class="space-y-3">`;
 
-                         // Populate the list if scores exist
-                         if (scores.length > 0) {
-                             // Sort scores (desc for points/waves, asc for moves) before displaying
-                             scores.sort((a, b) => {
-                                 if (!a || typeof a.score !== 'number') return 1; // Put invalid entries last
-                                 if (!b || typeof b.score !== 'number') return -1;
-                                 return (scoreLabel === 'Moves') ? a.score - b.score : b.score - a.score;
-                             });
+                        if (scores.length > 0) {
+                            scores.slice(0, 10).forEach((entry, index) => { // Take top 10
+                                leaderboardHTML += `
+                                    <li class="flex items-center justify-between text-lg">
+                                        <span class="flex items-center min-w-0">
+                                            <span class="font-bold text-gray-400 w-8 flex-shrink-0">${index + 1}.</span>
+                                            <span class="text-white truncate" title="${entry.playerName}">${entry.playerName}</span>
+                                        </span>
+                                        <span class="font-bold text-sky-400 flex-shrink-0 ml-2">${entry.score} ${scoreLabel}</span>
+                                    </li>`;
+                            });
+                        } else {
+                            leaderboardHTML += `<li class="text-center text-gray-400">No scores yet for this game.</li>`;
+                        }
 
-                             scores.slice(0, 10).forEach((entry, index) => { // Take only top 10
-                                 // Ensure entry has playerName and score before adding
-                                 if (entry && typeof entry.playerName === 'string' && typeof entry.score === 'number') {
-                                     leaderboardHTML += `
-                                        <li class="flex items-center justify-between text-lg">
-                                            <span class="flex items-center min-w-0"> {/* Allow shrinking */}
-                                                <span class="font-bold text-gray-400 w-8 flex-shrink-0">${index + 1}.</span>
-                                                <span class="text-white truncate" title="${entry.playerName}">${entry.playerName}</span>
-                                            </span>
-                                            <span class="font-bold text-sky-400 flex-shrink-0 ml-2">${entry.score} ${scoreLabel}</span>
-                                        </li>`;
-                                 } else {
-                                     console.warn(`Invalid entry format in ${game} leaderboard:`, entry);
-                                 }
-                             });
-                         } else {
-                             leaderboardHTML += `<li class="text-center text-gray-400">No scores yet. Be the first!</li>`;
-                         }
+                        leaderboardHTML += `</ol></div>`;
+                        globalLeaderboardGrid.innerHTML += leaderboardHTML;
+                    });
 
-                         leaderboardHTML += `</ol></div>`; // Close the card div
-                         globalLeaderboardGrid.innerHTML += leaderboardHTML; // Add the card to the grid
-                     }
-                 } catch (error) {
-                     console.error("Error fetching global leaderboards: ", error);
-                     fetchError = true; // Mark that an error occurred
-                 } finally {
-                     loadingIndicator.style.display = 'none'; // Hide loading indicator
-                     if (fetchError) {
-                         errorDisplay.style.display = 'block'; // Show error message
+
+                } catch (error) {
+                    console.error("Error fetching or processing high scores: ", error);
+                    fetchError = true; // Mark that an error occurred
+                     if (error.code === 'permission-denied') {
+                         errorDisplay.innerHTML = `<p>Could not load leaderboards due to permissions. Please ensure Firestore rules allow public list access on the 'highscores' collection.</p>`;
                      } else {
-                         globalLeaderboardContent.style.display = 'block'; // Show leaderboard content
+                         errorDisplay.innerHTML = `<p>Could not load leaderboards. Please try again later.</p>`;
                      }
-                 }
+                } finally {
+                    loadingIndicator.style.display = 'none'; // Hide loading indicator
+                    if (fetchError) {
+                        errorDisplay.style.display = 'block'; // Show error message
+                    } else if (hasAnyScores) {
+                         globalLeaderboardContent.style.display = 'block'; // Show leaderboard content only if scores were found
+                    } else if (!snapshot || snapshot.empty) {
+                        noScoresMessage.style.display = 'block'; // Ensure no scores message shows if snapshot was empty initially
+                    }
+                }
             };
 
             // Initial call to display leaderboards when the page loads
@@ -207,3 +252,4 @@
     </script>
 </body>
 </html>
+
