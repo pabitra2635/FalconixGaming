@@ -1873,11 +1873,73 @@
                 }
             });
         });
-        // Inside saveHighScore in index.html, when updating personal score:
-await setDoc(personalScoreRef, {
-    [gameName]: newScore,
-    playerName: user.displayName || 'Anonymous' // Store the name
-}, { merge: true });
+
+         // --- High Score Functions ---
+          const saveHighScore = async (gameName, newScore, scoreType = 'desc') => {
+              const user = auth.currentUser;
+              if (!user || !gameName || typeof newScore !== 'number') {
+                  console.log("User not logged in or invalid score/gameName, skipping save.");
+                  return;
+              }
+
+              const personalScoreRef = doc(db, "highscores", user.uid);
+              // *** Log the displayName directly from the user object ***
+              console.log("Current user object:", user);
+              console.log("User display name:", user.displayName);
+              const playerName = user.displayName || 'Anonymous'; // Get display name, fallback to Anonymous
+
+              try {
+                  console.log(`Attempting to save score for ${gameName}. User: ${user.uid}, Name to save: ${playerName}, Score: ${newScore}`); // Log name being saved
+
+                  // --- Get current personal high score ---
+                  const docSnap = await getDoc(personalScoreRef);
+                  const currentData = docSnap.exists() ? docSnap.data() : {};
+                  const currentPersonalScore = currentData[gameName];
+
+                  let shouldUpdatePersonal = false;
+                  if (scoreType === 'desc') { // Higher is better
+                      if (currentPersonalScore === undefined || newScore > currentPersonalScore) {
+                          shouldUpdatePersonal = true;
+                      }
+                  } else { // Lower is better (asc)
+                      if (currentPersonalScore === undefined || newScore < currentPersonalScore) {
+                          shouldUpdatePersonal = true;
+                      }
+                  }
+
+                  // Data payload - always include playerName
+                  const dataToSave = {
+                      playerName: playerName
+                  };
+
+                  // --- Update personal high score if necessary ---
+                  if (shouldUpdatePersonal) {
+                       console.log(`New personal best for ${gameName}! Updating document.`);
+                       // Add the new score to the payload
+                       dataToSave[gameName] = newScore;
+                       // *** Log data just before saving ***
+                       console.log("Data being saved (New Best):", dataToSave);
+                       await setDoc(personalScoreRef, dataToSave, { merge: true });
+                       console.log(`Personal score updated for ${gameName}: ${newScore}`);
+                       displayUserHighScores(user); // Refresh personal scores display
+                  } else if (!docSnap.exists() || !currentData.playerName || currentData.playerName !== playerName) {
+                       // If the score isn't a new best, BUT the doc doesn't exist, OR playerName is missing, OR playerName needs updating
+                       console.log(`Score not a new best, but ensuring playerName (${playerName}) is saved/updated.`);
+                       // *** Log data just before saving ***
+                       console.log("Data being saved (PlayerName Update/Create):", dataToSave);
+                       await setDoc(personalScoreRef, dataToSave, { merge: true }); // Only save playerName (or create doc with name)
+                  } else {
+                       console.log(`Score (${newScore}) is not a new personal best for ${gameName} (${currentPersonalScore}). PlayerName already correct. Not updating Firestore.`);
+                  }
+
+                 // --- Update global leaderboard logic ---
+                 // ... (rest of the global leaderboard update logic) ...
+
+              } catch (error) {
+                  console.error("Error saving high score: ", error); // Log any error during setDoc
+              }
+          };
+
     </script>
 </body>
 </html>
