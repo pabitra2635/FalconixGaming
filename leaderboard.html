@@ -53,7 +53,7 @@
             <div class="flex items-center justify-between h-16">
                 <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
                  <div class="flex items-center space-x-4">
-                     {/* Display user info if logged in */}
+                     <!-- Display user info if logged in -->
                      <div id="user-status" class="text-sm text-gray-300">Checking status...</div>
                      <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors">Back to Games</a>
                  </div>
@@ -66,35 +66,35 @@
         <section id="leaderboards" class="container mx-auto px-4 lg:px-8">
             <h1 class="text-4xl font-black-ops text-center mb-12">Global Leaderboards (Top 5)</h1>
 
-            {/* Login Prompt - Initially hidden */}
+            <!-- Login Prompt - Initially hidden -->
             <div id="login-prompt" class="hidden text-center text-gray-300 glassmorphism p-8 rounded-lg max-w-md mx-auto">
                 <p class="text-xl mb-4">Please log in to view the Global Leaderboards.</p>
-                {/* Link to main page with query param to suggest login */}
+                <!-- Link to main page with query param to suggest login -->
                 <a href="index.html?login=true" class="inline-block px-6 py-3 font-semibold text-white bg-sky-500 rounded-lg shadow-md hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 transition-colors duration-300">
                     Login on Main Page
                 </a>
                  <p class="text-sm mt-4 text-gray-400">(Navigate back to this page after logging in)</p>
             </div>
 
-            {/* Loading Indicator - Initially hidden */}
+            <!-- Loading Indicator - Initially hidden -->
             <div id="loading-indicator" class="hidden text-center">
                 <div class="loader"></div>
                 <p class="text-gray-400">Loading top scores...</p>
             </div>
 
-            {/* Global Leaderboard Content - Initially hidden */}
+            <!-- Global Leaderboard Content - Initially hidden -->
             <div id="global-leaderboard-content" class="hidden">
                  <div id="global-leaderboard-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-                    {/* Leaderboard cards injected here */}
+                    <!-- Leaderboard cards injected here -->
                 </div>
             </div>
 
-            {/* Error Display - Initially hidden */}
+            <!-- Error Display - Initially hidden -->
             <div id="global-leaderboard-error" class="hidden text-center text-red-400 mt-8">
                 <p>Could not load leaderboards. Please try again later.</p>
             </div>
 
-            {/* No Scores Message - Initially hidden */}
+            <!-- No Scores Message - Initially hidden -->
             <div id="no-scores-message" class="hidden text-center text-gray-400 mt-8">
                 <p>No high scores recorded yet for any games.</p>
             </div>
