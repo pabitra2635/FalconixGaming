@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FalconixGaming - Gaming Portal</title>
+    <title>FalconixGaming - Global Leaderboards</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
     <style>
@@ -16,154 +16,32 @@
             font-family: 'Inter', sans-serif;
             font-weight: 900;
         }
-        #gameCanvas, #racerGameCanvas, #towerDefenseCanvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
         .glassmorphism {
             background: rgba(31, 41, 55, 0.6); /* bg-gray-800 with opacity */
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .btn-primary {
-            @apply px-6 py-3 font-semibold text-white bg-sky-500 rounded-lg shadow-md hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
-        }
-        .btn-secondary {
-            @apply px-6 py-3 font-semibold text-white bg-indigo-500 rounded-lg shadow-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
-        }
-        .btn-danger {
-            @apply px-6 py-3 font-semibold text-white bg-pink-600 rounded-lg shadow-md hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
-        }
-        .btn-success {
-            @apply px-6 py-3 font-semibold text-white bg-green-600 rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
-        }
-         .btn-warning {
-            @apply px-6 py-3 font-semibold text-white bg-yellow-500 rounded-lg shadow-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
-        }
-        .btn-orange {
-            @apply px-6 py-3 font-semibold text-white bg-orange-500 rounded-lg shadow-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
-        }
-        /* New Outline Button Styles */
-        .btn-primary-outline {
-            @apply px-6 py-3 font-semibold text-sky-400 bg-transparent border-2 border-sky-500 rounded-lg shadow-md hover:bg-sky-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
-        }
-        .btn-secondary-outline {
-            @apply px-6 py-3 font-semibold text-indigo-400 bg-transparent border-2 border-indigo-500 rounded-lg shadow-md hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
-        }
-        .btn-danger-outline {
-            @apply px-6 py-3 font-semibold text-pink-500 bg-transparent border-2 border-pink-600 rounded-lg shadow-md hover:bg-pink-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
-        }
-        .btn-success-outline {
-            @apply px-6 py-3 font-semibold text-green-500 bg-transparent border-2 border-green-600 rounded-lg shadow-md hover:bg-green-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
-        }
-        .btn-warning-outline {
-            @apply px-6 py-3 font-semibold text-yellow-500 bg-transparent border-2 border-yellow-500 rounded-lg shadow-md hover:bg-yellow-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
-        }
-        .game-card:hover .game-card-overlay {
-            opacity: 1;
-        }
-        .game-card-overlay {
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-        #pixelRacerModal, #towerDefenseModal, #ticTacToeModal, #memoryMatchModal {
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-        }
-        .pointer-events-passthrough {
-            pointer-events: none;
-        }
-        .pointer-events-auto {
-            pointer-events: auto;
-        }
-        
-        /* Tic-Tac-Toe Styles */
-        .ttt-cell, .memory-card-face {
-            font-family: 'Fredoka One', cursive;
-        }
-        .ttt-cell {
-            transition: background-color 0.2s ease-in-out;
-        }
-        @keyframes celebrate {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        .winning-cell {
-            animation: celebrate 0.8s ease-in-out;
-            background-color: rgba(59, 130, 246, 0.3) !important;
+        /* Style for loading indicator */
+        .loader {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
         }
 
-        /* Memory Game Specific Styles */
-        .memory-game-board {
-            perspective: 1000px;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        .memory-card {
-            position: relative;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-            cursor: pointer;
-        }
-        .memory-card.is-flipped {
-            transform: rotateY(180deg);
-        }
-        .memory-card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 0.5rem;
-        }
-        .memory-card-front {
-            background-color: #4b5563; /* bg-gray-600 */
-        }
-        .memory-card-back {
-            background-color: #3b82f6; /* bg-blue-600 */
-            transform: rotateY(180deg);
-            font-size: 2.5rem; /* Emoji size */
-        }
-        .memory-card.matched .memory-card-back {
-            background-color: #16a34a; /* bg-green-600 */
-        }
-
-        /* Scrollbar Hiding Utility */
-       .hide-scrollbar::-webkit-scrollbar {
-           display: none;
-       }
-       .hide-scrollbar {
-           -ms-overflow-style: none;  /* IE and Edge */
-           scrollbar-width: none;  /* Firefox */
-       }
-
-        /* Fullscreen on mobile */
+         /* Responsive grid adjustments */
         @media (max-width: 768px) {
-            #pixelRacerModal, #towerDefenseModal, #ticTacToeModal, #memoryMatchModal {
-                padding: 0;
-            }
-            #pixelRacerModal > div, #towerDefenseModal > div, #ticTacToeModal > div, #memoryMatchModal > div {
-                width: 100%;
-                height: 100%;
-                max-width: 100%;
-                max-height: 100%;
-                border-radius: 0;
-            }
-            #pixelRacerModal .aspect-\[3\/4\], #towerDefenseModal .aspect-\[4\/3\] {
-                aspect-ratio: auto; /* Remove fixed aspect ratio */
-                height: 100%;
-                width: 100%;
-            }
-            #closeRacerModal, #closeTowerDefenseModal, #closeTicTacToeModal, #closeMemoryMatchModal {
-                top: 1rem;
-                right: 1rem;
-                background-color: rgba(0,0,0,0.5);
-                color: white;
-                z-index: 100;
-            }
+             #global-leaderboard-grid {
+                 grid-template-columns: 1fr;
+             }
         }
     </style>
 </head>
@@ -173,483 +51,84 @@
     <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
         <nav class="container mx-auto px-4 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <a href="#" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#" class="text-gray-300 hover:text-sky-400 transition-colors">Home</a>
-                    <a href="#games" class="text-gray-300 hover:text-sky-400 transition-colors">Games</a>
-                    <a href="#how-to-play" class="text-gray-300 hover:text-sky-400 transition-colors">How to Play</a>
-                    <a href="leaderboard.html" class="text-gray-300 hover:text-sky-400 transition-colors">Leaderboards</a>
-                </div>
-                <div class="hidden md:flex items-center space-x-4">
-                    <button id="login-button" class="btn-primary">Login with Google</button>
-                    <div id="user-info" class="hidden items-center space-x-4">
-                        <div id="user-display-name" class="text-white font-semibold text-right"></div>
-                        <button id="logout-button" class="px-6 py-3 font-semibold text-red-500 hover:bg-red-500/10 rounded-lg transition-colors duration-300">Logout</button>
-                    </div>
-                </div>
-                <!-- Mobile Menu Button -->
-                 <button id="mobile-menu-button" class="md:hidden text-gray-300 hover:text-white">
-                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                 </button>
-            </div>
-        </nav>
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Home</a>
-                <a href="#games" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Games</a>
-                <a href="#how-to-play" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">How to Play</a>
-                <a href="leaderboard.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Leaderboards</a>
-                <button id="mobile-login-button" class="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700">Login with Google</button>
-                <div id="mobile-user-info" class="hidden px-3 py-2">
-                    <div id="mobile-user-display-name" class="block text-base font-medium text-white"></div>
-                    <button id="mobile-logout-button" class="w-full text-left mt-2 block px-3 py-2 rounded-md text-base font-medium text-red-500 hover:bg-gray-700">Logout</button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="flex-grow">
-        <!-- Hero Section / Featured Game -->
-        <section id="featured-game" class="relative h-[600px] bg-gray-900 overflow-hidden">
-            <div id="gameContainer" class="absolute inset-0">
-                <canvas id="gameCanvas"></canvas>
-            </div>
-            <div id="uiLayer" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-                <div id="startScreen" class="flex flex-col items-center justify-center pointer-events-auto">
-                    <h1 class="text-5xl md:text-7xl font-black-ops text-white uppercase tracking-wider">Astro <span class="text-sky-400">Jumper</span></h1>
-                    <p class="mt-4 text-lg text-gray-300 max-w-2xl">Survive the longest in the asteroid belt. Click to jump. Don't fall into the void!</p>
-                    <button id="playButton" class="btn-primary mt-8 text-xl">Play Now</button>
-                </div>
-                <div id="inGameUI" class="hidden absolute top-5 left-5 text-left pointer-events-passthrough">
-                    <p class="text-2xl font-bold">Score: <span id="score">0</span></p>
-                </div>
-                <div id="gameOverScreen" data-game-name="Astro Jumper" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
-                    <h2 class="text-5xl font-black-ops text-white">GAME OVER</h2>
-                    <p class="mt-4 text-2xl text-gray-200">Final Score: <span id="finalScore" class="font-bold text-sky-400">0</span></p>
-                    <div class="mt-6 flex flex-col sm:flex-row gap-4">
-                        <button id="restartButton" class="btn-primary-outline text-xl">Play Again</button>
-                        <button id="shareAstroJumperScore" class="btn-secondary-outline text-xl">Share Score</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Games Grid Section -->
-        <section id="games" class="py-16 sm:py-24 bg-gray-800/50">
-            <div class="container mx-auto px-4 lg:px-8">
-                <h2 class="text-4xl font-black-ops text-center mb-12">Our Games</h2>
-                <!-- This container will be a flex row on mobile and a grid on larger screens -->
-                <div class="flex overflow-x-auto space-x-6 pb-4 sm:grid sm:grid-cols-2 sm:gap-8 lg:grid-cols-4 hide-scrollbar">
-                    <!-- Game Card 1 -->
-                    <div id="astro-jumper-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
-                        <img src="https://img.gamepix.com/games/astro-jumper/cover/astro-jumper.png?w=400&ar=16:10" alt="Astro Jumper" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
-                            <div class="flex items-center gap-3">
-                                <svg class="w-8 h-8 text-sky-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <h3 class="text-xl sm:text-2xl font-bold text-white">Astro Jumper</h3>
-                            </div>
-                            <p class="text-sky-300 mt-1">3D Platformer</p>
-                        </div>
-                        <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
-                            <span class="btn-primary pointer-events-none">Play Now</span>
-                        </div>
-                    </div>
-                    <!-- Game Card 2 -->
-                    <div id="pixel-racer-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
-                        <img src="https://as2.ftcdn.net/v2/jpg/04/81/59/51/1000_F_481595196_xeOLb1vk53gjYT1o2cz8hvfN4hkg83PB.jpg" alt="Car Racer" class="w-full h-full object-cover">
-                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
-                             <div class="flex items-center gap-3">
-                                 <svg class="w-8 h-8 text-pink-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                 <h3 class="text-xl sm:text-2xl font-bold text-white">Car Racer</h3>
-                               </div>
-                            <p class="text-pink-400 mt-1">2D Arcade Racer</p>
-                        </div>
-                         <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
-                            <span class="btn-danger pointer-events-none">Play Now</span>
-                        </div>
-                    </div>
-                    <!-- Game Card 3 -->
-                    <div id="tower-defense-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
-                        <img src="https://fs-prod-cdn.nintendo-europe.com/media/images/10_share_images/games_15/nintendo_switch_download_software_1/2x1_NSwitchDS_FantasyTowerDefense_image1600w.jpg" alt="Tower Defense" class="w-full h-full object-cover">
-                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
-                            <div class="flex items-center gap-3">
-                                <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <h3 class="text-xl sm:text-2xl font-bold text-white">Tower Defense</h3>
-                            </div>
-                            <p class="text-green-400 mt-1">Strategy</p>
-                        </div>
-                         <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
-                            <span class="btn-success pointer-events-none">Play Now</span>
-                        </div>
-                    </div>
-                    <!-- Game Card 4 -->
-                    <div id="tic-tac-toe-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
-                        <img src="https://wallpapercave.com/wp/wp8984750.jpg" alt="Tic-Tac-Toe" class="w-full h-full object-cover">
-                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
-                            <div class="flex items-center gap-3">
-                                <svg class="w-8 h-8 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <h3 class="text-xl sm:text-2xl font-bold text-white">Tic-Tac-Toe</h3>
-                            </div>
-                            <p class="text-purple-400 mt-1">Classic Puzzle</p>
-                        </div>
-                         <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
-                            <span class="btn-secondary pointer-events-none">Play Now</span>
-                        </div>
-                    </div>
-                     <!-- Game Card 5 -->
-                    <div id="memory-match-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
-                        <img src="https://img.gamedistribution.com/854fd8048c814acaa86b0faffe364290-1280x720.jpeg" alt="Memory Match" class="w-full h-full object-cover">
-                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
-                            <div class="flex items-center gap-3">
-                                <svg class="w-8 h-8 text-orange-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <h3 class="text-xl sm:text-2xl font-bold text-white">Memory Match</h3>
-                            </div>
-                            <p class="text-orange-400 mt-1">Puzzle</p>
-                        </div>
-                         <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
-                            <span class="btn-warning pointer-events-none">Play Now</span>
-                        </div>
-                    </div>
-                    <!-- Coming Soon Card -->
-                    <div class="group relative rounded-lg overflow-hidden shadow-lg cursor-not-allowed filter grayscale w-64 sm:w-auto flex-shrink-0">
-                        <img src="https://placehold.co/400x250/1f2937/6b7280?text=?" alt="Coming Soon" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
-                            <div class="flex items-center gap-3">
-                                <svg class="w-8 h-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>
-                                <h3 class="text-xl sm:text-2xl font-bold text-white">Coming Soon</h3>
-                            </div>
-                            <p class="text-gray-400 mt-1">Stay Tuned!</p>
-                        </div>
-                        <div class="absolute inset-0 bg-black/70 flex items-center justify-center">
-                            <span class="btn-secondary opacity-50 pointer-events-none">Coming Soon</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-<!-- Multiplayer Games Section -->
-<section id="multiplayer-games" class="py-16 sm:py-24 bg-gray-900/50">
-    <div class="container mx-auto px-4 lg:px-8">
-        <h2 class="text-4xl font-black-ops text-center mb-12">Multiplayer Games</h2>
-        <!-- This container will be a flex row on mobile and a grid on larger screens -->
-        <div class="flex overflow-x-auto space-x-6 pb-4 sm:grid sm:grid-cols-2 sm:gap-8 lg:grid-cols-4 hide-scrollbar">
-            <!-- Game Card 1 -->
-            <a href="mptictactoe.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 w-64 sm:w-auto flex-shrink-0">
-                <img src="https://www.rd.com/wp-content/uploads/2019/10/tic-tac-toe-scaled.jpg" alt="Tic-Tac-Toe" class="w-full h-full object-cover">
-                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <div class="absolute inset-0 p-6 flex flex-col justify-end">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-8 h-8 text-orange-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <h3 class="text-xl sm:text-2xl font-bold text-white">Tic-Tac-Toe</h3>
-                    </div>
-                    <p class="text-orange-400 mt-1">Puzzle</p>
-                </div>
-                 <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
-                    <span class="btn-warning pointer-events-none">Play Now</span>
-                </div>
-            </a>
-            <!-- Game Card 2: Memory Match -->
-            <a href="mpmemory.html" target="_blank" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 w-64 sm:w-auto flex-shrink-0">
-                <img src="https://static.vecteezy.com/system/resources/previews/012/672/122/original/memory-game-for-preschool-children-cards-with-cartoon-safari-desert-animals-activity-page-for-book-vector.jpg" alt="Memory Match" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <div class="absolute inset-0 p-6 flex flex-col justify-end">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-8 h-8 text-yellow-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <h3 class="text-xl sm:text-2xl font-bold text-white">Memory Match</h3>
-                    </div>
-                    <p class="text-yellow-400 mt-1">Puzzle</p>
-                </div>
-                <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
-                    <span class="btn-warning pointer-events-none">Play Now</span>
-                </div>
-            </a>
-            <!-- Coming Soon Card -->
-            <div class="group relative rounded-lg overflow-hidden shadow-lg cursor-not-allowed filter grayscale w-64 sm:w-auto flex-shrink-0">
-                <img src="https://placehold.co/400x250/1f2937/6b7280?text=?" alt="Coming Soon" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                <div class="absolute inset-0 p-6 flex flex-col justify-end">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-8 h-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>
-                        <h3 class="text-xl sm:text-2xl font-bold text-white">Coming Soon</h3>
-                    </div>
-                    <p class="text-gray-400 mt-1">More Multiplayer Fun!</p>
-                </div>
-                <div class="absolute inset-0 bg-black/70 flex items-center justify-center">
-                    <span class="btn-secondary opacity-50 pointer-events-none">Coming Soon</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-        <!-- Leaderboards Section -->
-        <section id="leaderboards" class="py-16 sm:py-24 bg-gray-800/50">
-            <div class="container mx-auto px-4 lg:px-8">
-                <h2 class="text-4xl font-black-ops text-center mb-12">Your High Scores</h2>
-                <div id="leaderboard-content" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <!-- Leaderboard cards will be injected here -->
-                </div>
-                 <div id="leaderboard-login-prompt" class="text-center text-gray-400">
-                     <p>Please log in to see your high scores.</p>
+                <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
+                 <div class="flex items-center space-x-4">
+                     <!-- Display user info if logged in -->
+                     <div id="user-status" class="text-sm text-gray-300">Checking status...</div>
                  </div>
             </div>
-        </section>
+        </nav>
+    </header>
 
-        <!-- How to Play Section -->
-        <section id="how-to-play" class="py-16 sm:py-24 bg-gray-900">
-            <div class="container mx-auto px-4 lg:px-8 text-center">
-                <h2 class="text-4xl font-black-ops text-center mb-4">How to Play</h2>
-                <p class="text-lg text-gray-400 mb-8 max-w-3xl mx-auto">Select a game below for instructions on its objective and controls.</p>
-                <div class="flex flex-wrap justify-center gap-4 mb-12">
-                    <button class="btn-primary game-info-btn" data-game="Astro Jumper">Astro Jumper</button>
-                    <button class="btn-danger game-info-btn" data-game="Car Racer">Car Racer</button>
-                    <button class="btn-success game-info-btn" data-game="Tower Defense">Tower Defense</button>
-                    <button class="btn-secondary game-info-btn" data-game="Tic-Tac-Toe">Tic-Tac-Toe</button>
-                    <button class="btn-warning game-info-btn" data-game="Memory Match">Memory Match</button>
+    <!-- Main Content: Leaderboards Section -->
+    <main class="flex-grow py-16 sm:py-24 bg-gray-800/50">
+        <section id="leaderboards" class="container mx-auto px-4 lg:px-8">
+            <h1 class="text-4xl font-black-ops text-center mb-12">Global Leaderboards (Top 5)</h1>
+
+            <!-- Login Prompt - Initially hidden -->
+            <div id="login-prompt" class="hidden text-center text-gray-300 glassmorphism p-8 rounded-lg max-w-md mx-auto">
+                <p class="text-xl mb-4">Please log in to view the Global Leaderboards.</p>
+                <!-- Link to main page with query param to suggest login -->
+                <a href="index.html?login=true" class="inline-block px-6 py-3 font-semibold text-white bg-sky-500 rounded-lg shadow-md hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 transition-colors duration-300">
+                    Login on Main Page
+                </a>
+                 <p class="text-sm mt-4 text-gray-400">(Navigate back to this page after logging in)</p>
+            </div>
+
+            <!-- Loading Indicator - Initially hidden -->
+            <div id="loading-indicator" class="hidden text-center">
+                <div class="loader"></div>
+                <p class="text-gray-400">Loading top scores...</p>
+            </div>
+
+            <!-- Global Leaderboard Content - Initially hidden -->
+            <div id="global-leaderboard-content" class="hidden">
+                 <div id="global-leaderboard-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                    <!-- Leaderboard cards injected here -->
                 </div>
-                <div id="gameExplanationResult" class="mt-12 min-h-[200px] flex items-center justify-center">
-                    <p class="text-gray-500">Select a game to see instructions.</p>
-                </div>
+            </div>
+
+            <!-- Error Display - Initially hidden -->
+            <div id="global-leaderboard-error" class="hidden text-center text-red-400 mt-8">
+                <p>Could not load leaderboards. Please try again later.</p>
+            </div>
+
+            <!-- No Scores Message - Initially hidden -->
+            <div id="no-scores-message" class="hidden text-center text-gray-400 mt-8">
+                <p>No high scores recorded yet for any games.</p>
             </div>
         </section>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 border-t border-gray-700">
+    <footer class="bg-gray-900 border-t border-gray-700 mt-auto">
         <div class="container mx-auto px-4 lg:px-8 py-8 text-center text-gray-400">
             <p>&copy; 2025 <a href="https://chat.whatsapp.com/DUXdfaOxJoPC87KjRWbkjo" style="text-decoration:underline;">FalconixGaming</a>. All Rights Reserved.</p>
-            <div class="flex justify-center space-x-6 mt-4">
-                <a href="https://wa.me/qr/MRKTOLBP5VHRI1" class="hover:text-white">Privacy Policy</a>
-                <a href="https://wa.me/qr/MRKTOLBP5VHRI1" class="hover:text-white">Terms of Service</a>
-                <a href="https://wa.me/qr/MRKTOLBP5VHRI1" class="hover:text-white">Contact</a>
-            </div>
         </div>
     </footer>
 
-    <!-- MODALS -->
-
-    <!-- Logout Confirmation Modal -->
-    <div id="logout-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
-        <div class="glassmorphism p-8 rounded-2xl text-center max-w-sm w-full">
-            <h3 class="text-2xl font-bold text-white">Are you sure?</h3>
-            <p class="mt-2 text-gray-300">You will be logged out of your account.</p>
-            <div class="mt-6 flex justify-center gap-4">
-                <button id="cancel-logout-btn" class="btn-primary">Cancel</button>
-                <button id="confirm-logout-btn" class="px-6 py-3 font-semibold text-red-500 bg-transparent border border-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors duration-300">Confirm Logout</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mobile Welcome Modal -->
-    <div id="mobile-welcome-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden md:hidden">
-        <div class="glassmorphism p-8 rounded-2xl text-center max-w-sm w-full relative">
-            <button id="close-welcome-modal" class="absolute top-2 right-2 text-gray-400 hover:text-white">
-                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <h2 class="text-3xl font-black-ops text-white">Welcome to <br>FALCONIX<span class="text-sky-400">GAMING</span></h2>
-            <p class="mt-4 text-gray-300">Log in to save your high scores and compete on the leaderboards!</p>
-            <button id="modal-login-button" class="btn-primary w-full mt-6 text-lg">
-                Login with Google
-            </button>
-        </div>
-    </div>
-    
-    <!-- Car Racer Game Modal -->
-    <div id="pixelRacerModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
-        <div class="w-full max-w-md lg:max-w-lg relative">
-            <div class="bg-gray-800 rounded-lg shadow-2xl overflow-hidden aspect-[3/4] relative">
-                <canvas id="racerGameCanvas"></canvas>
-                <div id="racerUiLayer" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 pointer-events-none">
-                    <div id="racerStartScreen" class="pointer-events-auto flex flex-col items-center">
-                        <h2 class="text-5xl font-black-ops text-white">CAR <span class="text-pink-500">RACER</span></h2>
-                        <p class="mt-4 text-gray-300 px-4">Use Arrow Keys on desktop, or Drag your finger on mobile to move!</p>
-                        <button id="racerStartButton" class="btn-danger mt-8 text-xl">Start Race</button>
-                    </div>
-                    <div id="racerInGameUI" class="hidden absolute top-5 left-5 text-left">
-                        <p class="text-2xl font-bold text-white">Score: <span id="racerScore">0</span></p>
-                    </div>
-                    <div id="racerGameOverScreen" data-game-name="Car Racer" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
-                        <h2 class="text-5xl font-black-ops text-white">CRASHED!</h2>
-                        <p class="mt-4 text-2xl text-gray-200">Final Score: <span id="racerFinalScore" class="font-bold text-pink-400">0</span></p>
-                        <div class="mt-6 flex flex-col sm:flex-row gap-4">
-                            <button id="racerRestartButton" class="btn-danger-outline text-xl">Try Again</button>
-                            <button id="shareRacerScore" class="btn-secondary-outline text-xl">Share Score</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <button id="closeRacerModal" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-gray-800 hover:bg-gray-200">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </button>
-        </div>
-    </div>
-
-    <!-- Tower Defense Game Modal -->
-    <div id="towerDefenseModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
-        <div class="w-full max-w-4xl relative">
-            <div class="bg-gray-800 rounded-lg shadow-2xl overflow-hidden aspect-[4/3] relative">
-                <canvas id="towerDefenseCanvas"></canvas>
-                <div id="tdUiLayer" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 pointer-events-none">
-                    <div id="tdStartScreen" class="pointer-events-auto flex flex-col items-center">
-                        <h2 class="text-5xl font-black-ops text-white">TOWER <span class="text-green-500">DEFENSE</span></h2>
-                        <p class="mt-4 text-gray-300">Place towers to stop the enemies from reaching the end!</p>
-                        <button id="tdStartButton" class="btn-success mt-8 text-xl">Start Game</button>
-                    </div>
-                     <div id="tdInGameUI" class="hidden absolute top-0 left-0 w-full h-full pointer-events-none">
-                         <div class="absolute top-2 left-2 text-left bg-gray-900/50 p-2 rounded-lg">
-                             <p class="font-bold text-white">❤️ Health: <span id="tdHealth"></span></p>
-                             <p class="font-bold text-white">💰 Gold: <span id="tdGold"></span></p>
-                             <p class="font-bold text-white">🌊 Wave: <span id="tdWave"></span></p>
-                         </div>
-                         <div id="tdTowerSelection" class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-4 pointer-events-auto">
-                             <button id="buyTurretButton" class="bg-gray-700 p-3 rounded-lg border-2 border-transparent hover:border-green-400">
-                                 <p class="font-bold">Turret</p>
-                                 <p class="text-sm">Cost: 100💰</p>
-                             </button>
-                         </div>
-                         <button id="nextWaveButton" class="absolute bottom-2 right-2 btn-success pointer-events-auto">Next Wave</button>
-                     </div>
-                    <div id="tdGameOverScreen" data-game-name="Tower Defense" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
-                        <h2 id="tdEndTitle" class="text-5xl font-black-ops text-white"></h2>
-                        <p class="mt-4 text-2xl text-gray-200">You survived <span id="tdFinalWave" class="font-bold text-green-400">0</span> waves.</p>
-                        <div class="mt-8 flex flex-col sm:flex-row gap-4">
-                            <button id="tdRestartButton" class="btn-success-outline text-xl">Play Again</button>
-                            <button id="shareTDScore" class="btn-secondary-outline text-xl">Share Score</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <button id="closeTowerDefenseModal" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-gray-800 hover:bg-gray-200">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </button>
-        </div>
-    </div>
-
-    <!-- Tic-Tac-Toe Game Modal -->
-    <div id="ticTacToeModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
-        <div class="w-full max-w-sm relative">
-            <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full border border-gray-700">
-                <div class="text-center mb-4">
-                    <h1 class="text-5xl font-bold text-gray-100" style="font-family: 'Fredoka One', cursive;">Tic-Tac-Toe</h1>
-                </div>
-                <div id="ttt-scoreboard" class="flex justify-around text-center mb-4">
-                    <div>
-                        <p class="text-lg font-bold text-red-500">Player X</p>
-                        <p id="ttt-score-x" class="text-3xl font-bold text-gray-100">0</p>
-                    </div>
-                    <div>
-                        <p class="text-lg font-bold text-blue-400">Player O</p>
-                        <p id="ttt-score-o" class="text-3xl font-bold text-gray-100">0</p>
-                    </div>
-                </div>
-                <div id="ttt-status" class="text-center text-xl font-semibold text-gray-400 mb-6 h-8 flex items-center justify-center"></div>
-                <div id="ttt-game-board" class="grid grid-cols-3 gap-3 mb-6">
-                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="0"></div>
-                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="1"></div>
-                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="2"></div>
-                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="3"></div>
-                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="4"></div>
-                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="5"></div>
-                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="6"></div>
-                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="7"></div>
-                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="8"></div>
-                </div>
-                <div id="ttt-button-container" class="space-y-2">
-                    <button id="ttt-next-round-button" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-200 hidden">Next Round</button>
-                    <button id="ttt-restart-button" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">Restart Game</button>
-                </div>
-            </div>
-            <button id="closeTicTacToeModal" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-gray-800 hover:bg-gray-200">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </button>
-        </div>
-    </div>
-
-    <!-- Memory Match Game Modal -->
-    <div id="memoryMatchModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
-        <div class="w-full max-w-lg relative">
-             <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full border border-gray-700">
-                <div class="text-center mb-4">
-                    <h1 class="text-5xl font-bold text-gray-100" style="font-family: 'Fredoka One', cursive;">Memory Match</h1>
-                    <p class="text-gray-400 mt-2">Moves: <span id="moves-count" class="font-bold">0</span></p>
-                </div>
-                <div id="memory-game-board" class="grid grid-cols-4 gap-4 mb-6 memory-game-board">
-                    <!-- Cards will be generated by JavaScript -->
-                </div>
-                <button id="memory-restart-button" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all duration-200">
-                    Restart Game
-                </button>
-            </div>
-            <button id="closeMemoryMatchModal" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-gray-800 hover:bg-gray-200">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-            </button>
-        </div>
-    </div>
-
-    <!-- Memory Match Win Modal -->
-    <div id="memoryMatchWinModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
-        <div class="glassmorphism p-8 rounded-2xl text-center max-w-sm w-full">
-            <h2 class="text-5xl font-black-ops text-white">You Won!</h2>
-            <p class="mt-4 text-2xl text-gray-200">Finished in <span id="memoryFinalMoves" class="font-bold text-yellow-400">0</span> moves!</p>
-            <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-                 <button id="memoryRestartButtonWin" class="btn-warning-outline text-xl">Play Again</button>
-                 <button id="shareMemoryScore" class="btn-secondary-outline text-xl">Share Score</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Fallback Share Modal -->
-    <div id="shareModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
-        <div class="glassmorphism p-8 rounded-2xl text-center max-w-md w-full relative">
-            <button id="closeShareModal" class="absolute top-2 right-2 text-gray-400 hover:text-white">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <h3 class="text-2xl font-bold text-white">Share Your Score!</h3>
-            <p class="mt-2 text-gray-300">Share your achievement with your friends.</p>
-            <textarea id="shareText" class="w-full bg-gray-900 text-white rounded-lg p-2 mt-4 h-24 resize-none" readonly></textarea>
-            <button id="copyShareText" class="btn-primary w-full mt-4">Copy Text</button>
-            <div class="mt-4 flex justify-center gap-4">
-                <a id="whatsappShareLink" href="#" target="_blank" class="btn-success">WhatsApp</a>
-                <a id="twitterShareLink" href="#" target="_blank" class="btn-primary">Twitter</a>
-            </div>
-        </div>
-    </div>
-    
     <!-- Scripts -->
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
     <script type="importmap">
     {
         "imports": {
-            "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.157.0/three.module.js",
-            "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js",
             "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
-            "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
-            "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
+            "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js",
+             "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"
         }
     }
     </script>
     <script type="module">
-        import * as THREE from 'three';
-        import * as CANNON from 'cannon-es';
         import { initializeApp } from 'firebase/app';
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
-        import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+        import { getFirestore, collection, getDocs } from 'firebase/firestore';
+        import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
         document.addEventListener('DOMContentLoaded', () => {
+            console.log("Leaderboard Page: DOM Loaded. Initializing Firebase..."); // Debug log
 
             // #############################################
             // ### FIREBASE SETUP                      ###
             // #############################################
-            
             const firebaseConfig = {
                 apiKey: "AIzaSyD02ui4dhTuGLz-Ff1af36ERdqqsn4iIeU",
                 authDomain: "falconixgaming-46210.firebaseapp.com",
@@ -660,1219 +139,189 @@
                 measurementId: "G-VJ6YC0GXK5"
             };
 
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            const db = getFirestore(app);
-            const provider = new GoogleAuthProvider();
+            let app;
+            let db;
+            let auth;
+
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                console.log("Leaderboard Page: Firebase initialized successfully."); // Debug log
+            } catch (error) {
+                console.error("Leaderboard Page: Firebase initialization failed:", error); // Error log
+                const errorDisplayInit = document.getElementById('global-leaderboard-error');
+                errorDisplayInit.innerHTML = `<p>Failed to connect to Firebase services. Please check connection/configuration.</p>`;
+                errorDisplayInit.style.display = 'block';
+                document.getElementById('loading-indicator').style.display = 'none';
+                 document.getElementById('user-status').textContent = 'Error initializing';
+                 document.getElementById('user-status').classList.add('text-red-400');
+                return;
+            }
 
             // --- UI Elements ---
-            const loginButton = document.getElementById('login-button');
-            const mobileLoginButton = document.getElementById('mobile-login-button');
-            const logoutButton = document.getElementById('logout-button');
-            const mobileLogoutButton = document.getElementById('mobile-logout-button');
-            const userInfo = document.getElementById('user-info');
-            const mobileUserInfo = document.getElementById('mobile-user-info');
-            const userDisplayName = document.getElementById('user-display-name');
-            const mobileUserDisplayName = document.getElementById('mobile-user-display-name');
-            const leaderboardContent = document.getElementById('leaderboard-content');
-            const leaderboardLoginPrompt = document.getElementById('leaderboard-login-prompt');
-            const logoutModal = document.getElementById('logout-modal');
-            const confirmLogoutBtn = document.getElementById('confirm-logout-btn');
-            const cancelLogoutBtn = document.getElementById('cancel-logout-btn');
-            const mobileWelcomeModal = document.getElementById('mobile-welcome-modal');
-            const closeWelcomeModal = document.getElementById('close-welcome-modal');
-            const modalLoginButton = document.getElementById('modal-login-button');
+            const globalLeaderboardGrid = document.getElementById('global-leaderboard-grid');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const globalLeaderboardContent = document.getElementById('global-leaderboard-content');
+            const errorDisplay = document.getElementById('global-leaderboard-error');
+            const noScoresMessage = document.getElementById('no-scores-message');
+            const loginPrompt = document.getElementById('login-prompt');
+            const userStatusEl = document.getElementById('user-status');
 
-            // --- Auth Functions ---
-            const signInWithGoogle = () => {
-                signInWithPopup(auth, provider).catch(e => console.error(e));
-                hideWelcomeModal();
-            };
-            
-            const showLogoutModal = () => logoutModal.classList.remove('hidden');
-            const hideLogoutModal = () => logoutModal.classList.add('hidden');
+            // --- Function to Display Global Leaderboards (Dynamically from /highscores) ---
+            const displayGlobalLeaderboards = async (currentUser) => {
+                console.log("Leaderboard Page: displayGlobalLeaderboards called. User:", currentUser ? currentUser.uid : 'null'); // Debug log
+                loadingIndicator.style.display = 'block';
+                globalLeaderboardContent.style.display = 'none';
+                errorDisplay.style.display = 'none';
+                noScoresMessage.style.display = 'none';
+                loginPrompt.style.display = 'none';
+                globalLeaderboardGrid.innerHTML = '';
 
-            const logout = () => {
-                signOut(auth).catch(e => console.error(e));
-                hideLogoutModal();
-            };
+                const games = ["Astro Jumper", "Car Racer", "Tower Defense", "Memory Match"];
+                const allScoresByGame = {};
+                games.forEach(game => allScoresByGame[game] = []);
 
-            const showWelcomeModal = () => {
-                if (sessionStorage.getItem('welcomeModalShown')) return;
-                setTimeout(() => {
-                    mobileWelcomeModal.classList.remove('hidden');
-                    sessionStorage.setItem('welcomeModalShown', 'true');
-                }, 2000);
-            };
+                let fetchError = false;
+                let hasAnyScores = false;
+                let snapshot = null;
 
-            const hideWelcomeModal = () => mobileWelcomeModal.classList.add('hidden');
-
-            loginButton.addEventListener('click', signInWithGoogle);
-            mobileLoginButton.addEventListener('click', signInWithGoogle);
-            modalLoginButton.addEventListener('click', signInWithGoogle);
-            logoutButton.addEventListener('click', showLogoutModal);
-            mobileLogoutButton.addEventListener('click', showLogoutModal);
-            confirmLogoutBtn.addEventListener('click', logout);
-            cancelLogoutBtn.addEventListener('click', hideLogoutModal);
-            closeWelcomeModal.addEventListener('click', hideWelcomeModal);
-            logoutModal.addEventListener('click', (e) => {
-                if (e.target === logoutModal) hideLogoutModal();
-            });
-            mobileWelcomeModal.addEventListener('click', (e) => {
-                if (e.target === mobileWelcomeModal) hideWelcomeModal();
-            });
-
-
-            // --- High Score Functions ---
-            const saveHighScore = async (gameName, newScore, scoreType = 'desc') => {
-                const user = auth.currentUser;
-                if (!user || !gameName || typeof newScore !== 'number') return;
-
-                const scoreRef = doc(db, "highscores", user.uid);
                 try {
-                    const docSnap = await getDoc(scoreRef);
-                    const currentData = docSnap.exists() ? docSnap.data() : {};
-                    const currentScore = currentData[gameName];
+                    const highscoresCol = collection(db, "highscores");
+                    console.log("Leaderboard Page: Fetching documents from /highscores..."); // Debug log
+                    snapshot = await getDocs(highscoresCol);
+                    console.log("Leaderboard Page: Fetched snapshot. Empty:", snapshot.empty, "Size:", snapshot.size); // Debug log
 
-                    let shouldUpdate = false;
-                    if (scoreType === 'desc') { // Higher is better
-                        if (currentScore === undefined || newScore > currentScore) {
-                            shouldUpdate = true;
-                        }
-                    } else { // Lower is better (asc)
-                        if (currentScore === undefined || newScore < currentScore) {
-                            shouldUpdate = true;
-                        }
-                    }
+                    if (!snapshot.empty) {
+                        snapshot.forEach(doc => {
+                            const userData = doc.data();
+                            const userId = doc.id;
+                            const playerName = userData.playerName || `User ${userId.substring(0, 6)}...`;
 
-                    if (shouldUpdate) {
-                        await setDoc(scoreRef, { [gameName]: newScore }, { merge: true });
-                        console.log(`New high score for ${gameName}: ${newScore}`);
-                        displayUserHighScores(user);
-                    }
-                } catch (error) {
-                    console.error("Error saving high score: ", error);
-                }
-            };
-            
-            const displayUserHighScores = async (user) => {
-                if (user) {
-                    leaderboardContent.style.display = 'grid';
-                    leaderboardLoginPrompt.style.display = 'none';
-                    const scoreRef = doc(db, "highscores", user.uid);
-                    const docSnap = await getDoc(scoreRef);
-                    const scores = docSnap.exists() ? docSnap.data() : {};
-                    
-                    const games = ["Astro Jumper", "Car Racer", "Tower Defense", "Memory Match"];
-                    leaderboardContent.innerHTML = games.map(game => {
-                        const score = scores[game] || 0;
-                        let scoreLabel = 'Points';
-                        if (game === 'Tower Defense') scoreLabel = 'Waves';
-                        if (game === 'Memory Match') scoreLabel = 'Moves';
-
-                        return `
-                        <div class="glassmorphism p-6 rounded-xl text-center">
-                            <h3 class="text-2xl font-bold text-indigo-300">${game}</h3>
-                            <p class="text-4xl font-black-ops text-white mt-4">${score}</p>
-                            <p class="text-gray-400 mt-1">${scoreLabel}</p>
-                        </div>
-                        `;
-                    }).join('');
-
-                } else {
-                    leaderboardContent.style.display = 'none';
-                    leaderboardLoginPrompt.style.display = 'block';
-                    leaderboardContent.innerHTML = '';
-                }
-            };
-
-
-            // --- Auth State Change Listener ---
-            onAuthStateChanged(auth, (user) => {
-                const isLoggedIn = !!user;
-                loginButton.style.display = isLoggedIn ? 'none' : 'flex';
-                mobileLoginButton.style.display = isLoggedIn ? 'none' : 'block';
-                userInfo.style.display = isLoggedIn ? 'flex' : 'none';
-                mobileUserInfo.style.display = isLoggedIn ? 'block' : 'none';
-
-                if (user) {
-                    userDisplayName.innerHTML = `${user.displayName} <br> <span class="text-xs text-gray-400">${user.email}</span>`;
-                    mobileUserDisplayName.innerHTML = `${user.displayName} <br> <span class="text-xs text-gray-400">${user.email}</span>`;
-                    hideWelcomeModal();
-                } else {
-                    const isMobile = window.innerWidth <= 768;
-                    if (isMobile) {
-                        showWelcomeModal();
-                    }
-                }
-                displayUserHighScores(user);
-            });
-            // --- Handle Login Redirect ---
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('login') === 'true') {
-                // Check if a user is already signed in
-                if (!auth.currentUser) {
-                    signInWithGoogle();
-                }
-            }
-            
-            // #############################################
-            // ### MOBILE MENU TOGGLE                  ###
-            // #############################################
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-
-            mobileMenuButton.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
-
-            // #############################################
-            // ### HOW TO PLAY SECTION                 ###
-            // #############################################
-            const gameInfoButtons = document.querySelectorAll('.game-info-btn');
-            const gameExplanationResultEl = document.getElementById('gameExplanationResult');
-
-            const gameExplanations = {
-                "Astro Jumper": {
-                    objective: "Survive as long as possible by jumping from one platform to the next without falling into the void.",
-                    gameplay: "Your character moves forward automatically. Your only job is to time your jumps perfectly to land on the next platform.",
-                    desktop_controls: "Click anywhere on the screen to jump.",
-                    mobile_controls: "Tap anywhere on the screen to jump."
-                },
-                "Car Racer": {
-                    objective: "Dodge the oncoming traffic for as long as you can to get the highest possible score.",
-                    gameplay: "You control a car at the bottom of the screen. Other cars will drive down towards you, and you must move left and right to avoid crashing.",
-                    desktop_controls: "Use the Left and Right Arrow Keys to move your car.",
-                    mobile_controls: "Touch and drag your finger left or right on the screen to move the car."
-                },
-                "Tower Defense": {
-                    objective: "Prevent enemies from reaching the end of the path by building and placing defensive towers.",
-                    gameplay: "Use your starting gold to build turrets on the grass. Defeated enemies give you more gold to build more towers. Survive as many waves as you can!",
-                    desktop_controls: "Click the 'Turret' button, then click on a valid green tile to place it. Click 'Next Wave' to start the attack.",
-                    mobile_controls: "Tap the 'Turret' button, then tap on a valid green tile to place it. Tap 'Next Wave' to start the attack."
-                },
-                 "Tic-Tac-Toe": {
-                    objective: "Be the first player to get three of your marks in a row, either horizontally, vertically, or diagonally.",
-                    gameplay: "Players take turns placing their mark ('X' or 'O') in an empty square on a 3x3 grid. The game ends when one player wins or the board is full, resulting in a draw.",
-                    desktop_controls: "Click on an empty square to place your mark.",
-                    mobile_controls: "Tap on an empty square to place your mark."
-                },
-                "Memory Match": {
-                    objective: "Find all the matching pairs of cards in the fewest number of moves.",
-                    gameplay: "Click or tap on a card to flip it over. Then, try to find its matching pair. If the cards don't match, they will be flipped back over.",
-                    desktop_controls: "Click on a card to flip it.",
-                    mobile_controls: "Tap on a card to flip it."
-                }
-            };
-
-            gameInfoButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const gameName = button.dataset.game;
-                    showGameExplanation(gameName);
-                });
-            });
-
-            function showGameExplanation(gameName) {
-                const info = gameExplanations[gameName];
-                if (info) {
-                    gameExplanationResultEl.innerHTML = `
-                        <div class="glassmorphism p-8 rounded-2xl text-left max-w-2xl w-full">
-                            <h3 class="text-2xl font-bold text-indigo-300">Objective</h3>
-                            <p class="mt-2 text-gray-300">${info.objective}</p>
-                            <h3 class="text-2xl font-bold text-indigo-300 mt-4">Gameplay</h3>
-                            <p class="mt-2 text-gray-300">${info.gameplay}</p>
-                            <h3 class="text-2xl font-bold text-indigo-300 mt-4">Controls</h3>
-                            <p class="mt-2 text-gray-300"><strong class="text-white">Desktop:</strong> ${info.desktop_controls}</p>
-                            <p class="mt-2 text-gray-300"><strong class="text-white">Mobile:</strong> ${info.mobile_controls}</p>
-                        </div>
-                    `;
-                }
-            }
-
-            // #############################################
-            // ### SHARE SCORE FUNCTIONALITY           ###
-            // #############################################
-            const shareModal = document.getElementById('shareModal');
-            const closeShareModalBtn = document.getElementById('closeShareModal');
-            const copyShareTextBtn = document.getElementById('copyShareText');
-            
-            function shareScore(gameName, score, scoreType = 'points') {
-                const url = window.location.origin + window.location.pathname;
-                let text = `I just scored ${score} ${scoreType} in ${gameName} on FalconixGaming! Can you beat my score?`;
-
-                if (navigator.share) {
-                    navigator.share({
-                        title: `My ${gameName} Score!`,
-                        text: `${text}\n\nPlay now!`,
-                        url: url,
-                    })
-                    .then(() => console.log('Successful share'))
-                    .catch((error) => console.log('Error sharing', error));
-                } else {
-                    const shareTextEl = document.getElementById('shareText');
-                    const whatsappLink = document.getElementById('whatsappShareLink');
-                    const twitterLink = document.getElementById('twitterShareLink');
-
-                    const fullShareText = `${text}\n\nPlay now: ${url}`;
-                    shareTextEl.value = fullShareText;
-                    whatsappLink.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(fullShareText)}`;
-                    twitterLink.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullShareText)}`;
-                    
-                    shareModal.classList.remove('hidden');
-                }
-            }
-
-            closeShareModalBtn.addEventListener('click', () => shareModal.classList.add('hidden'));
-            copyShareTextBtn.addEventListener('click', () => {
-                const shareTextEl = document.getElementById('shareText');
-                shareTextEl.select();
-                shareTextEl.setSelectionRange(0, 99999); // For mobile devices
-                document.execCommand('copy');
-                copyShareTextBtn.textContent = 'Copied!';
-                setTimeout(() => { copyShareTextBtn.textContent = 'Copy Text'; }, 2000);
-            });
-
-            // #############################################
-            // ### ASTRO JUMPER (3D GAME) CODE         ###
-            // #############################################
-            const gameContainer = document.getElementById('gameContainer');
-            const canvas = document.getElementById('gameCanvas');
-            const startScreen = document.getElementById('startScreen');
-            const playButton = document.getElementById('playButton');
-            const restartButton = document.getElementById('restartButton');
-            const scoreElement = document.getElementById('score');
-            const finalScoreElement = document.getElementById('finalScore');
-            const shareAstroJumperScoreBtn = document.getElementById('shareAstroJumperScore');
-            let isGameRunning = false;
-            let score = 0;
-            let player, playerBody;
-            const platforms = [];
-            const platformBodies = [];
-            let nextPlatformX = 0;
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-            const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -20, 0) });
-            
-            function initAstroJumper() {
-                renderer.setSize(gameContainer.clientWidth, gameContainer.clientHeight);
-                renderer.setPixelRatio(window.devicePixelRatio);
-                renderer.shadowMap.enabled = true;
-                renderer.setClearColor(0x111827, 1);
-                camera.position.set(0, 5, 15);
-                camera.lookAt(0, 0, 0);
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-                scene.add(ambientLight);
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-                directionalLight.position.set(10, 20, 5);
-                directionalLight.castShadow = true;
-                scene.add(directionalLight);
-                createStarfield();
-                resetAstroJumper();
-                animateAstroJumper();
-            }
-            function createStarfield() {
-                const starVertices = [];
-                for (let i = 0; i < 10000; i++) { starVertices.push(THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000), THREE.MathUtils.randFloatSpread(2000)); }
-                const starGeometry = new THREE.BufferGeometry();
-                starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
-                const stars = new THREE.Points(starGeometry, new THREE.PointsMaterial({ color: 0x888888 }));
-                scene.add(stars);
-            }
-            function createPlayer() {
-                const geometry = new THREE.IcosahedronGeometry(0.5, 0);
-                const material = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, flatShading: true });
-                player = new THREE.Mesh(geometry, material);
-                player.castShadow = true;
-                scene.add(player);
-                const shape = new CANNON.Sphere(0.5);
-                playerBody = new CANNON.Body({ mass: 1, shape });
-                playerBody.position.set(0, 5, 0);
-                world.addBody(playerBody);
-            }
-            function createPlatform(x, y, z, isFirst = false) {
-                const width = isFirst ? 4 : THREE.MathUtils.randFloat(2.5, 4);
-                const geometry = new THREE.BoxGeometry(width, 0.5, 3);
-                const material = new THREE.MeshStandardMaterial({ color: 0x475569, flatShading: true });
-                const platform = new THREE.Mesh(geometry, material);
-                platform.position.set(x, y, z);
-                platform.receiveShadow = true;
-                scene.add(platform);
-                platforms.push(platform);
-                const shape = new CANNON.Box(new CANNON.Vec3(width / 2, 0.5 / 2, 3 / 2));
-                const platformBody = new CANNON.Body({ mass: 0, shape, material: new CANNON.Material() });
-                platformBody.position.set(x, y, z);
-                world.addBody(platformBody);
-                platformBodies.push(platformBody);
-            }
-            function generatePlatforms() {
-                createPlatform(0, 0, 0, true);
-                nextPlatformX = 0;
-                for (let i = 0; i < 15; i++) generateNextPlatform();
-            }
-            function generateNextPlatform() {
-                const lastPlatform = platforms[platforms.length - 1];
-                const x = lastPlatform.position.x + THREE.MathUtils.randFloat(5, 8);
-                const y = lastPlatform.position.y + THREE.MathUtils.randFloat(-1.5, 1.5);
-                createPlatform(x, y, 0);
-                nextPlatformX = x;
-            }
-            function playerJump() {
-                if (!isGameRunning) return;
-                const from = playerBody.position;
-                const to = new CANNON.Vec3(from.x, from.y - 0.51, from.z);
-                if (world.raycastClosest(from, to, {}, new CANNON.RaycastResult())) { playerBody.velocity.y = 10; }
-            }
-            function resetAstroJumper() {
-                platforms.forEach(p => scene.remove(p));
-                platformBodies.forEach(b => world.removeBody(b));
-                if (player) scene.remove(player);
-                if (playerBody) world.removeBody(playerBody);
-                platforms.length = 0;
-                platformBodies.length = 0;
-                createPlayer();
-                playerBody.velocity.x = 6;
-                generatePlatforms();
-                score = 0;
-                scoreElement.innerText = '0';
-                camera.position.set(0, 5, 15);
-            }
-            function startAstroJumper() {
-                resetAstroJumper();
-                isGameRunning = true;
-                document.getElementById('uiLayer').classList.add('pointer-events-passthrough');
-                document.getElementById('uiLayer').style.backgroundColor = 'transparent';
-                document.getElementById('startScreen').style.display = 'none';
-                document.getElementById('gameOverScreen').style.display = 'none';
-                document.getElementById('inGameUI').style.display = 'block';
-            }
-            async function endAstroJumper() {
-                isGameRunning = false;
-                finalScoreElement.innerText = score;
-                await saveHighScore('Astro Jumper', score);
-                document.getElementById('uiLayer').classList.remove('pointer-events-passthrough');
-                document.getElementById('uiLayer').style.backgroundColor = 'rgba(0,0,0,0.5)';
-                document.getElementById('inGameUI').style.display = 'none';
-                document.getElementById('gameOverScreen').style.display = 'flex';
-            }
-            function animateAstroJumper() {
-                requestAnimationFrame(animateAstroJumper);
-                if (isGameRunning) {
-                    world.step(1 / 60);
-                    if (player && playerBody) {
-                        player.position.copy(playerBody.position);
-                        player.quaternion.copy(playerBody.quaternion);
-
-                        const newScore = Math.floor(player.position.x);
-                        if (newScore > score) {
-                            score = newScore;
-                            scoreElement.innerText = score;
-                        }
-                    }
-                    const targetCameraX = player.position.x + 5;
-                    const targetCameraY = player.position.y + 5;
-                    camera.position.x += (targetCameraX - camera.position.x) * 0.05;
-                    camera.position.y += (targetCameraY - camera.position.y) * 0.05;
-                    camera.lookAt(player.position.x, player.position.y, player.position.z);
-                    if (player.position.x > nextPlatformX - 20) generateNextPlatform();
-                    if (platforms.length > 20) {
-                        scene.remove(platforms.shift());
-                        world.removeBody(platformBodies.shift());
-                    }
-                    if (player.position.y < -10 || player.position.y > 20) endAstroJumper();
-                }
-                renderer.render(scene, camera);
-            }
-            playButton.addEventListener('click', startAstroJumper);
-            restartButton.addEventListener('click', startAstroJumper);
-            gameContainer.addEventListener('click', playerJump);
-            shareAstroJumperScoreBtn.addEventListener('click', () => {
-                shareScore('Astro Jumper', score, 'points');
-            });
-            document.getElementById('astro-jumper-card').addEventListener('click', () => {
-                document.getElementById('featured-game').scrollIntoView({ behavior: 'smooth' });
-            });
-            initAstroJumper();
-
-            // #############################################
-            // ### CAR RACER (2D GAME) CODE            ###
-            // #############################################
-            const racerModal = document.getElementById('pixelRacerModal');
-            const playRacerBtn = document.getElementById('pixel-racer-card');
-            const closeRacerBtn = document.getElementById('closeRacerModal');
-            const racerCanvas = document.getElementById('racerGameCanvas');
-            const racerCtx = racerCanvas.getContext('2d');
-            const racerStartScreen = document.getElementById('racerStartScreen');
-            const racerInGameUI = document.getElementById('racerInGameUI');
-            const racerGameOverScreen = document.getElementById('racerGameOverScreen');
-            const racerStartButton = document.getElementById('racerStartButton');
-            const racerRestartButton = document.getElementById('racerRestartButton');
-            const racerScoreEl = document.getElementById('racerScore');
-            const racerFinalScoreEl = document.getElementById('racerFinalScore');
-            const shareRacerScoreBtn = document.getElementById('shareRacerScore');
-            
-            let racerRunning = false;
-            let racerScore = 0;
-            let animationFrameId;
-            let playerCar, obstacles, roadLines;
-            const keys = { ArrowLeft: false, ArrowRight: false };
-
-            // --- Car Image Loading ---
-            const carImageSrcs = [
-                'https://i.ibb.co/N639DgRG/car-png-top-view-png-hatchback-car-top-view-png-clipart-1092.png', // Player Car
-                'https://www.seekpng.com/png/full/54-544318_car-top-view-png.png',
-                'https://www.seekpng.com/png/full/38-388934_28-collection-of-car-clipart-top-view-top.png',
-                'https://www.seekpng.com/png/full/54-545057_clipart-orange-rental-car-key-icon-royalty-free.png',
-                'https://www.seekpng.com/png/full/44-446913_45-top-view-of-car-clipart-images-green.png'
-            ];
-            const carImages = [];
-            let imagesLoaded = 0;
-
-            racerStartButton.disabled = true;
-            racerStartButton.textContent = 'Loading...';
-
-            carImageSrcs.forEach(src => {
-                const img = new Image();
-                img.src = src;
-                img.onload = () => {
-                    imagesLoaded++;
-                    if (imagesLoaded === carImageSrcs.length) {
-                         racerStartButton.disabled = false;
-                         racerStartButton.textContent = 'Start Race';
-                    }
-                };
-                carImages.push(img);
-            });
-            
-            const playerCarImg = carImages[0];
-            const obstacleCarImgs = carImages.slice(1);
-
-            function openRacerModal() {
-                racerModal.classList.remove('invisible', 'opacity-0');
-                racerCanvas.width = racerCanvas.parentElement.clientWidth;
-                racerCanvas.height = racerCanvas.parentElement.clientHeight;
-                showRacerStartScreen();
-            }
-            function closeRacerModal() {
-                racerModal.classList.add('invisible', 'opacity-0');
-                stopRacerGame();
-            }
-            function showRacerStartScreen() {
-                racerStartScreen.style.display = 'flex';
-                racerInGameUI.style.display = 'none';
-                racerGameOverScreen.style.display = 'none';
-            }
-            function startRacerGame() {
-                stopRacerGame();
-                racerRunning = true;
-                racerScore = 0;
-                const carWidth = 45;
-                const carHeight = 80;
-                playerCar = { x: racerCanvas.width / 2 - (carWidth/2), y: racerCanvas.height - (carHeight + 20), width: carWidth, height: carHeight, speed: 7, img: playerCarImg };
-                obstacles = [];
-                roadLines = [];
-                for (let i = 0; i < 8; i++) spawnObstacle();
-                for (let i = 0; i < 5; i++) roadLines.push({ y: i * (racerCanvas.height / 4) });
-                racerStartScreen.style.display = 'none';
-                racerGameOverScreen.style.display = 'none';
-                racerInGameUI.style.display = 'block';
-                gameLoop();
-            }
-            function stopRacerGame() {
-                racerRunning = false;
-                if (animationFrameId) {
-                    cancelAnimationFrame(animationFrameId);
-                    animationFrameId = null;
-                }
-            }
-            async function endRacerGame() {
-                stopRacerGame();
-                const finalRacerScore = Math.floor(racerScore);
-                racerFinalScoreEl.textContent = finalRacerScore;
-                await saveHighScore('Car Racer', finalRacerScore);
-                racerGameOverScreen.style.display = 'flex';
-                racerInGameUI.style.display = 'none';
-            }
-            function spawnObstacle() {
-                const carWidth = 45;
-                const carHeight = 80;
-                const lastObstacleY = obstacles.length > 0 ? obstacles[obstacles.length - 1].y : -200;
-                
-                let speed = 3 + Math.random() * 2 + (racerScore / 50);
-
-                obstacles.push({ 
-                    x: Math.random() * (racerCanvas.width - carWidth), 
-                    y: lastObstacleY - (Math.random() * 200 + 300), 
-                    width: carWidth, 
-                    height: carHeight, 
-                    speed: speed,
-                    img: obstacleCarImgs[Math.floor(Math.random() * obstacleCarImgs.length)]
-                });
-            }
-            function update() {
-                if (!racerRunning) return;
-                racerScore += 0.1;
-                racerScoreEl.textContent = Math.floor(racerScore);
-                if (keys.ArrowLeft && playerCar.x > 0) playerCar.x -= playerCar.speed;
-                if (keys.ArrowRight && playerCar.x < racerCanvas.width - playerCar.width) playerCar.x += playerCar.speed;
-                roadLines.forEach(line => { line.y += 4 + (racerScore / 100) ; if (line.y > racerCanvas.height) line.y = -40; });
-                obstacles.forEach((obs, index) => {
-                    obs.y += obs.speed;
-                    if (obs.y > racerCanvas.height) {
-                        obstacles.splice(index, 1);
-                        spawnObstacle();
-                    }
-                    if (playerCar.x < obs.x + obs.width && playerCar.x + playerCar.width > obs.x && playerCar.y < obs.y + obs.height && playerCar.y + playerCar.height > obs.y) {
-                        endRacerGame();
-                    }
-                });
-            }
-            function draw() {
-                racerCtx.fillStyle = '#374151';
-                racerCtx.fillRect(0, 0, racerCanvas.width, racerCanvas.height);
-                racerCtx.fillStyle = '#6b7280';
-                const laneWidth = racerCanvas.width / 3;
-                roadLines.forEach(line => {
-                    racerCtx.fillRect(laneWidth - 5, line.y, 10, 40);
-                    racerCtx.fillRect(laneWidth * 2 - 5, line.y, 10, 40);
-                });7
-
-                // Draw player car image
-                racerCtx.drawImage(playerCar.img, playerCar.x, playerCar.y, playerCar.width, playerCar.height);
-                
-                // Draw obstacle car images
-                obstacles.forEach(obs => {
-                    racerCtx.drawImage(obs.img, obs.x, obs.y, obs.width, obs.height);
-                });
-            }
-            function gameLoop() {
-                update();
-                draw();
-                if (racerRunning) {
-                    animationFrameId = requestAnimationFrame(gameLoop);
-                }
-            }
-            playRacerBtn.addEventListener('click', openRacerModal);
-            closeRacerBtn.addEventListener('click', closeRacerModal);
-            racerStartButton.addEventListener('click', startRacerGame);
-            racerRestartButton.addEventListener('click', startRacerGame);
-            shareRacerScoreBtn.addEventListener('click', () => {
-                shareScore('Car Racer', Math.floor(racerScore), 'points');
-            });
-            window.addEventListener('keydown', (e) => {
-                if (racerModal.classList.contains('invisible')) return;
-                if (e.key in keys) { e.preventDefault(); keys[e.key] = true; }
-            });
-            window.addEventListener('keyup', (e) => {
-                if (racerModal.classList.contains('invisible')) return;
-                if (e.key in keys) { e.preventDefault(); keys[e.key] = false; }
-            });
-            function handleTouch(e) {
-                if (racerModal.classList.contains('invisible') || !racerRunning) return;
-                e.preventDefault();
-                const touchX = e.touches[0].clientX;
-                const racerCanvasRect = racerCanvas.getBoundingClientRect();
-                let targetX = touchX - racerCanvasRect.left - (playerCar.width / 2);
-                if (targetX < 0) targetX = 0;
-                if (targetX > racerCanvas.width - playerCar.width) targetX = racerCanvas.width - playerCar.width;
-                playerCar.x = targetX;
-            }
-            racerCanvas.addEventListener('touchstart', handleTouch, { passive: false });
-            racerCanvas.addEventListener('touchmove', handleTouch, { passive: false });
-
-            // #############################################
-            // ### TOWER DEFENSE (2D GAME) CODE        ###
-            // #############################################
-            
-            const tdModal = document.getElementById('towerDefenseModal');
-            const playTDButton = document.getElementById('tower-defense-card');
-            const closeTDButton = document.getElementById('closeTowerDefenseModal');
-            const tdCanvas = document.getElementById('towerDefenseCanvas');
-            const tdCtx = tdCanvas.getContext('2d');
-            const tdStartScreen = document.getElementById('tdStartScreen');
-            const tdInGameUI = document.getElementById('tdInGameUI');
-            const tdGameOverScreen = document.getElementById('tdGameOverScreen');
-            const tdStartButton = document.getElementById('tdStartButton');
-            const tdRestartButton = document.getElementById('tdRestartButton');
-            const tdHealthEl = document.getElementById('tdHealth');
-            const tdGoldEl = document.getElementById('tdGold');
-            const tdWaveEl = document.getElementById('tdWave');
-            const tdEndTitleEl = document.getElementById('tdEndTitle');
-            const tdFinalWaveEl = document.getElementById('tdFinalWave');
-            const shareTDScoreBtn = document.getElementById('shareTDScore');
-            const buyTurretButton = document.getElementById('buyTurretButton');
-            const nextWaveButton = document.getElementById('nextWaveButton');
-            let tdRunning = false;
-            let health, gold, wave;
-            let enemies = [];
-            let towers = [];
-            let projectiles = [];
-            let selectedTower = null;
-            let waveInProgress = false;
-            let mousePos = { x: 0, y: 0 };
-            let grid = [];
-            let TILE_SIZE = 50;
-            const GRID_COLS = 16;
-            const GRID_ROWS = 12;
-            const pathCoords = [ {x: 0, y: 5}, {x: 3, y: 5}, {x: 3, y: 2}, {x: 7, y: 2}, {x: 7, y: 8}, {x: 12, y: 8}, {x: 12, y: 4}, {x: 16, y: 4} ];
-
-            function openTDModal() {
-                tdModal.classList.remove('invisible', 'opacity-0');
-                setupTDGrid();
-                tdStartScreen.style.display = 'block';
-                tdInGameUI.style.display = 'none';
-                tdGameOverScreen.style.display = 'none';
-            }
-            function closeTDModal() {
-                tdModal.classList.add('invisible', 'opacity-0');
-                stopTDGame();
-            }
-            function setupTDGrid() {
-                const parent = tdCanvas.parentElement;
-                const size = Math.min(parent.clientWidth, parent.clientHeight);
-                tdCanvas.width = size;
-                tdCanvas.height = size * (GRID_ROWS / GRID_COLS);
-                TILE_SIZE = tdCanvas.width / GRID_COLS;
-                grid = [];
-                for (let y = 0; y < GRID_ROWS; y++) { grid.push(Array(GRID_COLS).fill(0)); }
-                for (let i = 0; i < pathCoords.length - 1; i++) {
-                    let start = pathCoords[i];
-                    let end = pathCoords[i+1];
-                    if (start.x === end.x) {
-                        for (let y = Math.min(start.y, end.y); y <= Math.max(start.y, end.y); y++) { if (grid[y]) grid[y][start.x] = 1; }
-                    } else {
-                        for (let x = Math.min(start.x, end.x); x <= Math.max(start.x, end.x); x++) { if (grid[start.y]) grid[start.y][x] = 1; }
-                    }
-                }
-            }
-            function startTDGame() {
-                tdRunning = true;
-                health = 20;
-                gold = 250;
-                wave = 0;
-                enemies = [];
-                towers = [];
-                projectiles = [];
-                selectedTower = null;
-                waveInProgress = false;
-                setupTDGrid();
-                updateTDUI();
-                tdStartScreen.style.display = 'none';
-                tdGameOverScreen.style.display = 'none';
-                tdInGameUI.style.display = 'block';
-                nextWaveButton.style.display = 'block';
-                gameLoopTD();
-            }
-            function stopTDGame() { tdRunning = false; }
-            function updateTDUI() {
-                tdHealthEl.textContent = health;
-                tdGoldEl.textContent = gold;
-                tdWaveEl.textContent = wave;
-            }
-            function startNextWave() {
-                if (waveInProgress) return;
-                wave++;
-                waveInProgress = true;
-                nextWaveButton.style.display = 'none';
-                updateTDUI();
-                const enemyCount = wave * 5 + 5;
-                for (let i = 0; i < enemyCount; i++) {
-                    const enemyHealth = 50 + wave * 15;
-                    enemies.push({ x: -TILE_SIZE * i * 1.5, y: pathCoords[0].y * TILE_SIZE, speed: 1 + wave * 0.05, health: enemyHealth, maxHealth: enemyHealth, pathIndex: 0 });
-                }
-            }
-            function gameLoopTD() {
-                if (!tdRunning) return;
-                tdCtx.clearRect(0, 0, tdCanvas.width, tdCanvas.height);
-                drawTDGrid();
-                drawTDPath();
-                towers.forEach(t => { t.update(); t.draw(); });
-                projectiles.forEach((p, i) => { p.update(i); p.draw(); });
-                
-                for (let i = enemies.length - 1; i >= 0; i--) {
-                    const e = enemies[i];
-                    const status = updateEnemy(e);
-                    if (status === 'finished') {
-                        enemies.splice(i, 1);
-                        health--;
-                        updateTDUI();
-                        if (health <= 0) endGameTD(false);
-                    } else if (e.health <= 0) {
-                        enemies.splice(i, 1);
-                        gold += 10;
-                        updateTDUI();
-                    } else {
-                        drawEnemy(e);
-                    }
-                }
-
-                if (waveInProgress && enemies.length === 0) {
-                    waveInProgress = false;
-                    nextWaveButton.style.display = 'block';
-                    if (wave >= 10) endGameTD(true);
-                }
-                if (selectedTower) drawPlacementPreview();
-                requestAnimationFrame(gameLoopTD);
-            }
-            function drawTDGrid() {
-                tdCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-                for (let i = 0; i < GRID_COLS; i++) {
-                    tdCtx.beginPath();
-                    tdCtx.moveTo(i * TILE_SIZE, 0);
-                    tdCtx.lineTo(i * TILE_SIZE, tdCanvas.height);
-                    tdCtx.stroke();
-                }
-                for (let i = 0; i < GRID_ROWS; i++) {
-                    tdCtx.beginPath();
-                    tdCtx.moveTo(0, i * TILE_SIZE);
-                    tdCtx.lineTo(tdCanvas.width, i * TILE_SIZE);
-                    tdCtx.stroke();
-                }
-            }
-            function drawTDPath() {
-                tdCtx.fillStyle = '#374151';
-                for(let y=0; y < grid.length; y++) {
-                    for(let x=0; x < grid[y].length; x++) {
-                        if(grid[y][x] === 1) {
-                            tdCtx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                        }
-                    }
-                }
-            }
-            function drawEnemy(enemy) {
-                tdCtx.fillStyle = '#ef4444';
-                tdCtx.fillRect(enemy.x, enemy.y, TILE_SIZE * 0.6, TILE_SIZE * 0.6);
-                tdCtx.fillStyle = '#4b5563';
-                tdCtx.fillRect(enemy.x, enemy.y - 10, TILE_SIZE * 0.6, 5);
-                tdCtx.fillStyle = '#22c55e';
-                tdCtx.fillRect(enemy.x, enemy.y - 10, TILE_SIZE * 0.6 * (enemy.health / enemy.maxHealth), 5);
-            }
-            function updateEnemy(enemy) {
-                if (enemy.pathIndex >= pathCoords.length - 1) {
-                    return 'finished';
-                }
-                const endPoint = pathCoords[enemy.pathIndex + 1];
-                const targetX = endPoint.x * TILE_SIZE;
-                const targetY = endPoint.y * TILE_SIZE;
-                const dx = targetX - enemy.x;
-                const dy = targetY - enemy.y;
-                const distance = Math.sqrt(dx*dx + dy*dy);
-                if (distance < enemy.speed) {
-                    enemy.pathIndex++;
-                } else {
-                    enemy.x += (dx / distance) * enemy.speed;
-                    enemy.y += (dy / distance) * enemy.speed;
-                }
-                return 'alive';
-            }
-            function createTower(gridX, gridY) {
-                const tower = {
-                    x: (gridX + 0.5) * TILE_SIZE, y: (gridY + 0.5) * TILE_SIZE, range: TILE_SIZE * 2.5, fireRate: 45, fireCooldown: 0,
-                    draw() {
-                        tdCtx.fillStyle = '#10b981';
-                        tdCtx.beginPath();
-                        tdCtx.arc(this.x, this.y, TILE_SIZE/3, 0, Math.PI * 2);
-                        tdCtx.fill();
-                    },
-                    update() {
-                        this.fireCooldown--;
-                        if (this.fireCooldown <= 0) {
-                            const target = this.findTarget();
-                            if (target) { this.shoot(target); this.fireCooldown = this.fireRate; }
-                        }
-                    },
-                    findTarget() {
-                        for (const enemy of enemies) {
-                            const dx = this.x - (enemy.x + (TILE_SIZE * 0.3));
-                            const dy = this.y - (enemy.y + (TILE_SIZE * 0.3));
-                            if (Math.sqrt(dx*dx + dy*dy) < this.range) return enemy;
-                        }
-                        return null;
-                    },
-                    shoot(target) {
-                        projectiles.push({
-                            x: this.x, y: this.y, target: target, speed: 5,
-                            update(i) {
-                                if(!this.target || this.target.health <= 0) { projectiles.splice(i, 1); return; }
-                                const dx = (this.target.x + TILE_SIZE * 0.3) - this.x;
-                                const dy = (this.target.y + TILE_SIZE * 0.3) - this.y;
-                                const dist = Math.sqrt(dx*dx + dy*dy);
-                                if (dist < this.speed) {
-                                    this.target.health -= 25;
-                                    projectiles.splice(i, 1);
-                                } else {
-                                    this.x += (dx/dist) * this.speed;
-                                    this.y += (dy/dist) * this.speed;
+                            games.forEach(game => {
+                                if (userData[game] !== undefined && typeof userData[game] === 'number') {
+                                    allScoresByGame[game].push({ score: userData[game], playerName: playerName, userId: userId });
+                                    hasAnyScores = true;
                                 }
-                            },
-                            draw() {
-                                tdCtx.fillStyle = '#facc15';
-                                tdCtx.beginPath();
-                                tdCtx.arc(this.x, this.y, 5, 0, Math.PI * 2);
-                                tdCtx.fill();
-                            }
+                            });
                         });
                     }
-                };
-                towers.push(tower);
-                grid[gridY][gridX] = 2;
-            }
-            function getMousePos(canvas, evt) {
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                const clientX = evt.clientX || (evt.touches && evt.touches[0].clientX);
-                const clientY = evt.clientY || (evt.touches && evt.touches[0].clientY);
-                if (clientX === undefined) return {x:0, y:0};
-                return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
-            }
-            function handleCanvasClick(e) {
-                if (!selectedTower) return;
-                const pos = getMousePos(tdCanvas, e);
-                const gridX = Math.floor(pos.x / TILE_SIZE);
-                const gridY = Math.floor(pos.y / TILE_SIZE);
-                if (grid[gridY] && grid[gridY][gridX] === 0) {
-                    createTower(gridX, gridY);
-                    gold -= 100;
-                    updateTDUI();
-                    selectedTower = null;
-                }
-            }
-            function drawPlacementPreview() {
-                const gridX = Math.floor(mousePos.x / TILE_SIZE);
-                const gridY = Math.floor(mousePos.y / TILE_SIZE);
-                const centerX = (gridX + 0.5) * TILE_SIZE;
-                const centerY = (gridY + 0.5) * TILE_SIZE;
-                let isValidPlacement = false;
-                if(grid[gridY] && grid[gridY][gridX] === 0) { isValidPlacement = true; }
-                tdCtx.fillStyle = isValidPlacement ? 'rgba(0, 255, 0, 0.3)' : 'rgba(255, 0, 0, 0.3)';
-                tdCtx.beginPath();
-                tdCtx.arc(centerX, centerY, TILE_SIZE * 2.5, 0, Math.PI * 2);
-                tdCtx.fill();
-                tdCtx.fillStyle = '#16a34a';
-                tdCtx.beginPath();
-                tdCtx.arc(centerX, centerY, TILE_SIZE/3, 0, Math.PI * 2);
-                tdCtx.fill();
-            }
-            async function endGameTD(win) {
-                stopTDGame();
-                await saveHighScore('Tower Defense', wave);
-                tdInGameUI.style.display = 'none';
-                tdGameOverScreen.style.display = 'flex';
-                tdEndTitleEl.textContent = win ? "VICTORY!" : "DEFEAT!";
-                tdFinalWaveEl.textContent = wave;
-            }
-            playTDButton.addEventListener('click', openTDModal);
-            closeTDButton.addEventListener('click', closeTDModal);
-            tdStartButton.addEventListener('click', startTDGame);
-            tdRestartButton.addEventListener('click', startTDGame);
-            shareTDScoreBtn.addEventListener('click', () => {
-                shareScore('Tower Defense', wave, 'waves');
-            });
-            nextWaveButton.addEventListener('click', startNextWave);
-            buyTurretButton.addEventListener('click', () => { if (gold >= 100) selectedTower = 'turret'; });
-            tdCanvas.addEventListener('mousemove', e => { mousePos = getMousePos(tdCanvas, e); });
-            tdCanvas.addEventListener('touchmove', e => { mousePos = getMousePos(tdCanvas, e); });
-            tdCanvas.addEventListener('click', handleCanvasClick);
-            tdCanvas.addEventListener('touchend', e => { if (selectedTower) { handleCanvasClick(e); e.preventDefault(); } });
-            
-            // #############################################
-            // ### TIC-TAC-TOE (2D GAME) CODE          ###
-            // #############################################
-            const ticTacToeModal = document.getElementById('ticTacToeModal');
-            const playTTTBtn = document.getElementById('tic-tac-toe-card');
-            const closeTTTBtn = document.getElementById('closeTicTacToeModal');
-            let tttInitialized = false;
 
-            function openTTTModal() {
-                ticTacToeModal.classList.remove('invisible', 'opacity-0');
-                if (!tttInitialized) {
-                    initTicTacToe();
-                    tttInitialized = true;
-                }
-            }
+                    console.log("Leaderboard Page: Aggregated scores:", allScoresByGame); // Debug log
 
-            function closeTTTModal() {
-                ticTacToeModal.classList.add('invisible', 'opacity-0');
-            }
-            
-            playTTTBtn.addEventListener('click', openTTTModal);
-            closeTTTBtn.addEventListener('click', closeTTTModal);
+                    // Process and display scores
+                    games.forEach(game => {
+                        const scores = allScoresByGame[game];
+                        let scoreLabel = 'Points';
+                        let sortOrder = 'desc';
 
-            function initTicTacToe() {
-                const statusDisplay = document.getElementById('ttt-status');
-                const cells = document.querySelectorAll('.ttt-cell');
-                const restartButton = document.getElementById('ttt-restart-button');
-                const nextRoundButton = document.getElementById('ttt-next-round-button');
-                const scoreXDisplay = document.getElementById('ttt-score-x');
-                const scoreODisplay = document.getElementById('ttt-score-o');
+                        if (game === 'Tower Defense') scoreLabel = 'Waves';
+                        if (game === 'Memory Match') { scoreLabel = 'Moves'; sortOrder = 'asc'; }
 
-                let gameActive = true;
-                let startingPlayer = 'X';
-                let currentPlayer = 'X';
-                let gameState = ["", "", "", "", "", "", "", "", ""];
-                let scoreX = 0;
-                let scoreO = 0;
+                        scores.sort((a, b) => {
+                            if (typeof a.score !== 'number') return 1;
+                            if (typeof b.score !== 'number') return -1;
+                            return (sortOrder === 'asc') ? a.score - b.score : b.score - a.score;
+                        });
 
-                const winningConditions = [
-                    [0, 1, 2], [3, 4, 5], [6, 7, 8],
-                    [0, 3, 6], [1, 4, 7], [2, 5, 8],
-                    [0, 4, 8], [2, 4, 6]
-                ];
-
-                const winningMessage = () => `Player ${currentPlayer} wins! 🎉`;
-                const drawMessage = () => `It's a draw! 🤝`;
-                const currentPlayerTurn = () => `Player ${currentPlayer}'s turn`;
-
-                function handleCellClick(event) {
-                    const clickedCell = event.target;
-                    const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
-                    if (gameState[clickedCellIndex] !== "" || !gameActive) return;
-                    
-                    handleCellPlayed(clickedCell, clickedCellIndex);
-                    handleResultValidation();
-                }
-
-                function handleCellPlayed(clickedCell, clickedCellIndex) {
-                    gameState[clickedCellIndex] = currentPlayer;
-                    clickedCell.textContent = currentPlayer;
-                    clickedCell.classList.add(currentPlayer === 'X' ? 'text-red-500' : 'text-blue-400');
-                }
-
-                function handleResultValidation() {
-                    let roundWon = false;
-                    let winningLine = [];
-                    for (const winCondition of winningConditions) {
-                        const a = gameState[winCondition[0]];
-                        const b = gameState[winCondition[1]];
-                        const c = gameState[winCondition[2]];
-                        if (a === '' || b === '' || c === '') continue;
-                        if (a === b && b === c) {
-                            roundWon = true;
-                            winningLine = winCondition;
-                            break;
-                        }
-                    }
-
-                    if (roundWon) {
-                        statusDisplay.textContent = winningMessage();
-                        gameActive = false;
-                        if (currentPlayer === 'X') {
-                            scoreX++;
-                            scoreXDisplay.textContent = scoreX;
+                        let leaderboardHTML = `<div class="glassmorphism p-6 rounded-xl"><h3 class="text-2xl font-bold text-center text-indigo-300 mb-4">${game}</h3><ol class="space-y-3">`;
+                        if (scores.length > 0) {
+                            scores.slice(0, 5).forEach((entry, index) => { // Show Top 5
+                                const isCurrentUser = currentUser && entry.userId === currentUser.uid;
+                                leaderboardHTML += `
+                                    <li class="flex items-center justify-between text-lg ${isCurrentUser ? 'bg-sky-900/50 rounded px-2 py-1' : ''}">
+                                        <span class="flex items-center min-w-0">
+                                            <span class="font-bold text-gray-400 w-8 flex-shrink-0">${index + 1}.</span>
+                                            <span class="text-white truncate" title="${entry.playerName}">${entry.playerName} ${isCurrentUser ? '(You)' : ''}</span>
+                                        </span>
+                                        <span class="font-bold text-sky-400 flex-shrink-0 ml-2">${entry.score} ${scoreLabel}</span>
+                                    </li>`;
+                            });
                         } else {
-                            scoreO++;
-                            scoreODisplay.textContent = scoreO;
+                            leaderboardHTML += `<li class="text-center text-gray-400">No scores yet for this game.</li>`;
                         }
-                        winningLine.forEach(index => cells[index].classList.add('winning-cell'));
-                        nextRoundButton.classList.remove('hidden');
-                        return;
-                    }
-
-                    if (!gameState.includes("")) {
-                        statusDisplay.textContent = drawMessage();
-                        gameActive = false;
-                        nextRoundButton.classList.remove('hidden');
-                        return;
-                    }
-                    handlePlayerChange();
-                }
-
-                function handlePlayerChange() {
-                    currentPlayer = currentPlayer === "X" ? "O" : "X";
-                    statusDisplay.textContent = currentPlayerTurn();
-                }
-                
-                function startNextRound() {
-                    gameActive = true;
-                    startingPlayer = startingPlayer === 'X' ? 'O' : 'X';
-                    currentPlayer = startingPlayer;
-                    gameState = ["", "", "", "", "", "", "", "", ""];
-                    statusDisplay.textContent = currentPlayerTurn();
-                    cells.forEach(cell => {
-                        cell.textContent = "";
-                        cell.classList.remove('text-red-500', 'text-blue-400', 'winning-cell');
+                        leaderboardHTML += `</ol></div>`;
+                        globalLeaderboardGrid.innerHTML += leaderboardHTML;
                     });
-                    nextRoundButton.classList.add('hidden');
-                }
 
-                function handleRestartGame() {
-                    scoreX = 0;
-                    scoreO = 0;
-                    scoreXDisplay.textContent = '0';
-                    scoreODisplay.textContent = '0';
-                    startingPlayer = 'X';
-                    startNextRound();
-                }
-
-                cells.forEach(cell => cell.addEventListener('click', handleCellClick));
-                nextRoundButton.addEventListener('click', startNextRound);
-                restartButton.addEventListener('click', handleRestartGame);
-
-                statusDisplay.textContent = currentPlayerTurn();
-            }
-
-            // #############################################
-            // ### MEMORY MATCH (2D GAME) CODE         ###
-            // #############################################
-            const memoryMatchModal = document.getElementById('memoryMatchModal');
-            const memoryMatchWinModal = document.getElementById('memoryMatchWinModal');
-            const playMemoryMatchBtn = document.getElementById('memory-match-card');
-            const closeMemoryMatchBtn = document.getElementById('closeMemoryMatchModal');
-            const shareMemoryScoreBtn = document.getElementById('shareMemoryScore');
-            let memoryMatchInitialized = false;
-
-            function openMemoryMatchModal() {
-                memoryMatchModal.classList.remove('invisible', 'opacity-0');
-                if (!memoryMatchInitialized) {
-                    initMemoryMatch();
-                    memoryMatchInitialized = true;
-                }
-            }
-
-            function closeMemoryMatchModal() {
-                memoryMatchModal.classList.add('invisible', 'opacity-0');
-            }
-            
-            playMemoryMatchBtn.addEventListener('click', openMemoryMatchModal);
-            closeMemoryMatchBtn.addEventListener('click', closeMemoryMatchModal);
-
-            function initMemoryMatch() {
-                const gameBoard = document.getElementById('memory-game-board');
-                const movesCountSpan = document.getElementById('moves-count');
-                const restartButton = document.getElementById('memory-restart-button');
-                const restartButtonWin = document.getElementById('memoryRestartButtonWin');
-                const memoryFinalMovesEl = document.getElementById('memoryFinalMoves');
-                const cardSymbols = ['🚀', '🔥', '⭐', '🎉', '💎', '💯', '👾', '🏆'];
-                let cards = [...cardSymbols, ...cardSymbols];
-
-                let flippedCards = [];
-                let matchedPairs = 0;
-                let moves = 0;
-                let lockBoard = false;
-
-                function shuffle(array) {
-                    for (let i = array.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [array[i], array[j]] = [array[j], array[i]];
-                    }
-                }
-
-                function createBoard() {
-                    shuffle(cards);
-                    gameBoard.innerHTML = '';
-                    cards.forEach(symbol => {
-                        const cardElement = document.createElement('div');
-                        cardElement.classList.add('memory-card', 'h-24');
-                        cardElement.dataset.symbol = symbol;
-
-                        cardElement.innerHTML = `
-                            <div class="memory-card-face memory-card-front"></div>
-                            <div class="memory-card-face memory-card-back">${symbol}</div>
-                        `;
-
-                        cardElement.addEventListener('click', handleCardClick);
-                        gameBoard.appendChild(cardElement);
-                    });
-                }
-
-                function handleCardClick(event) {
-                    const clickedCard = event.currentTarget;
-                    if (lockBoard || clickedCard.classList.contains('is-flipped')) return;
-
-                    flipCard(clickedCard);
-
-                    if (flippedCards.length < 2) {
-                        flippedCards.push(clickedCard);
-                    }
-
-                    if (flippedCards.length === 2) {
-                        incrementMoves();
-                        checkForMatch();
-                    }
-                }
-
-                function flipCard(card) {
-                    card.classList.add('is-flipped');
-                }
-                
-                function unflipCards() {
-                    lockBoard = true;
-                    setTimeout(() => {
-                        flippedCards.forEach(card => card.classList.remove('is-flipped'));
-                        resetFlippedCards();
-                    }, 1000);
-                }
-
-                function checkForMatch() {
-                    const [card1, card2] = flippedCards;
-                    const isMatch = card1.dataset.symbol === card2.dataset.symbol;
-
-                    if (isMatch) {
-                        disableMatchedCards();
+                } catch (error) {
+                    console.error("Leaderboard Page: Error fetching or processing high scores: ", error); // *** More detailed Error log ***
+                    console.error("Error Name:", error.name);
+                    console.error("Error Code:", error.code);
+                    console.error("Error Message:", error.message);
+                    fetchError = true;
+                     if (error.code === 'permission-denied' || error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions')) {
+                         errorDisplay.innerHTML = `<p>Could not load leaderboards due to permissions. Please ensure you are logged in and Firestore rules allow list access for authenticated users on the 'highscores' collection.</p>`;
+                     } else {
+                         errorDisplay.innerHTML = `<p>Could not load leaderboards. An unexpected error occurred: ${error.message}</p>`;
+                     }
+                } finally {
+                    loadingIndicator.style.display = 'none';
+                    if (fetchError) {
+                        errorDisplay.style.display = 'block';
+                    } else if (hasAnyScores) {
+                         globalLeaderboardContent.style.display = 'block';
                     } else {
-                        unflipCards();
+                         noScoresMessage.style.display = 'block';
                     }
+                     console.log("Leaderboard Page: displayGlobalLeaderboards finished."); // Debug log
                 }
-                
-                async function disableMatchedCards() {
-                    flippedCards.forEach(card => {
-                        card.removeEventListener('click', handleCardClick);
-                        card.classList.add('matched');
-                    });
-                    matchedPairs++;
-                    resetFlippedCards();
+            };
 
-                    if (matchedPairs === cardSymbols.length) {
-                       await saveHighScore('Memory Match', moves, 'asc');
-                       memoryFinalMovesEl.textContent = moves;
-                       setTimeout(() => {
-                           memoryMatchWinModal.classList.remove('hidden');
-                       }, 500);
-                    }
-                }
-                
-                function resetFlippedCards() {
-                    flippedCards = [];
-                    lockBoard = false;
-                }
+             // *** Authentication Check ***
+             console.log("Leaderboard Page: Setting up onAuthStateChanged listener..."); // Debug log
+             const unsubscribe = onAuthStateChanged(auth, (user) => { // Store the unsubscribe function
+                 console.log("Leaderboard Page: onAuthStateChanged triggered. User:", user ? user.uid : 'null', "User Object:", user); // *** Log the whole user object ***
+                 // Hide all content sections initially
+                 loadingIndicator.style.display = 'none';
+                 globalLeaderboardContent.style.display = 'none';
+                 errorDisplay.style.display = 'none';
+                 noScoresMessage.style.display = 'none';
+                 loginPrompt.style.display = 'none';
 
-                function incrementMoves() {
-                    moves++;
-                    movesCountSpan.textContent = moves;
-                }
-                
-                function restartGame() {
-                    moves = 0;
-                    matchedPairs = 0;
-                    movesCountSpan.textContent = '0';
-                    resetFlippedCards();
-                    createBoard();
-                    memoryMatchWinModal.classList.add('hidden');
-                }
+                 try {
+                     if (user) {
+                         // User is signed in
+                         console.log("Leaderboard Page: User is signed in:", user.displayName, user.uid); // Debug log
+                         userStatusEl.textContent = `${user.displayName || 'User'}`;
+                         userStatusEl.classList.remove('text-red-400');
+                         userStatusEl.classList.add('text-green-400');
+                         displayGlobalLeaderboards(user); // Fetch and display leaderboards
+                     } else {
+                         // User is signed out
+                         console.log("Leaderboard Page: User is signed out."); // Debug log
+                         userStatusEl.textContent = 'Not logged in';
+                         userStatusEl.classList.remove('text-green-400');
+                         userStatusEl.classList.add('text-red-400');
+                         loginPrompt.style.display = 'block'; // Show the login prompt message
+                     }
+                 } catch (uiError) {
+                     console.error("Leaderboard Page: Error updating UI in onAuthStateChanged:", uiError);
+                     errorDisplay.innerHTML = '<p>An error occurred while updating the page status.</p>';
+                     errorDisplay.style.display = 'block';
+                 }
+             }, (error) => {
+                  console.error("Leaderboard Page: Error in onAuthStateChanged listener:", error); // Error log for the listener
+                  userStatusEl.textContent = 'Auth Error';
+                  userStatusEl.classList.add('text-red-400');
+                  errorDisplay.innerHTML = '<p>Could not check authentication status. Please refresh the page.</p>';
+                  errorDisplay.style.display = 'block';
+                  // Hide other sections on auth error
+                  loadingIndicator.style.display = 'none';
+                  globalLeaderboardContent.style.display = 'none';
+                  noScoresMessage.style.display = 'none';
+                  loginPrompt.style.display = 'none';
+             });
 
-                restartButton.addEventListener('click', restartGame);
-                restartButtonWin.addEventListener('click', restartGame);
-                shareMemoryScoreBtn.addEventListener('click', () => {
-                    shareScore('Memory Match', moves, 'moves');
-                });
-                createBoard();
-            }
+             // Optional: Detach listener when the user navigates away (if needed, less critical for simple pages)
+             // window.addEventListener('beforeunload', () => {
+             //     if (unsubscribe) {
+             //         console.log("Leaderboard Page: Unsubscribing from auth changes.");
+             //         unsubscribe();
+             //     }
+             // });
 
-
-            window.addEventListener('resize', () => {
-                camera.aspect = gameContainer.clientWidth / gameContainer.clientHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(gameContainer.clientWidth, gameContainer.clientHeight);
-                if(racerCanvas) {
-                    racerCanvas.width = racerCanvas.parentElement.clientWidth;
-                    racerCanvas.height = racerCanvas.parentElement.clientHeight;
-                }
-                if(tdCanvas) {
-                    setupTDGrid();
-                }
-            });
-        });
+        }); // End DOMContentLoaded
     </script>
 </body>
 </html>
