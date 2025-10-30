@@ -309,32 +309,53 @@
         let selectedSquare = null;
         let validMoves = [];
         let pendingPromotionMove = null;
+        
+        // --- CHECK FOR GAME ID IN URL ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameIdFromUrl = urlParams.get('gameId');
+        if (gameIdFromUrl) {
+            gameIdInput.value = gameIdFromUrl;
+        }
 
         // --- Authentication Flow ---
         const redirectToLogin = () => window.location.href = 'index.html?login=true';
         loginButton.onclick = redirectToLogin;
         authViewLoginButton.onclick = redirectToLogin;
 
-        // *** UPDATED: Added error handling to onAuthStateChanged ***
+        // *** UPDATED: Combined onAuthStateChanged listener ***
         onAuthStateChanged(auth, user => {
             console.log("Chess Page: onAuthStateChanged triggered. User:", user ? user.uid : 'null');
             currentUser = user;
             loadingView.classList.add('hidden'); 
+            
             if (user) {
+                // --- USER IS LOGGED IN ---
                 userDisplayName.textContent = user.displayName;
                 userIdDisplay.textContent = user.uid;
                 loginButton.classList.add('hidden');
                 userInfoHeader.classList.remove('hidden');
                 authView.classList.add('hidden');
+                
+                // If we are not in a game, show the lobby
                 if (gameView.classList.contains('hidden')) { 
                     lobbyView.classList.remove('hidden');
                 }
+                
+                // *** NEW: Auto-join logic moved here ***
+                // If there's a gameId in the URL and we are NOT already in a game
+                if (gameIdFromUrl && !currentGameId) {
+                     console.log("Auto-joining game from URL...");
+                     joinGameBtn.click(); // Automatically click join
+                }
+                
             } else {
+                // --- USER IS LOGGED OUT ---
                 userDisplayName.textContent = '';
                 loginButton.classList.remove('hidden');
                 userInfoHeader.classList.add('hidden');
-                authView.classList.remove('hidden');
+                authView.classList.remove('hidden'); // Show login prompt
                 lobbyView.classList.add('hidden');
+                
                 if (!gameView.classList.contains('hidden')) {
                     leaveGameBtn.click(); // Automatically leave game if logged out
                 }
@@ -455,6 +476,11 @@
             gameView.classList.remove('hidden');
             shareGameBtn.classList.remove('hidden');
             console.log(`Switched to game ${gameId} as ${color}`);
+            
+            // Clear gameId from URL so user isn't prompted to rejoin if they leave
+            const url = new URL(window.location);
+            url.searchParams.delete('gameId');
+            window.history.pushState({}, '', url);
 
             const gameRef = doc(db, "mpchess", gameId);
             unsubscribeGame = onSnapshot(gameRef, (doc) => {
@@ -490,7 +516,11 @@
         
         function switchToLobbyView() {
             gameView.classList.add('hidden');
-            lobbyView.classList.remove('hidden');
+            if(currentUser) { // Only show lobby if logged in
+                lobbyView.classList.remove('hidden');
+            } else {
+                authView.classList.remove('hidden');
+            }
             gameIdInput.value = '';
             shareGameBtn.classList.add('hidden');
         }
@@ -524,7 +554,7 @@
                     statusDisplay.textContent = `Checkmate! ${winnerName} wins! 🎉`;
                 }
                 rematchBtn.classList.remove('hidden');
-                if (gameData.rematch[currentUser.uid]) {
+                if (currentUser && gameData.rematch[currentUser.uid]) {
                     rematchBtn.textContent = 'Waiting for opponent...';
                     rematchBtn.disabled = true;
                 } else {
@@ -826,28 +856,7 @@
         };
         
         // --- Auto-Join from URL ---
-        const urlParams = new URLSearchParams(window.location.search);
-        const gameIdFromUrl = urlParams.get('gameId');
-        if (gameIdFromUrl) {
-            gameIdInput.value = gameIdFromUrl;
-            // Try to auto-join if user is already logged in
-            const authCheck = onAuthStateChanged(auth, (user) => {
-                 authCheck(); // Unsubscribe from this initial check immediately
-                 if (user) {
-                     console.log("Auto-joining game from URL...");
-                     joinGameBtn.click(); // Automatically click join if logged in
-                 } else {
-                     // If not logged in, show the auth view
-                     console.log("Game ID in URL, but user not logged in. Showing auth view.");
-                     loadingView.classList.add('hidden');
-                     authView.classList.remove('hidden');
-                 }
-            }, (error) => {
-                 console.error("Auth check for auto-join failed:", error);
-                 loadingView.classList.add('hidden');
-                 authView.classList.remove('hidden');
-            });
-        }
+        // (This block was removed to simplify auth flow)
 
     </script>
 </body>
