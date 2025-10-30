@@ -390,6 +390,23 @@
         </div>
     </div>
 </section>
+<!-- *** Season 1 Prize Modal *** -->
+<div id="season-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
+    <div class="glassmorphism p-8 rounded-2xl text-center max-w-md w-full relative">
+        <button id="close-season-modal" class="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <h3 class="text-3xl font-black-ops text-yellow-300">Season 1 Challenge</h3>
+        <p class="mt-4 text-xl text-gray-200">
+            The top-ranked player for <strong class="text-white">each game</strong> on the global leaderboard at the end of the season will win a prize!
+        </p>
+        <p class="mt-4 text-2xl font-bold text-white">Prize: <span class="text-green-400">₹100</span></p>
+        <p class="mt-2 text-lg text-gray-300">
+            Season 1 runs from <strong class="text-white">November 1st</strong> to <strong class="text-white">November 30th, 2025</strong>.
+        </p>
+        <p class="mt-4 text-gray-400 text-sm">Scores will be finalized at midnight (IST) on November 30th. Winners will be announced on December 1st. Good luck!</p>
+    </div>
+</div>
 
         <!-- Leaderboards Section -->
         <section id="leaderboards" class="py-16 sm:py-24 bg-gray-800/50">
@@ -409,6 +426,21 @@
                 </a>
             </div>
         </section>
+<!-- *** NEW: Season 1 Headline *** -->
+<section id="season-announcement" class="py-12 bg-gray-800/50">
+    <div class="container mx-auto px-4 lg:px-8">
+        <div class="text-center glassmorphism p-6 rounded-lg max-w-3xl mx-auto">
+            <h2 class="text-3xl font-black-ops text-yellow-300">Season 1 is LIVE!</h2>
+            <p class="text-lg text-gray-200 mt-2">
+                Compete from <strong class="text-white">Nov 1st - Nov 30th</strong>. The top player in each game wins <strong class="text-green-400">100!</strong>
+            </p>
+            <!-- This button ID needs to match the new JS listener -->
+            <button id="main-view-prizes-btn" class="mt-4 px-5 py-2 font-semibold text-white bg-indigo-500 rounded-lg shadow-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105">
+                View Details
+            </button>
+        </div>
+    </div>
+</section>
 
         <!-- How to Play Section -->
         <section id="how-to-play" class="py-16 sm:py-24 bg-gray-900">
@@ -651,6 +683,42 @@
         import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 
         document.addEventListener('DOMContentLoaded', () => {
+
+                        // #############################################
+            // ### SEASON 1 MODAL LOGIC                ###
+            // #############################################
+            const seasonModal = document.getElementById('season-modal');
+            const closeSeasonModalBtn = document.getElementById('close-season-modal');
+
+            // Show Season Modal Once Per Session
+            if (!sessionStorage.getItem('season1ModalShown')) {
+                setTimeout(() => {
+                    seasonModal.classList.remove('hidden');
+                    sessionStorage.setItem('season1ModalShown', 'true'); // Set flag
+                }, 3500); // Show after 3.5 seconds (slightly longer delay for main page)
+            }
+
+            // Season Modal Event Listeners
+            closeSeasonModalBtn.addEventListener('click', () => {
+                seasonModal.classList.add('hidden');
+            });
+
+            seasonModal.addEventListener('click', (e) => {
+                if (e.target === seasonModal) { // Clicked on the overlay
+                    seasonModal.classList.add('hidden');
+                }
+            });
+            // ### END SEASON 1 MODAL LOGIC ###
+            // ### Event Listener for the new Season Headline Button ###
+            const mainViewPrizesBtn = document.getElementById('main-view-prizes-btn');
+            if (mainViewPrizesBtn) {
+                mainViewPrizesBtn.addEventListener('click', () => {
+                    const seasonModal = document.getElementById('season-modal');
+                    if (seasonModal) {
+                        seasonModal.classList.remove('hidden');
+                    }
+                });
+            }
 
             // #############################################
             // ### FIREBASE SETUP                      ###
