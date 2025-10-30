@@ -47,6 +47,7 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
+
     <!-- Header -->
     <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
         <nav class="container mx-auto px-4 lg:px-8">
@@ -204,7 +205,7 @@
                             const userId = doc.id;
                             const playerName = userData.playerName || `${userId.substring(0, 6)}...`;
 
-                            // *** UPDATED: Add user to all game lists ***
+                            // Add user to all game lists
                             games.forEach(game => {
                                 const score = (userData[game] !== undefined && typeof userData[game] === 'number') ? userData[game] : 0;
                                 const timestamp = userData[`${game}_timestamp`] || null; // e.g., Astro Jumper_timestamp
@@ -241,6 +242,14 @@
 
                             // 1. Primary Sort: Score
                             if (sortOrder === 'asc') { // Memory Match (lower is better)
+                                // --- NEW: Handle 0 scores ---
+                                // If a has score 0 and b does not, a goes to the end
+                                if (a.score === 0 && b.score !== 0) return 1; 
+                                // If b has score 0 and a does not, b goes to the end
+                                if (a.score !== 0 && b.score === 0) return -1;
+                                // --- End Handle 0 scores ---
+
+                                // If both are non-zero, or both are zero, sort by score
                                 if (a.score !== b.score) {
                                     return a.score - b.score;
                                 }
@@ -251,7 +260,6 @@
                             }
 
                             // 2. Secondary Sort (Tie-breaker): Timestamp (earlier is better)
-                            // Treat null timestamps as "latest" (Infinity)
                             const timeA = a.timestamp ? a.timestamp.toMillis() : Infinity;
                             const timeB = b.timestamp ? b.timestamp.toMillis() : Infinity;
                             
@@ -383,7 +391,7 @@
                   userStatusEl.textContent = 'Auth Error';
                   userIdDisplayEl.style.display = 'none'; // Hide ID display on auth error
                   userStatusEl.classList.add('text-red-400');
-                  errorDisplay.innerHTML = '<p>Could not check authentication status. Please refresh the page.</p>';
+                  errorDisplay.innerHTML = '<p>Could not check-in authentication status. Please refresh the page.</p>';
                   errorDisplay.style.display = 'block';
                   loadingIndicator.style.display = 'none';
                   globalLeaderboardContent.style.display = 'none';
@@ -395,3 +403,4 @@
     </script>
 </body>
 </html>
+
