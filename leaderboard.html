@@ -70,15 +70,22 @@
     <main class="flex-grow py-16 sm:py-24 bg-gray-800/50">
         <section id="leaderboards" class="container mx-auto px-4 lg:px-8">
             
-            <!-- *** NEW: Season 1 Headline *** -->
+            <!-- *** UPDATED: Season 1 Headline *** -->
             <div class="text-center mb-12 glassmorphism p-6 rounded-lg max-w-3xl mx-auto">
                 <h2 class="text-3xl font-black-ops text-yellow-300">Season 1 is LIVE!</h2>
                 <p class="text-lg text-gray-200 mt-2">
                     Compete from <strong class="text-white">Nov 1st - Nov 30th</strong>. The top player in each game wins <strong class="text-green-400">100!</strong>
                 </p>
-                <button id="view-prizes-btn" class="mt-4 px-5 py-2 font-semibold text-white bg-indigo-500 rounded-lg shadow-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105">
-                    View Details
-                </button>
+                <!-- *** UPDATED: Button Group *** -->
+                <div class="mt-4 flex flex-col sm:flex-row gap-4 justify-center">
+                    <button id="view-prizes-btn" class="px-5 py-2 font-semibold text-white bg-indigo-500 rounded-lg shadow-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105">
+                        View Details
+                    </button>
+                    <!-- *** NEW: Rules Button *** -->
+                    <button id="view-rules-btn" class="px-5 py-2 font-semibold text-indigo-400 bg-transparent border-2 border-indigo-500 rounded-lg shadow-md hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105">
+                        Read Rules
+                    </button>
+                </div>
             </div>
             
             <h1 class="text-4xl font-black-ops text-center mb-12">Global Leaderboards (Top 5)</h1>
@@ -125,7 +132,7 @@
         </div>
     </footer>
 
-    <!-- *** NEW: Season 1 Prize Modal *** -->
+    <!-- Season 1 Prize Modal -->
     <div id="season-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
         <div class="glassmorphism p-8 rounded-2xl text-center max-w-md w-full relative">
             <button id="close-season-modal" class="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors">
@@ -140,6 +147,90 @@
                 Season 1 runs from <strong class="text-white">November 1st</strong> to <strong class="text-white">November 30th, 2025</strong>.
             </p>
             <p class="mt-4 text-gray-400 text-sm">Scores will be finalized at midnight (IST) on November 30th. Winners will be announced on December 1st. Good luck!</p>
+        </div>
+    </div>
+
+    <!-- *** NEW: Season 1 Rules Modal *** -->
+    <div id="rules-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
+        <!-- Modal content -->
+        <div class="glassmorphism p-6 sm:p-8 rounded-2xl max-w-2xl w-full relative max-h-[80vh] overflow-y-auto">
+            <!-- Close Button -->
+            <button id="close-rules-modal" class="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <h3 class="text-3xl font-black-ops text-center text-yellow-300 mb-6">Season 1 Rules & Regulations</h3>
+            
+            <div class="text-left space-y-6">
+                <!-- Section 1: Duration -->
+                <div>
+                    <h4 class="text-xl font-bold text-white">🗓 Season Duration</h4>
+                    <p class="mt-1 text-gray-300">1 November – 30 November 2025</p>
+                </div>
+
+                <!-- Section 2: Player Login -->
+                <div>
+                    <h4 class="text-xl font-bold text-white">👤 Player Login</h4>
+                    <ul class="list-disc list-inside mt-2 text-gray-300 space-y-1">
+                        <li>All players must log in using Google to participate.</li>
+                        <li>Each Google account counts as one unique player profile.</li>
+                        <li>Scores are automatically linked to your Google ID — no manual entry needed.</li>
+                        <li>Logging out and switching accounts during a match is not allowed.</li>
+                    </ul>
+                </div>
+
+                <!-- Section 3: Gameplay -->
+                <div>
+                    <h4 class="text-xl font-bold text-white">🏁 Gameplay Rules</h4>
+                    <ul class="list-disc list-inside mt-2 text-gray-300 space-y-1">
+                        <li>Play any of the available games: Astro Jumper, Car Racer, Tic Tac Toe, Memory Match, Tower Defense, and more.</li>
+                        <li>Only scores achieved between 1 Nov – 30 Nov will count toward the Season 1 leaderboard.</li>
+                        <li>For multiplayer games, only verified results are accepted.</li>
+                        <li>Any use of bots, scripts, or unfair methods leads to instant disqualification.</li>
+                    </ul>
+                </div>
+
+                <!-- Section 4: Rewards -->
+                <div>
+                    <h4 class="text-xl font-bold text-white">💰 Rewards</h4>
+                    <ul class="list-disc list-inside mt-2 text-gray-300 space-y-1">
+                        <li>Top 1 player of each game wins ₹100 cash reward.</li>
+                        <li>Winners will be announced on 1 December 2025 via the website and WhatsApp community.</li>
+                        <li>Prizes will be sent through UPI or digital payment within 7 days.</li>
+                        <li>In case of a tie, the player who reached the top score first will be declared the winner.</li>
+                    </ul>
+                </div>
+
+                <!-- Section 5: Leaderboard -->
+                <div>
+                    <h4 class="text-xl font-bold text-white">🌍 Leaderboard & Ranking</h4>
+                    <ul class="list-disc list-inside mt-2 text-gray-300 space-y-1">
+                        <li>Rankings are updated in real time using Firebase.</li>
+                        <li>Each player’s global rank and personal best appear on the main page.</li>
+                        <li>The leaderboard resets after each season.</li>
+                    </ul>
+                </div>
+
+                <!-- Section 6: Fair Play -->
+                <div>
+                    <h4 class="text-xl font-bold text-white">⚖ Fair Play Policy</h4>
+                    <ul class="list-disc list-inside mt-2 text-gray-300 space-y-1">
+                        <li>One Google account = one player.</li>
+                        <li>Any attempt to manipulate scores or exploit bugs will result in a ban.</li>
+                        <li>The admin’s decision will be final and binding.</li>
+                    </ul>
+                </div>
+
+                <!-- Section 7: Community -->
+                <div>
+                    <h4 class="text-xl font-bold text-white">📢 Community & Support</h4>
+                    <ul class="list-disc list-inside mt-2 text-gray-300 space-y-1">
+                        <li>Join the Falconix WhatsApp Community for updates, results, and announcements.</li>
+                        <li>Feedback and game suggestions for Season 2 are always welcome!</li>
+                    </ul>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -207,12 +298,18 @@
             const userStatusEl = document.getElementById('user-status');
             const userIdDisplayEl = document.getElementById('user-id-display');
 
-            // *** NEW: Season Modal Elements ***
+            // --- Season Modal Elements ---
             const seasonModal = document.getElementById('season-modal');
             const viewPrizesBtn = document.getElementById('view-prizes-btn');
             const closeSeasonModalBtn = document.getElementById('close-season-modal');
+            
+            // *** NEW: Rules Modal Elements ***
+            const rulesModal = document.getElementById('rules-modal');
+            const viewRulesBtn = document.getElementById('view-rules-btn');
+            const closeRulesModalBtn = document.getElementById('close-rules-modal');
 
-            // *** NEW: Show Season Modal Once Per Session ***
+
+            // --- Show Season Modal Once Per Session ---
             if (!sessionStorage.getItem('season1ModalShown')) {
                 setTimeout(() => {
                     seasonModal.classList.remove('hidden');
@@ -220,7 +317,7 @@
                 }, 2500); // Show after 2.5 seconds
             }
 
-            // *** NEW: Season Modal Event Listeners ***
+            // --- Season Modal Event Listeners ---
             viewPrizesBtn.addEventListener('click', () => {
                 seasonModal.classList.remove('hidden');
             });
@@ -232,6 +329,21 @@
             seasonModal.addEventListener('click', (e) => {
                 if (e.target === seasonModal) { // Clicked on the overlay
                     seasonModal.classList.add('hidden');
+                }
+            });
+            
+            // *** NEW: Rules Modal Event Listeners ***
+            viewRulesBtn.addEventListener('click', () => {
+                rulesModal.classList.remove('hidden');
+            });
+
+            closeRulesModalBtn.addEventListener('click', () => {
+                rulesModal.classList.add('hidden');
+            });
+
+            rulesModal.addEventListener('click', (e) => {
+                if (e.target === rulesModal) { // Clicked on the overlay
+                    rulesModal.classList.add('hidden');
                 }
             });
             // *** END NEW SECTION ***
@@ -463,3 +575,5 @@
     </script>
 </body>
 </html>
+see that code
+
