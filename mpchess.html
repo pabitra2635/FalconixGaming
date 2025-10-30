@@ -189,7 +189,7 @@
                         </div>
 
                          <!-- Rematch Button -->
-                        <button id="rematch-btn" class_name="btn-warning mt-4 hidden">Request Rematch</button>
+                        <button id="rematch-btn" class="btn-warning mt-4 hidden">Request Rematch</button>
                     </div>
 
                     <!-- Chat Box -->
@@ -237,7 +237,6 @@
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         
         // --- CHESS.JS IMPORT ---
-        // We import the ES Module version from a CDN
         import { Chess } from "https://cdnjs.cloudflare.com/ajax/libs/chess.js/1.0.0-beta.8/chess.js";
 
         // --- YOUR FALCONIXGAMING FIREBASE CONFIGURATION ---
@@ -251,9 +250,20 @@
             measurementId: "G-VJ6YC0GXK5"
         };
         
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        let app, auth, db;
+        
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            console.log("Chess Page: Firebase initialized successfully.");
+        } catch (error) {
+            console.error("Chess Page: Firebase initialization failed:", error);
+            const loadingView = document.getElementById('loading-view');
+            loadingView.innerHTML = `<h1 class="text-4xl font-bold text-red-500 mb-4">Error</h1><p class="text-gray-300">Failed to initialize. Check console.</p>`;
+            return; // Stop if Firebase fails
+        }
+
 
         // --- DOM ELEMENTS ---
         const loadingView = document.getElementById('loading-view');
@@ -292,7 +302,9 @@
         loginButton.onclick = redirectToLogin;
         authViewLoginButton.onclick = redirectToLogin;
 
+        // *** UPDATED: Added error handling to onAuthStateChanged ***
         onAuthStateChanged(auth, user => {
+            console.log("Chess Page: onAuthStateChanged triggered. User:", user ? user.uid : 'null');
             currentUser = user;
             loadingView.classList.add('hidden'); 
             if (user) {
@@ -311,52 +323,82 @@
                 authView.classList.remove('hidden');
                 lobbyView.classList.add('hidden');
                 if (!gameView.classList.contains('hidden')) {
-                    leaveGameBtn.click();
+                    leaveGameBtn.click(); // Automatically leave game if logged out
                 }
             }
+        }, (error) => {
+            // --- NEW: Handle auth listener errors ---
+            console.error("Chess Page: Error in onAuthStateChanged listener:", error);
+            loadingView.innerHTML = `<h1 class="text-4xl font-bold text-red-500 mb-4">Auth Error</h1><p class="text-gray-300">Could not check login status. Please refresh.</p>`;
+            loadingView.classList.remove('hidden');
+            authView.classList.add('hidden');
+            lobbyView.classList.add('hidden');
+            gameView.classList.add('hidden');
         });
 
         // --- Lobby Logic ---
         createGameBtn.onclick = async () => {
+            if (!currentUser) return showMessage("You must be logged in to create a game.");
             createGameBtn.disabled = true;
             const gameId = crypto.randomUUID().split('-')[0];
             const gameRef = doc(db, "mpchess", gameId);
             const initialFen = new Chess().fen(); // Standard starting position
 
-            await setDoc(gameRef, {
-                fen: initialFen,
-                playerIds: [currentUser.uid],
-                players: { [currentUser.uid]: { symbol: 'white', name: currentUser.displayName } },
-                currentPlayer: 'white',
-                status: 'waiting', // Waiting for player 2
-                winner: null,
-                scores: { white: 0, black: 0 },
-                captured: { white: [], black: [] },
-                rematch: {},
-                lastMove: null
-            });
-            createGameBtn.disabled = false;
-            switchToGameView(gameId, 'white');
+            try {
+                await setDoc(gameRef, {
+                    fen: initialFen,
+                    playerIds: [currentUser.uid],
+                    players: { [currentUser.uid]: { symbol: 'white', name: currentUser.displayName } },
+                    currentPlayer: 'white',
+                    status: 'waiting', // Waiting for player 2
+                    winner: null,
+                    scores: { white: 0, black: 0 },
+                    captured: { white: [], black: [] },
+                    rematch: {},
+                    lastMove: null,
+                    createdAt: serverTimestamp() // Add a creation timestamp
+                });
+                switchToGameView(gameId, 'white');
+            } catch (error) {
+                console.error("Error creating game:", error);
+                showMessage("Error creating game. Check permissions.");
+            } finally {
+                createGameBtn.disabled = false;
+            }
         };
 
         joinGameBtn.onclick = async () => {
+            if (!currentUser) return showMessage("You must be logged in to join a game.");
             const gameId = gameIdInput.value.trim();
             if (!gameId) return showMessage("Please enter a Game ID.");
             joinGameBtn.disabled = true;
             
             const gameRef = doc(db, "mpchess", gameId);
-            const gameSnap = await getDoc(gameRef);
+            let gameSnap;
+            try {
+                gameSnap = await getDoc(gameRef);
+            } catch (error) {
+                console.error("Error getting game doc:", error);
+                showMessage("Error finding game.");
+                joinGameBtn.disabled = false;
+                return;
+            }
 
             if (gameSnap.exists()) {
                 const gameData = gameSnap.data();
                 if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUser.uid)) {
                     // Join as Black
-                    await updateDoc(gameRef, {
-                        [`players.${currentUser.uid}`]: { symbol: 'black', name: currentUser.displayName },
-                        playerIds: [...gameData.playerIds, currentUser.uid],
-                        status: 'active' // Game starts
-                    });
-                    switchToGameView(gameId, 'black');
+                    try {
+                        await updateDoc(gameRef, {
+                            [`players.${currentUser.uid}`]: { symbol: 'black', name: currentUser.displayName },
+                            playerIds: [...gameData.playerIds, currentUser.uid],
+                            status: 'active' // Game starts
+                        });
+                        switchToGameView(gameId, 'black');
+                    } catch (error) {
+                        console.error("Error joining game:", error);
+                        showMessage("Error joining game. Check permissions.");
+                    }
                 } else if (gameData.playerIds.includes(currentUser.uid)) {
                     // Rejoin existing game
                     switchToGameView(gameId, gameData.players[currentUser.uid].symbol);
@@ -370,14 +412,25 @@
         };
         
         leaveGameBtn.onclick = async () => {
-            if (currentGameId) {
-                const gameRef = doc(db, "mpchess", currentGameId);
-                await updateDoc(gameRef, { status: 'abandoned' }).catch(err => {});
-            }
             if (unsubscribeGame) unsubscribeGame();
             if (unsubscribeChat) unsubscribeChat();
+            
+            if (currentGameId && currentUser) {
+                const gameRef = doc(db, "mpchess", currentGameId);
+                // Try to update status, but don't block leaving if it fails
+                try {
+                     await updateDoc(gameRef, { 
+                         status: 'abandoned',
+                         [`rematch.${currentUser.uid}`]: false // Cancel any pending rematch
+                    });
+                } catch (error) {
+                    console.warn("Could not update game status on leave:", error.message);
+                }
+            }
+            
             currentGameId = null; playerColor = null;
             selectedSquare = null; validMoves = [];
+            chess = new Chess(); // Reset local game
             switchToLobbyView();
         };
 
@@ -388,6 +441,7 @@
             lobbyView.classList.add('hidden');
             gameView.classList.remove('hidden');
             shareGameBtn.classList.remove('hidden');
+            console.log(`Switched to game ${gameId} as ${color}`);
 
             const gameRef = doc(db, "mpchess", gameId);
             unsubscribeGame = onSnapshot(gameRef, (doc) => {
@@ -398,6 +452,9 @@
                     showMessage("The game session has ended or was deleted.");
                     leaveGameBtn.click();
                 }
+            }, (error) => {
+                console.error("Error in game snapshot listener:", error);
+                showMessage("Connection to game lost. Please leave and rejoin.");
             });
 
             // Chat listener
@@ -413,6 +470,8 @@
                     chatMessages.appendChild(msgDiv);
                 });
                 chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, (error) => {
+                console.error("Error in chat snapshot listener:", error);
             });
         }
         
@@ -448,8 +507,8 @@
                 if (gameData.winner === 'draw') {
                     statusDisplay.textContent = "It's a Stalemate/Draw! 🤝";
                 } else {
-                    const winnerName = gameData.winner === 'white' ? playerW.name : playerB.name;
-                    statusDisplay.textContent = `Checkmate! ${winnerName} (${gameData.winner}) wins! 🎉`;
+                    const winnerName = (gameData.winner === 'white' ? playerW?.name : playerB?.name) || gameData.winner;
+                    statusDisplay.textContent = `Checkmate! ${winnerName} wins! 🎉`;
                 }
                 rematchBtn.classList.remove('hidden');
                 if (gameData.rematch[currentUser.uid]) {
@@ -469,13 +528,15 @@
                     statusDisplay.classList.add('text-green-400');
                     statusDisplay.classList.remove('text-yellow-300', 'text-red-400');
                 } else {
-                    statusDisplay.textContent = `Opponent's turn${inCheck ? ' (Opponent is in Check!)' : ''}`;
+                    const opponentName = (playerColor === 'white' ? playerB?.name : playerW?.name) || 'Opponent';
+                    statusDisplay.textContent = `${opponentName}'s turn${inCheck ? ' (Opponent is in Check!)' : ''}`;
                     statusDisplay.classList.add('text-yellow-300');
                     statusDisplay.classList.remove('text-green-400', 'text-red-400');
                 }
             } else if (gameData.status === 'abandoned') {
                  statusDisplay.textContent = "Opponent left the game.";
                  statusDisplay.classList.add('text-red-400');
+                 rematchBtn.classList.add('hidden'); // No rematch if opponent left
             }
 
             // Update captured pieces
@@ -540,8 +601,8 @@
         // Handles clicking on a square
         async function handleSquareClick(algebraic, piece, gameData) {
             // Check if it's the player's turn
-            if (gameData.status !== 'active' || gameData.currentPlayer !== playerColor) {
-                clearHighlights();
+            if (gameData.status !== 'active' || gameData.currentPlayer !== playerColor || !currentUser) {
+                clearHighlights(gameData);
                 return;
             }
 
@@ -565,11 +626,12 @@
                         await updateFirebaseBoard(chess.fen(), result, gameData);
                     }
                 } catch (e) {
-                    console.warn("Invalid move attempt:", e.message); // chess.js throws error on invalid move
+                    // This catches invalid moves (e.g., clicking an empty square, illegal move)
+                    // Just clear selection
                 }
                 
                 // Whether move was valid or not, clear selection
-                clearHighlights();
+                clearHighlights(gameData);
                 return;
             }
             
@@ -582,12 +644,12 @@
             }
         }
         
-        function clearHighlights() {
+        function clearHighlights(gameData) {
             selectedSquare = null;
             validMoves = [];
-            // Re-render board without highlights (snapshot will do this, but this is faster)
-            const gameRef = doc(db, "mpchess", currentGameId);
-            getDoc(gameRef).then(doc => updateUI(doc.data()));
+            if(gameData) {
+                renderBoard(gameData); // Re-render without highlights
+            }
         }
         
         function showPromotionModal() {
@@ -601,21 +663,30 @@
                 if (pendingPromotionMove) {
                     try {
                         const gameRef = doc(db, "mpchess", currentGameId);
+                        // Get the *latest* game data before making a move
                         const gameSnap = await getDoc(gameRef);
+                        if (!gameSnap.exists()) throw new Error("Game doc not found");
                         const gameData = gameSnap.data();
-                        // Reload state to ensure it's current
+
+                        // Reload local chess instance to match Firebase
                         chess.load(gameData.fen); 
                         
+                        // Check if it's still our turn (opponent might have left)
+                        if(gameData.status !== 'active' || gameData.currentPlayer !== playerColor) {
+                            throw new Error("Not your turn or game is over.");
+                        }
+
                         const result = chess.move({ ...pendingPromotionMove, promotion: promotionPiece });
                         if (result) {
                             await updateFirebaseBoard(chess.fen(), result, gameData);
                         }
                     } catch (e) {
                         console.error("Error during promotion move:", e);
+                        showMessage("Move failed. The game state might have changed.");
                     }
                 }
                 promotionModal.classList.add('hidden');
-                clearHighlights();
+                clearHighlights(null); // Clear highlights locally
                 pendingPromotionMove = null;
             };
         });
@@ -654,8 +725,13 @@
         
         // --- Rematch ---
         rematchBtn.onclick = async () => {
+            if (!currentUser || !currentGameId) return;
+            rematchBtn.disabled = true;
+            rematchBtn.textContent = 'Waiting for opponent...';
+            
             const gameRef = doc(db, "mpchess", currentGameId);
             const gameSnap = await getDoc(gameRef);
+            if (!gameSnap.exists()) return; // Game deleted
             const gameData = gameSnap.data();
             
             const newRematchState = { ...gameData.rematch, [currentUser.uid]: true };
@@ -682,16 +758,21 @@
         // --- Chat ---
         sendChatBtn.onclick = async () => {
             const text = chatInput.value.trim();
-            if (text && currentGameId && currentUser) {
+            if (text && currentGameId && currentUser && playerColor) {
                 const chatRef = collection(db, "mpchess", currentGameId, "messages");
-                await addDoc(chatRef, {
-                    text: text,
-                    senderId: currentUser.uid,
-                    senderName: currentUser.displayName,
-                    senderColor: playerColor,
-                    timestamp: serverTimestamp()
-                });
-                chatInput.value = '';
+                chatInput.value = ''; // Clear input immediately
+                try {
+                    await addDoc(chatRef, {
+                        text: text,
+                        senderId: currentUser.uid,
+                        senderName: currentUser.displayName,
+                        senderColor: playerColor,
+                        timestamp: serverTimestamp()
+                    });
+                } catch (error) {
+                    console.error("Error sending chat:", error);
+                    chatInput.value = text; // Put text back if send failed
+                }
             }
         };
         chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatBtn.click(); });
@@ -738,17 +819,24 @@
             gameIdInput.value = gameIdFromUrl;
             // Try to auto-join if user is already logged in
             const authCheck = onAuthStateChanged(auth, (user) => {
+                 authCheck(); // Unsubscribe from this initial check immediately
                  if (user) {
+                     console.log("Auto-joining game from URL...");
                      joinGameBtn.click(); // Automatically click join if logged in
-                     authCheck(); // Unsubscribe from this initial check
                  } else {
                      // If not logged in, show the auth view
+                     console.log("Game ID in URL, but user not logged in. Showing auth view.");
                      loadingView.classList.add('hidden');
                      authView.classList.remove('hidden');
                  }
+            }, (error) => {
+                 console.error("Auth check for auto-join failed:", error);
+                 loadingView.classList.add('hidden');
+                 authView.classList.remove('hidden');
             });
         }
 
     </script>
 </body>
 </html>
+
