@@ -8,15 +8,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Fredoka+One&family=Black+Ops+One&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- *** ADDED: Import Map Support *** -->
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    
+    <!-- *** UPDATED IMPORT MAP *** -->
     <script type="importmap">
     {
         "imports": {
             "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
             "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
             "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js",
-            "chess.js": "https://cdnjs.cloudflare.com/ajax/libs/chess.js/1.0.0-beta.8/chess.js"
+            "chess.js": "https://cdn.jsdelivr.net/npm/chess.js@1.0.0-beta.8/dist/chess.mjs"
         }
     }
     </script>
@@ -105,6 +106,21 @@
         /* Chat Box Styles */
         #chat-messages { height: 150px; }
         #chat-messages div:nth-child(odd) { background-color: #374151; } /* bg-gray-700 */
+
+        /* Gemini Loader */
+        .loader {
+            border: 4px solid #4b5563; /* border-gray-600 */
+            border-top: 4px solid #3b82f6; /* Blue */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
         /* Responsive font size for pieces */
         @media (max-width: 400px) {
@@ -200,8 +216,16 @@
                             </div>
                         </div>
 
-                         <!-- Rematch Button -->
-                        <button id="rematch-btn" class="btn-warning mt-4 hidden">Request Rematch</button>
+                         <!-- Action Buttons Below Board -->
+                        <div class="flex gap-4">
+                             <button id="rematch-btn" class="btn-warning mt-4 hidden flex-1">Request Rematch</button>
+                             <!-- *** NEW: Analyze Game Button *** -->
+                             <button id="analyze-game-btn" class="btn-primary mt-4 hidden flex-1">Analyze Game ✨</button>
+                        </div>
+                        
+                        <!-- *** NEW: Analysis Loader *** -->
+                        <div id="analysis-loader" class="loader my-4 hidden"></div>
+
                     </div>
 
                     <!-- Chat Box -->
@@ -211,6 +235,8 @@
                             <div id="chat-messages" class="p-2 overflow-y-auto"></div>
                             <div class="flex border-t border-gray-700">
                                 <input type="text" id="chat-input" placeholder="Type a message..." class="flex-grow p-2 bg-transparent text-white focus:outline-none">
+                                <!-- *** NEW: Smart Chat Button *** -->
+                                <button id="smart-chat-btn" class="bg-indigo-500 text-white font-bold py-2 px-3 hover:bg-indigo-600" title="Get Chat Suggestion ✨">✨</button>
                                 <button id="send-chat-btn" class="bg-sky-500 text-white font-bold py-2 px-4 rounded-r-lg hover:bg-sky-600">Send</button>
                             </div>
                         </div>
@@ -239,10 +265,20 @@
                 </div>
             </div>
 
+            <!-- *** NEW: Analysis Modal *** -->
+            <div id="analysis-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-xl text-left border border-gray-700 max-w-lg w-full max-h-[80vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-2xl font-bold">Game Analysis ✨</h3>
+                        <button id="close-analysis-modal-btn" class="text-gray-400 hover:text-white">&times;</button>
+                    </div>
+                    <div id="analysis-text" class="prose prose-invert text-gray-300 whitespace-pre-wrap"></div>
+                </div>
+            </div>
+
         </div>
     </main>
 
-    <!-- *** SCRIPT TAG: Corrected to use importmap *** -->
     <script type="module">
         // --- FIREBASE IMPORTS ---
         import { initializeApp } from 'firebase/app';
@@ -263,6 +299,10 @@
             measurementId: "G-VJ6YC0GXK5"
         };
         
+        // *** NEW: Gemini API Key (Leave empty) ***
+        const apiKey = ""; // This will be handled by the environment
+        const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
         let app, auth, db;
         
         try {
@@ -276,7 +316,6 @@
             loadingView.innerHTML = `<h1 class="text-4xl font-bold text-red-500 mb-4">Error</h1><p class="text-gray-300">Failed to initialize. Check console.</p>`;
             return; // Stop if Firebase fails
         }
-
 
         // --- DOM ELEMENTS ---
         const loadingView = document.getElementById('loading-view');
@@ -295,6 +334,14 @@
         const messageModal = document.getElementById('message-modal'), messageText = document.getElementById('message-text'), closeModalBtn = document.getElementById('close-modal-btn');
         const shareGameBtn = document.getElementById('share-game-btn'), gameLinkCopied = document.getElementById('game-link-copied');
         const promotionModal = document.getElementById('promotion-modal');
+
+        // *** NEW: Gemini feature DOM elements ***
+        const analyzeGameBtn = document.getElementById('analyze-game-btn');
+        const analysisLoader = document.getElementById('analysis-loader');
+        const analysisModal = document.getElementById('analysis-modal');
+        const analysisText = document.getElementById('analysis-text');
+        const closeAnalysisModalBtn = document.getElementById('close-analysis-modal-btn');
+        const smartChatBtn = document.getElementById('smart-chat-btn');
 
         // --- UNICODE CHESS PIECES ---
         const PIECES = {
@@ -322,7 +369,6 @@
         loginButton.onclick = redirectToLogin;
         authViewLoginButton.onclick = redirectToLogin;
 
-        // *** UPDATED: Combined onAuthStateChanged listener ***
         onAuthStateChanged(auth, user => {
             console.log("Chess Page: onAuthStateChanged triggered. User:", user ? user.uid : 'null');
             currentUser = user;
@@ -336,13 +382,10 @@
                 userInfoHeader.classList.remove('hidden');
                 authView.classList.add('hidden');
                 
-                // If we are not in a game, show the lobby
                 if (gameView.classList.contains('hidden')) { 
                     lobbyView.classList.remove('hidden');
                 }
                 
-                // *** NEW: Auto-join logic moved here ***
-                // If there's a gameId in the URL and we are NOT already in a game
                 if (gameIdFromUrl && !currentGameId) {
                      console.log("Auto-joining game from URL...");
                      joinGameBtn.click(); // Automatically click join
@@ -361,7 +404,6 @@
                 }
             }
         }, (error) => {
-            // --- NEW: Handle auth listener errors ---
             console.error("Chess Page: Error in onAuthStateChanged listener:", error);
             loadingView.innerHTML = `<h1 class="text-4xl font-bold text-red-500 mb-4">Auth Error</h1><p class="text-gray-300">Could not check login status. Please refresh.</p>`;
             loadingView.classList.remove('hidden');
@@ -376,21 +418,22 @@
             createGameBtn.disabled = true;
             const gameId = crypto.randomUUID().split('-')[0];
             const gameRef = doc(db, "mpchess", gameId);
-            const initialFen = new Chess().fen(); // Standard starting position
+            const initialFen = new Chess().fen(); 
 
             try {
                 await setDoc(gameRef, {
                     fen: initialFen,
+                    pgn: "", // Store PGN for analysis
                     playerIds: [currentUser.uid],
                     players: { [currentUser.uid]: { symbol: 'white', name: currentUser.displayName } },
                     currentPlayer: 'white',
-                    status: 'waiting', // Waiting for player 2
+                    status: 'waiting', 
                     winner: null,
                     scores: { white: 0, black: 0 },
                     captured: { white: [], black: [] },
                     rematch: {},
                     lastMove: null,
-                    createdAt: serverTimestamp() // Add a creation timestamp
+                    createdAt: serverTimestamp()
                 });
                 switchToGameView(gameId, 'white');
             } catch (error) {
@@ -451,11 +494,10 @@
             
             if (currentGameId && currentUser) {
                 const gameRef = doc(db, "mpchess", currentGameId);
-                // Try to update status, but don't block leaving if it fails
                 try {
                      await updateDoc(gameRef, { 
                          status: 'abandoned',
-                         [`rematch.${currentUser.uid}`]: false // Cancel any pending rematch
+                         [`rematch.${currentUser.uid}`]: false 
                     });
                 } catch (error) {
                     console.warn("Could not update game status on leave:", error.message);
@@ -464,7 +506,7 @@
             
             currentGameId = null; playerColor = null;
             selectedSquare = null; validMoves = [];
-            chess = new Chess(); // Reset local game
+            chess = new Chess(); 
             switchToLobbyView();
         };
 
@@ -475,9 +517,10 @@
             lobbyView.classList.add('hidden');
             gameView.classList.remove('hidden');
             shareGameBtn.classList.remove('hidden');
+            analyzeGameBtn.classList.add('hidden'); // Hide analysis button on game start
+            analysisLoader.classList.add('hidden');
             console.log(`Switched to game ${gameId} as ${color}`);
             
-            // Clear gameId from URL so user isn't prompted to rejoin if they leave
             const url = new URL(window.location);
             url.searchParams.delete('gameId');
             window.history.pushState({}, '', url);
@@ -516,18 +559,19 @@
         
         function switchToLobbyView() {
             gameView.classList.add('hidden');
-            if(currentUser) { // Only show lobby if logged in
+            if(currentUser) { 
                 lobbyView.classList.remove('hidden');
             } else {
                 authView.classList.remove('hidden');
             }
             gameIdInput.value = '';
             shareGameBtn.classList.add('hidden');
+            analyzeGameBtn.classList.add('hidden');
+            analysisLoader.classList.add('hidden');
         }
 
-        // Main UI update function, called by Firebase snapshot
+        // Main UI update function
         function updateUI(gameData) {
-            // Load the FEN string from Firebase into our local chess.js instance
             try {
                 chess.load(gameData.fen);
             } catch (e) {
@@ -535,17 +579,17 @@
                 return;
             }
 
-            // Update player names
             const playerW = Object.values(gameData.players).find(p => p.symbol === 'white');
             const playerB = Object.values(gameData.players).find(p => p.symbol === 'black');
             playerWhiteName.textContent = `White: ${playerW ? playerW.name.split(' ')[0] : 'Waiting...'}`;
             playerBlackName.textContent = `Black: ${playerB ? playerB.name.split(' ')[0] : 'Waiting...'}`;
             
-            // Render the board
             renderBoard(gameData);
 
-            // Update status
             rematchBtn.classList.add('hidden');
+            analyzeGameBtn.classList.add('hidden'); // Hide by default
+            analysisLoader.classList.add('hidden');
+
             if (gameData.status === 'finished') {
                 if (gameData.winner === 'draw') {
                     statusDisplay.textContent = "It's a Stalemate/Draw! 🤝";
@@ -554,6 +598,7 @@
                     statusDisplay.textContent = `Checkmate! ${winnerName} wins! 🎉`;
                 }
                 rematchBtn.classList.remove('hidden');
+                analyzeGameBtn.classList.remove('hidden'); // *** SHOW ANALYZE BUTTON ***
                 if (currentUser && gameData.rematch[currentUser.uid]) {
                     rematchBtn.textContent = 'Waiting for opponent...';
                     rematchBtn.disabled = true;
@@ -579,17 +624,17 @@
             } else if (gameData.status === 'abandoned') {
                  statusDisplay.textContent = "Opponent left the game.";
                  statusDisplay.classList.add('text-red-400');
-                 rematchBtn.classList.add('hidden'); // No rematch if opponent left
+                 rematchBtn.classList.add('hidden'); 
             }
 
-            // Update captured pieces
             const capturedHTML = (pieces) => pieces.map(p => PIECES[p.color][p.type]).join(' ');
             capturedWhiteContainer.innerHTML = capturedHTML(gameData.captured.white || []);
             capturedBlackContainer.innerHTML = capturedHTML(gameData.captured.black || []);
         }
 
-        // Renders the board based on the local chess.js instance
+        // Renders the board
         function renderBoard(gameData) {
+            // ... (renderBoard function is unchanged) ...
             chessBoardEl.innerHTML = ''; // Clear board
             
             const ranks = playerColor === 'white' ? [8, 7, 6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6, 7, 8];
@@ -615,7 +660,6 @@
                         squareEl.innerHTML = `<span class="piece-${piece.color === 'w' ? 'white' : 'black'}">${PIECES[piece.color][piece.type]}</span>`;
                     }
                     
-                    // Add highlights
                     if (algebraic === selectedSquare) {
                         squareEl.classList.add('selected-square');
                     } else {
@@ -625,12 +669,10 @@
                         }
                     }
                     
-                    // Highlight last move
                     if (gameData.lastMove && (algebraic === gameData.lastMove.from || algebraic === gameData.lastMove.to)) {
                         squareEl.classList.add('last-move');
                     }
                     
-                    // Highlight king in check
                     if (algebraic === kingSquare) {
                         squareEl.classList.add('in-check');
                     }
@@ -643,51 +685,42 @@
 
         // Handles clicking on a square
         async function handleSquareClick(algebraic, piece, gameData) {
-            // Check if it's the player's turn
+            // ... (handleSquareClick function is unchanged, it calls updateFirebaseBoard) ...
             if (gameData.status !== 'active' || gameData.currentPlayer !== playerColor || !currentUser) {
                 clearHighlights(gameData);
                 return;
             }
 
-            // --- 1. Attempting to make a move ---
             if (selectedSquare) {
                 const move = { from: selectedSquare, to: algebraic };
                 
-                // Check for promotion
                 const pieceType = chess.get(selectedSquare).type;
                 if (pieceType === 'p' && (algebraic.endsWith('8') || algebraic.endsWith('1'))) {
                     pendingPromotionMove = move;
                     showPromotionModal();
-                    return; // Wait for user to select promotion piece
+                    return; 
                 }
 
-                // Try to make a regular move
                 try {
-                    const result = chess.move(move); // This validates the move
+                    const result = chess.move(move); 
                     if (result) {
-                        // Move is valid, update Firebase
                         await updateFirebaseBoard(chess.fen(), result, gameData);
                     }
-                } catch (e) {
-                    // This catches invalid moves (e.g., clicking an empty square, illegal move)
-                    // Just clear selection
-                }
+                } catch (e) {}
                 
-                // Whether move was valid or not, clear selection
                 clearHighlights(gameData);
                 return;
             }
             
-            // --- 2. Selecting a piece ---
             if (piece && piece.color === playerColor.charAt(0)) {
                 selectedSquare = algebraic;
-                // Get valid moves for this piece
                 validMoves = chess.moves({ square: algebraic, verbose: true });
-                renderBoard(gameData); // Re-render to show selection and valid moves
+                renderBoard(gameData); 
             }
         }
         
         function clearHighlights(gameData) {
+            // ... (clearHighlights function is unchanged) ...
             selectedSquare = null;
             validMoves = [];
             if(gameData) {
@@ -696,25 +729,24 @@
         }
         
         function showPromotionModal() {
+            // ... (showPromotionModal function is unchanged) ...
             promotionModal.style.color = playerColor === 'white' ? '#FFF' : '#1f2937';
             promotionModal.classList.remove('hidden');
         }
         
         promotionModal.querySelectorAll('button').forEach(btn => {
+            // ... (promotionModal logic is unchanged, it calls updateFirebaseBoard) ...
             btn.onclick = async () => {
                 const promotionPiece = btn.dataset.piece;
                 if (pendingPromotionMove) {
                     try {
                         const gameRef = doc(db, "mpchess", currentGameId);
-                        // Get the *latest* game data before making a move
                         const gameSnap = await getDoc(gameRef);
                         if (!gameSnap.exists()) throw new Error("Game doc not found");
                         const gameData = gameSnap.data();
 
-                        // Reload local chess instance to match Firebase
                         chess.load(gameData.fen); 
                         
-                        // Check if it's still our turn (opponent might have left)
                         if(gameData.status !== 'active' || gameData.currentPlayer !== playerColor) {
                             throw new Error("Not your turn or game is over.");
                         }
@@ -729,7 +761,7 @@
                     }
                 }
                 promotionModal.classList.add('hidden');
-                clearHighlights(null); // Clear highlights locally
+                clearHighlights(null); 
                 pendingPromotionMove = null;
             };
         });
@@ -737,28 +769,27 @@
         // Updates Firebase with the new game state
         async function updateFirebaseBoard(newFen, lastMove, oldGameData) {
             const gameRef = doc(db, "mpchess", currentGameId);
-            const newChessInstance = new Chess(newFen); // Use a new instance for game state
+            const newChessInstance = new Chess(newFen); 
             
             const updates = {
                 fen: newFen,
+                pgn: newChessInstance.pgn(), // *** NEW: Update PGN on every move ***
                 currentPlayer: newChessInstance.turn() === 'w' ? 'white' : 'black',
                 lastMove: { from: lastMove.from, to: lastMove.to },
-                rematch: {} // Reset rematch requests
+                rematch: {} 
             };
             
-            // Check for game over
             if (newChessInstance.isCheckmate()) {
                 updates.status = 'finished';
-                updates.winner = playerColor; // The player who just moved is the winner
+                updates.winner = playerColor; 
                 updates[`scores.${playerColor}`] = oldGameData.scores[playerColor] + 1;
             } else if (newChessInstance.isStalemate() || newChessInstance.isDraw()) {
                 updates.status = 'finished';
                 updates.winner = 'draw';
             }
             
-            // Update captured pieces
             if (lastMove.captured) {
-                const capturedColor = lastMove.color === 'w' ? 'black' : 'white'; // The *opposite* color was captured
+                const capturedColor = lastMove.color === 'w' ? 'black' : 'white'; 
                 const piece = { type: lastMove.captured, color: capturedColor };
                 updates[`captured.${capturedColor}`] = [...(oldGameData.captured[capturedColor] || []), piece];
             }
@@ -768,42 +799,42 @@
         
         // --- Rematch ---
         rematchBtn.onclick = async () => {
+            // ... (rematchBtn logic is unchanged, but now includes pgn reset) ...
             if (!currentUser || !currentGameId) return;
             rematchBtn.disabled = true;
             rematchBtn.textContent = 'Waiting for opponent...';
             
             const gameRef = doc(db, "mpchess", currentGameId);
             const gameSnap = await getDoc(gameRef);
-            if (!gameSnap.exists()) return; // Game deleted
+            if (!gameSnap.exists()) return; 
             const gameData = gameSnap.data();
             
             const newRematchState = { ...gameData.rematch, [currentUser.uid]: true };
             
             if (Object.keys(newRematchState).length === 2) {
-                // Both players want a rematch
                 const newGame = new Chess();
                 await updateDoc(gameRef, {
                     fen: newGame.fen(),
+                    pgn: newGame.pgn(), // *** NEW: Reset PGN ***
                     currentPlayer: 'white',
                     status: 'active',
                     winner: null,
                     rematch: {},
                     lastMove: null,
                     captured: { white: [], black: [] },
-                    // Scores are preserved, players/playerIds don't change
                 });
             } else {
-                // Only this player has requested
                 await updateDoc(gameRef, { rematch: newRematchState });
             }
         };
 
         // --- Chat ---
         sendChatBtn.onclick = async () => {
+            // ... (sendChatBtn logic is unchanged) ...
             const text = chatInput.value.trim();
             if (text && currentGameId && currentUser && playerColor) {
                 const chatRef = collection(db, "mpchess", currentGameId, "messages");
-                chatInput.value = ''; // Clear input immediately
+                chatInput.value = ''; 
                 try {
                     await addDoc(chatRef, {
                         text: text,
@@ -814,7 +845,7 @@
                     });
                 } catch (error) {
                     console.error("Error sending chat:", error);
-                    chatInput.value = text; // Put text back if send failed
+                    chatInput.value = text; 
                 }
             }
         };
@@ -833,6 +864,7 @@
         };
 
         shareGameBtn.onclick = async () => {
+            // ... (shareGameBtn logic is unchanged) ...
             if (!currentGameId) return;
             const shareUrl = `${window.location.origin}${window.location.pathname}?gameId=${currentGameId}`;
             const shareText = `I challenge you to a game of Chess! ♟️\n\nJoin my game with this code: ${currentGameId}\n\nOr click the link:`;
@@ -854,9 +886,127 @@
                 });
             }
         };
+
+        // #############################################
+        // ### NEW: GEMINI API FUNCTIONS             ###
+        // #############################################
+
+        /**
+         * Calls the Gemini API with exponential backoff.
+         */
+        async function callGeminiApi(payload, retries = 3, delay = 1000) {
+            try {
+                const response = await fetch(geminiApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    if (response.status === 429 && retries > 0) {
+                        // Rate limit error, retry with backoff
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        return callGeminiApi(payload, retries - 1, delay * 2);
+                    }
+                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!text) {
+                    throw new Error("No valid text response from API.");
+                }
+                return text;
+
+            } catch (error) {
+                console.error("Gemini API call failed:", error);
+                throw error;
+            }
+        }
+
+        /**
+         * Handles the "Analyze Game" button click
+         */
+        async function handleAnalyzeGame() {
+            console.log("Starting game analysis...");
+            analysisLoader.classList.remove('hidden');
+            analyzeGameBtn.disabled = true;
+            
+            try {
+                // Get the game data one last time to ensure PGN is current
+                const gameRef = doc(db, "mpchess", currentGameId);
+                const gameSnap = await getDoc(gameRef);
+                if (!gameSnap.exists()) throw new Error("Game data not found.");
+                
+                const pgn = gameSnap.data().pgn;
+                if (!pgn) throw new Error("No PGN data found for analysis.");
+
+                const systemPrompt = "You are a friendly and encouraging chess coach. Analyze the following chess game played in PGN format. Provide a brief, bulleted summary for both White and Black, highlighting one key blunder and one brilliant move for each (if they exist). Conclude with a single, positive, encouraging sentence for both players.";
+                const userQuery = `Please analyze this chess game: ${pgn}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: {
+                        parts: [{ text: systemPrompt }]
+                    }
+                };
+
+                const analysis = await callGeminiApi(payload);
+                
+                analysisText.textContent = analysis;
+                analysisModal.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Analysis failed:", error);
+                showMessage("Sorry, the game analysis failed. Please try again later.");
+            } finally {
+                analysisLoader.classList.add('hidden');
+                analyzeGameBtn.disabled = false;
+            }
+        }
         
-        // --- Auto-Join from URL ---
-        // (This block was removed to simplify auth flow)
+        /**
+         * Handles the "Smart Chat" button click
+         */
+         async function handleSmartChat() {
+            console.log("Generating smart chat...");
+            smartChatBtn.disabled = true;
+            
+            try {
+                const currentFen = chess.fen();
+                const chatHistoryNodes = [...chatMessages.childNodes];
+                const lastChatMessage = chatHistoryNodes.length > 0 ? chatHistoryNodes[chatHistoryNodes.length - 1].textContent : "The chat is empty.";
+
+                const systemPrompt = "You are a witty but friendly chess opponent. Based on the current FEN of the game and the last chat message, generate a short, clever, one-sentence chat message (under 10 words). It could be a witty taunt, a compliment, or a nervous comment. Be creative and fun. Do not use emojis. Only output the chat message itself, with no extra text.";
+                const userQuery = `Current game state (FEN): ${currentFen}\nLast chat: "${lastChatMessage}"`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: {
+                        parts: [{ text: systemPrompt }]
+                    }
+                };
+                
+                let suggestion = await callGeminiApi(payload);
+                
+                // Clean up the response
+                suggestion = suggestion.replace(/\"/g, ''); // Remove quotes
+                
+                chatInput.value = suggestion;
+                chatInput.focus();
+
+            } catch (error) {
+                console.error("Smart chat failed:", error);
+                showMessage("Could not get a chat suggestion.");
+            } finally {
+                smartChatBtn.disabled = false;
+            }
+         }
+
+        // --- NEW: Event Listeners for Gemini Features ---
+        analyzeGameBtn.addEventListener('click', handleAnalyzeGame);
+        closeAnalysisModalBtn.addEventListener('click', () => analysisModal.classList.add('hidden'));
+        smartChatBtn.addEventListener('click', handleSmartChat);
 
     </script>
 </body>
