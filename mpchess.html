@@ -8,6 +8,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Fredoka+One&family=Black+Ops+One&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- *** ADDED: Import Map Support *** -->
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
+            "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
+            "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js",
+            "chess.js": "https://cdnjs.cloudflare.com/ajax/libs/chess.js/1.0.0-beta.8/chess.js"
+        }
+    }
+    </script>
     <style>
         /* Custom fonts and styles from the theme */
         body { font-family: 'Inter', sans-serif; background-color: #111827; }
@@ -230,14 +242,15 @@
         </div>
     </main>
 
+    <!-- *** SCRIPT TAG: Corrected to use importmap *** -->
     <script type="module">
         // --- FIREBASE IMPORTS ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { initializeApp } from 'firebase/app';
+        import { getAuth, onAuthStateChanged } from 'firebase/auth';
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
         
         // --- CHESS.JS IMPORT ---
-        import { Chess } from "https://cdnjs.cloudflare.com/ajax/libs/chess.js/1.0.0-beta.8/chess.js";
+        import { Chess } from "chess.js";
 
         // --- YOUR FALCONIXGAMING FIREBASE CONFIGURATION ---
         const firebaseConfig = {
