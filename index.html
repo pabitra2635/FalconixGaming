@@ -1873,6 +1873,71 @@
                 }
             });
         });
+                // --- High Score Functions ---
+        const saveHighScore = async (gameName, newScore, scoreType = 'desc') => {
+            const user = auth.currentUser;
+            console.log("saveHighScore: Current user object:", user); // Debug log
+            if (!user || !gameName || typeof newScore !== 'number') {
+                 console.log("saveHighScore: Aborted (no user, gameName, or newScore is not a number)");
+                return;
+            }
+
+            const personalScoreRef = doc(db, "highscores", user.uid);
+            // *** GET PLAYER NAME ***
+            const playerName = user.displayName || 'Anonymous'; // Get display name, fallback to Anonymous
+            console.log("saveHighScore: User display name:", user.displayName); // Debug log
+
+            try {
+                const docSnap = await getDoc(personalScoreRef);
+                const currentData = docSnap.exists() ? docSnap.data() : {};
+                const currentScore = currentData[gameName];
+                
+                let shouldUpdatePersonal = false;
+                if (scoreType === 'desc') { // Higher is better
+                    if (currentScore === undefined || newScore > currentScore) {
+                        shouldUpdatePersonal = true;
+                    }
+                } else { // Lower is better (asc)
+                    if (currentScore === undefined || newScore < currentScore) {
+                        shouldUpdatePersonal = true;
+                    }
+                }
+
+                // *** CHECK IF NAME ALSO NEEDS UPDATING ***
+                const shouldUpdateName = !currentData.playerName || currentData.playerName !== playerName;
+
+                // Only write to the DB if the score is new OR the name is missing/different
+                if (shouldUpdatePersonal || shouldUpdateName) {
+                    
+                    // Construct the data payload
+                    let dataToSave = {
+                        playerName: playerName // Always include the latest name
+                    };
+
+                    if (shouldUpdatePersonal) {
+                        dataToSave[gameName] = newScore; // Add the new high score
+                        console.log(`saveHighScore: New personal best for ${gameName}: ${newScore}`);
+                    } else {
+                        console.log(`saveHighScore: Updating playerName for ${user.uid}.`);
+                    }
+                    
+                    console.log("saveHighScore: Data being saved:", dataToSave); // Debug log
+                    // *** SAVE THE DATA (SCORE + NAME) ***
+                    await setDoc(personalScoreRef, dataToSave, { merge: true });
+
+                    if (shouldUpdatePersonal) {
+                        displayUserHighScores(user); // Update local UI if score changed
+                    }
+                } else {
+                    console.log(`saveHighScore: No update needed for ${gameName}. Score (${newScore}) is not better than (${currentScore}) and name is correct.`);
+                }
+
+            } catch (error) {
+                console.error("Error saving high score: ", error);
+            }
+        };
+
+
     </script>
 </body>
 </html>
