@@ -425,7 +425,7 @@
                      if (user) {
                          // User is signed in
                          console.log("Leaderboard Page: User is signed in:", user.displayName, user.uid);
-                         userStatusEl.textContent = `Logged in as: ${user.displayName || 'User'}`; // Display name in header
+                         userStatusEl.textContent = `${user.displayName || 'User'}`; // Display name in header
                          userIdDisplayEl.textContent = `Your ID: ${user.uid}`; // Display ID above header
                          userIdDisplayEl.style.display = 'block'; // Show the ID element
                          userStatusEl.classList.remove('text-red-400');
@@ -463,5 +463,3 @@
     </script>
 </body>
 </html>
-
-
