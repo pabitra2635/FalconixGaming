@@ -126,7 +126,7 @@
     </script>
     <script type="module">
         import { initializeApp } from 'firebase/app';
-        import { getFirestore, collection, getDocs, serverTimestamp } from 'firebase/firestore'; // Import serverTimestamp (though not used here, it's good practice)
+        import { getFirestore, collection, getDocs, serverTimestamp } from 'firebase/firestore'; // Import serverTimestamp
         import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -206,22 +206,20 @@
                             const userId = doc.id;
                             const playerName = userData.playerName || `${userId.substring(0, 6)}...`;
 
+                            // *** UPDATED: Add user to all game lists ***
                             games.forEach(game => {
-                                const score = userData[game];
-                                // *** Get the timestamp for the specific game score ***
+                                const score = (userData[game] !== undefined && typeof userData[game] === 'number') ? userData[game] : 0;
                                 const timestamp = userData[`${game}_timestamp`] || null; // e.g., Astro Jumper_timestamp
 
-                                if (score !== undefined && typeof score === 'number') {
-                                    allScoresByGame[game].push({
-                                        score: score,
-                                        playerName: playerName,
-                                        userId: userId,
-                                        timestamp: timestamp // Add timestamp to the object
-                                    });
-                                    hasAnyScores = true;
-                                }
+                                allScoresByGame[game].push({
+                                    score: score,
+                                    playerName: playerName,
+                                    userId: userId,
+                                    timestamp: timestamp // Add timestamp to the object
+                                });
                             });
                         });
+                        hasAnyScores = true; // Set true if we have any user documents
                     }
 
                     console.log("Leaderboard Page: Aggregated scores:", allScoresByGame);
@@ -255,7 +253,7 @@
                             }
 
                             // 2. Secondary Sort (Tie-breaker): Timestamp (earlier is better)
-                            // Treat null timestamps as "latest"
+                            // Treat null timestamps as "latest" (Infinity)
                             const timeA = a.timestamp ? a.timestamp.toMillis() : Infinity;
                             const timeB = b.timestamp ? b.timestamp.toMillis() : Infinity;
                             
@@ -272,16 +270,14 @@
 
                         // Find the current user's rank in the *now sorted* list
                         let userRank = -1;
-                        let userScore = null;
-                        let userTimestamp = null;
+                        let userScore = 0; // Default to 0
                         const currentUserId = currentUser ? currentUser.uid : null;
 
                         if (currentUserId) {
                             for (let i = 0; i < scores.length; i++) {
                                 if (scores[i].userId === currentUserId) {
                                     userRank = i + 1; // Rank is index + 1
-                                    userScore = scores[i].score;
-                                    userTimestamp = scores[i].timestamp;
+                                    userScore = scores[i].score; // Get their actual score (which might be 0)
                                     break;
                                 }
                             }
@@ -301,7 +297,7 @@
                                     </li>`;
                             });
 
-                            // Add user's rank if they are logged in, have a score, and are NOT in the top 5
+                            // Add user's rank if they are logged in, have a rank, and are NOT in the top 5
                             if (currentUser && userRank > 5) {
                                 const playerName = currentUser.displayName || `${currentUser.uid.substring(0, 6)}...`;
                                 leaderboardHTML += `
