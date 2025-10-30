@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FalconixGaming - Multiplayer Chess</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Fredoka+One&family=Black+Ops+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom fonts and styles from the theme */
+        body { font-family: 'Inter', sans-serif; background-color: #111827; }
+        h1, h2, h3 { font-family: 'Fredoka One', cursive; }
+        .font-black-ops { font-family: 'Inter', sans-serif; font-weight: 900; }
+        .btn-primary {
+            @apply px-6 py-3 font-semibold text-white bg-sky-500 rounded-lg shadow-md hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
+        }
+        .btn-secondary {
+            @apply px-5 py-2 font-semibold text-white bg-indigo-500 rounded-lg shadow-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105;
+        }
+        .btn-danger {
+            @apply w-full bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700 transition-all duration-300;
+        }
+        .btn-warning {
+             @apply w-full bg-yellow-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-yellow-600 transition-all duration-300;
+        }
+        
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* --- Chess Board Styles --- */
+        #chess-board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border: 4px solid #4b5563; /* border-gray-600 */
+        }
+        .square {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem; /* Default piece size */
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+        .square.light { background-color: #e5e7eb; } /* gray-200 */
+        .square.dark { background-color: #6b7280; } /* gray-500 */
+        
+        /* Piece Colors */
+        .piece-white { color: #ffffff; text-shadow: 0 0 4px #000; }
+        .piece-black { color: #1f2937; } /* gray-800 */
+
+        /* Move Indicators */
+        .selected-square {
+            background-color: #3b82f6 !important; /* bg-blue-600 */
+            box-shadow: 0 0 10px #3b82f6;
+        }
+        .valid-move::after {
+            content: '';
+            position: absolute;
+            width: 25%;
+            height: 25%;
+            background-color: rgba(22, 163, 74, 0.5); /* bg-green-600/50 */
+            border-radius: 50%;
+        }
+        .valid-capture::after {
+            content: '';
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            background-color: transparent;
+            border: 4px solid rgba(220, 38, 38, 0.5); /* bg-red-600/50 */
+            border-radius: 50%;
+            box-sizing: border-box;
+        }
+        .last-move {
+            background-color: rgba(234, 179, 8, 0.3) !important; /* bg-yellow-500/30 */
+        }
+        .in-check {
+             background-color: rgba(220, 38, 38, 0.4) !important; /* bg-red-600/40 */
+        }
+
+        /* Captured Pieces */
+        #captured-pieces-white, #captured-pieces-black {
+            font-size: 1.5rem;
+            color: #9ca3af; /* gray-400 */
+            min-height: 2.5rem;
+        }
+        
+        /* Chat Box Styles */
+        #chat-messages { height: 150px; }
+        #chat-messages div:nth-child(odd) { background-color: #374151; } /* bg-gray-700 */
+
+        /* Responsive font size for pieces */
+        @media (max-width: 400px) {
+            .square { font-size: 2rem; }
+            #captured-pieces-white, #captured-pieces-black { font-size: 1.25rem; }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-50 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
+        <nav class="w-full max-w-7xl mx-auto px-4 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
+                <div id="auth-container" class="flex items-center">
+                     <button id="login-button" class="btn-primary">Login with Google</button>
+                     <div id="user-info-header" class="hidden items-center space-x-4">
+                         <span id="user-display-name" class="text-white font-semibold"></span>
+                     </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex items-center justify-center flex-grow w-full px-4">
+        <div class="bg-gray-800 p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-4xl my-8 border border-gray-700">
+
+            <!-- Loading View -->
+            <div id="loading-view" class="text-center">
+                <h1 class="text-4xl font-bold text-gray-100 mb-4">Checking Login Status...</h1>
+                <p class="text-gray-400">Please wait.</p>
+            </div>
+
+            <!-- Auth View -->
+            <div id="auth-view" class="text-center hidden">
+                <h1 class="text-4xl font-bold text-gray-100 mb-4">Welcome to Multiplayer Chess!</h1>
+                <p class="text-gray-400 mb-6">Please log in on the main page to play.</p>
+                <button id="auth-view-login-button" class="btn-primary w-full max-w-xs mx-auto">Go to Login</button>
+            </div>
+
+            <!-- Lobby View -->
+            <div id="lobby-view" class="hidden">
+                <h1 class="text-4xl text-center font-bold text-gray-100 mb-6">Multiplayer Chess</h1>
+                <div class="max-w-md mx-auto space-y-4">
+                    <button id="create-game-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700">Create New Game</button>
+                    <div class="relative flex py-2 items-center"><div class="flex-grow border-t border-gray-600"></div><span class="flex-shrink mx-4 text-gray-400">OR</span><div class="flex-grow border-t border-gray-600"></div></div>
+                    <input type="text" id="game-id-input" placeholder="Enter Game ID to Join" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-400">
+                    <button id="join-game-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700">Join Game</button>
+                </div>
+                 <div class="text-center mt-6 text-xs text-gray-500"><p>Your User ID: <span id="user-id-display" class="font-mono"></span></p></div>
+            </div>
+
+            <!-- Game View -->
+            <div id="game-view" class="hidden">
+                <!-- Game Info Bar -->
+                <div class="flex flex-col sm:flex-row justify-between sm:items-center text-center sm:text-left mb-4">
+                    <div class="mb-2 sm:mb-0">
+                        <p class="text-sm text-gray-400">Game ID: <span id="game-id-display" class="font-mono cursor-pointer" title="Click to copy"></span></p>
+                        <p id="game-link-copied" class="text-xs text-green-400 opacity-0 transition-opacity">Game link copied!</p>
+                    </div>
+                    <div id="status-display" class="text-xl font-semibold text-yellow-300">Loading game...</div>
+                    <div class="flex justify-center sm:justify-end gap-4 mt-2 sm:mt-0">
+                        <button id="share-game-btn" class="btn-secondary py-2 px-4 text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" /></svg>
+                            Share
+                        </button>
+                        <button id="leave-game-btn" class="py-2 px-4 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700">Leave</button>
+                    </div>
+                </div>
+
+                <!-- Main Game Area -->
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <!-- Board and Player Info -->
+                    <div class="flex-grow max-w-2xl mx-auto w-full">
+                        <!-- Player Black (Top) -->
+                        <div class="flex justify-between items-center p-2 bg-gray-700 rounded-t-lg">
+                            <span id="player-black-name" class="text-lg font-bold">Black: Waiting...</span>
+                            <div id="captured-pieces-white" class="flex gap-1">
+                                <!-- Captured white pieces go here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Chess Board -->
+                        <div id="chess-board"></div>
+
+                        <!-- Player White (Bottom) -->
+                        <div class="flex justify-between items-center p-2 bg-gray-700 rounded-b-lg">
+                            <span id="player-white-name" class="text-lg font-bold">White: Waiting...</span>
+                            <div id="captured-pieces-black" class="flex gap-1">
+                                <!-- Captured black pieces go here -->
+                            </div>
+                        </div>
+
+                         <!-- Rematch Button -->
+                        <button id="rematch-btn" class_name="btn-warning mt-4 hidden">Request Rematch</button>
+                    </div>
+
+                    <!-- Chat Box -->
+                    <div class="w-full lg:w-72 flex-shrink-0">
+                        <h3 class="text-2xl text-center lg:text-left mb-2">Game Chat</h3>
+                        <div id="chat-box" class="bg-gray-900 rounded-lg border border-gray-700">
+                            <div id="chat-messages" class="p-2 overflow-y-auto"></div>
+                            <div class="flex border-t border-gray-700">
+                                <input type="text" id="chat-input" placeholder="Type a message..." class="flex-grow p-2 bg-transparent text-white focus:outline-none">
+                                <button id="send-chat-btn" class="bg-sky-500 text-white font-bold py-2 px-4 rounded-r-lg hover:bg-sky-600">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Modal -->
+            <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-xl text-center border border-gray-700">
+                    <p id="message-text" class="text-lg mb-4"></p>
+                    <button id="close-modal-btn" class="btn-primary">Close</button>
+                </div>
+            </div>
+
+            <!-- Promotion Modal -->
+            <div id="promotion-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-xl text-center border border-gray-700">
+                    <h3 class="text-2xl font-bold mb-4">Promote Pawn to:</h3>
+                    <div class="flex justify-center gap-4 text-6xl">
+                        <button data-piece="q" class="cursor-pointer hover:opacity-75" title="Queen">♕</button>
+                        <button data-piece="r" class="cursor-pointer hover:opacity-75" title="Rook">♖</button>
+                        <button data-piece="b" class="cursor-pointer hover:opacity-75" title="Bishop">♗</button>
+                        <button data-piece="n" class="cursor-pointer hover:opacity-75" title="Knight">♘</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script type="module">
+        // --- FIREBASE IMPORTS ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, collection, addDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        
+        // --- CHESS.JS IMPORT ---
+        // We import the ES Module version from a CDN
+        import { Chess } from "https://cdnjs.cloudflare.com/ajax/libs/chess.js/1.0.0-beta.8/chess.js";
+
+        // --- YOUR FALCONIXGAMING FIREBASE CONFIGURATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyD02ui4dhTuGLz-Ff1af36ERdqqsn4iIeU",
+            authDomain: "falconixgaming-46210.firebaseapp.com",
+            projectId: "falconixgaming-46210",
+            storageBucket: "falconixgaming-46210.appspot.com",
+            messagingSenderId: "1096905282147",
+            appId: "1:1096905282147:web:e2faa9105d31c6ec009e56",
+            measurementId: "G-VJ6YC0GXK5"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- DOM ELEMENTS ---
+        const loadingView = document.getElementById('loading-view');
+        const authView = document.getElementById('auth-view'), lobbyView = document.getElementById('lobby-view'), gameView = document.getElementById('game-view');
+        const loginButton = document.getElementById('login-button');
+        const authViewLoginButton = document.getElementById('auth-view-login-button');
+        const userInfoHeader = document.getElementById('user-info-header'), userDisplayName = document.getElementById('user-display-name');
+        const createGameBtn = document.getElementById('create-game-btn'), joinGameBtn = document.getElementById('join-game-btn');
+        const leaveGameBtn = document.getElementById('leave-game-btn'), rematchBtn = document.getElementById('rematch-btn');
+        const gameIdInput = document.getElementById('game-id-input'), userIdDisplay = document.getElementById('user-id-display');
+        const gameIdDisplay = document.getElementById('game-id-display'), statusDisplay = document.getElementById('status-display');
+        const playerWhiteName = document.getElementById('player-white-name'), playerBlackName = document.getElementById('player-black-name');
+        const capturedWhiteContainer = document.getElementById('captured-pieces-white'), capturedBlackContainer = document.getElementById('captured-pieces-black');
+        const chessBoardEl = document.getElementById('chess-board');
+        const chatMessages = document.getElementById('chat-messages'), chatInput = document.getElementById('chat-input'), sendChatBtn = document.getElementById('send-chat-btn');
+        const messageModal = document.getElementById('message-modal'), messageText = document.getElementById('message-text'), closeModalBtn = document.getElementById('close-modal-btn');
+        const shareGameBtn = document.getElementById('share-game-btn'), gameLinkCopied = document.getElementById('game-link-copied');
+        const promotionModal = document.getElementById('promotion-modal');
+
+        // --- UNICODE CHESS PIECES ---
+        const PIECES = {
+            'w': { 'p': '♙', 'r': '♖', 'n': '♘', 'b': '♗', 'q': '♕', 'k': '♔' },
+            'b': { 'p': '♟', 'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚' }
+        };
+
+        // --- GAME STATE ---
+        let currentUser = null, currentGameId = null, playerColor = null;
+        let unsubscribeGame = null, unsubscribeChat = null;
+        let chess = new Chess(); // Local chess.js instance
+        let selectedSquare = null;
+        let validMoves = [];
+        let pendingPromotionMove = null;
+
+        // --- Authentication Flow ---
+        const redirectToLogin = () => window.location.href = 'index.html?login=true';
+        loginButton.onclick = redirectToLogin;
+        authViewLoginButton.onclick = redirectToLogin;
+
+        onAuthStateChanged(auth, user => {
+            currentUser = user;
+            loadingView.classList.add('hidden'); 
+            if (user) {
+                userDisplayName.textContent = user.displayName;
+                userIdDisplay.textContent = user.uid;
+                loginButton.classList.add('hidden');
+                userInfoHeader.classList.remove('hidden');
+                authView.classList.add('hidden');
+                if (gameView.classList.contains('hidden')) { 
+                    lobbyView.classList.remove('hidden');
+                }
+            } else {
+                userDisplayName.textContent = '';
+                loginButton.classList.remove('hidden');
+                userInfoHeader.classList.add('hidden');
+                authView.classList.remove('hidden');
+                lobbyView.classList.add('hidden');
+                if (!gameView.classList.contains('hidden')) {
+                    leaveGameBtn.click();
+                }
+            }
+        });
+
+        // --- Lobby Logic ---
+        createGameBtn.onclick = async () => {
+            createGameBtn.disabled = true;
+            const gameId = crypto.randomUUID().split('-')[0];
+            const gameRef = doc(db, "mpchess", gameId);
+            const initialFen = new Chess().fen(); // Standard starting position
+
+            await setDoc(gameRef, {
+                fen: initialFen,
+                playerIds: [currentUser.uid],
+                players: { [currentUser.uid]: { symbol: 'white', name: currentUser.displayName } },
+                currentPlayer: 'white',
+                status: 'waiting', // Waiting for player 2
+                winner: null,
+                scores: { white: 0, black: 0 },
+                captured: { white: [], black: [] },
+                rematch: {},
+                lastMove: null
+            });
+            createGameBtn.disabled = false;
+            switchToGameView(gameId, 'white');
+        };
+
+        joinGameBtn.onclick = async () => {
+            const gameId = gameIdInput.value.trim();
+            if (!gameId) return showMessage("Please enter a Game ID.");
+            joinGameBtn.disabled = true;
+            
+            const gameRef = doc(db, "mpchess", gameId);
+            const gameSnap = await getDoc(gameRef);
+
+            if (gameSnap.exists()) {
+                const gameData = gameSnap.data();
+                if (gameData.playerIds.length === 1 && !gameData.playerIds.includes(currentUser.uid)) {
+                    // Join as Black
+                    await updateDoc(gameRef, {
+                        [`players.${currentUser.uid}`]: { symbol: 'black', name: currentUser.displayName },
+                        playerIds: [...gameData.playerIds, currentUser.uid],
+                        status: 'active' // Game starts
+                    });
+                    switchToGameView(gameId, 'black');
+                } else if (gameData.playerIds.includes(currentUser.uid)) {
+                    // Rejoin existing game
+                    switchToGameView(gameId, gameData.players[currentUser.uid].symbol);
+                } else {
+                    showMessage("This game is full.");
+                }
+            } else {
+                showMessage("Game not found.");
+            }
+            joinGameBtn.disabled = false;
+        };
+        
+        leaveGameBtn.onclick = async () => {
+            if (currentGameId) {
+                const gameRef = doc(db, "mpchess", currentGameId);
+                await updateDoc(gameRef, { status: 'abandoned' }).catch(err => {});
+            }
+            if (unsubscribeGame) unsubscribeGame();
+            if (unsubscribeChat) unsubscribeChat();
+            currentGameId = null; playerColor = null;
+            selectedSquare = null; validMoves = [];
+            switchToLobbyView();
+        };
+
+        // --- Game Logic ---
+        function switchToGameView(gameId, color) {
+            currentGameId = gameId; playerColor = color;
+            gameIdDisplay.textContent = gameId;
+            lobbyView.classList.add('hidden');
+            gameView.classList.remove('hidden');
+            shareGameBtn.classList.remove('hidden');
+
+            const gameRef = doc(db, "mpchess", gameId);
+            unsubscribeGame = onSnapshot(gameRef, (doc) => {
+                const gameData = doc.data();
+                if (gameData) {
+                    updateUI(gameData);
+                } else {
+                    showMessage("The game session has ended or was deleted.");
+                    leaveGameBtn.click();
+                }
+            });
+
+            // Chat listener
+            const chatRef = collection(db, "mpchess", gameId, "messages");
+            const q = query(chatRef, orderBy("timestamp", "asc"));
+            unsubscribeChat = onSnapshot(q, (snapshot) => {
+                chatMessages.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const msg = doc.data();
+                    const msgDiv = document.createElement('div');
+                    msgDiv.classList.add('p-2', 'rounded-lg', 'text-sm', 'break-words');
+                    msgDiv.innerHTML = `<strong style="color: ${msg.senderColor === 'white' ? '#e5e7eb' : '#9ca3af'}">${msg.senderName}:</strong> ${msg.text}`;
+                    chatMessages.appendChild(msgDiv);
+                });
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        }
+        
+        function switchToLobbyView() {
+            gameView.classList.add('hidden');
+            lobbyView.classList.remove('hidden');
+            gameIdInput.value = '';
+            shareGameBtn.classList.add('hidden');
+        }
+
+        // Main UI update function, called by Firebase snapshot
+        function updateUI(gameData) {
+            // Load the FEN string from Firebase into our local chess.js instance
+            try {
+                chess.load(gameData.fen);
+            } catch (e) {
+                console.error("Invalid FEN string from Firebase:", gameData.fen, e);
+                return;
+            }
+
+            // Update player names
+            const playerW = Object.values(gameData.players).find(p => p.symbol === 'white');
+            const playerB = Object.values(gameData.players).find(p => p.symbol === 'black');
+            playerWhiteName.textContent = `White: ${playerW ? playerW.name.split(' ')[0] : 'Waiting...'}`;
+            playerBlackName.textContent = `Black: ${playerB ? playerB.name.split(' ')[0] : 'Waiting...'}`;
+            
+            // Render the board
+            renderBoard(gameData);
+
+            // Update status
+            rematchBtn.classList.add('hidden');
+            if (gameData.status === 'finished') {
+                if (gameData.winner === 'draw') {
+                    statusDisplay.textContent = "It's a Stalemate/Draw! 🤝";
+                } else {
+                    const winnerName = gameData.winner === 'white' ? playerW.name : playerB.name;
+                    statusDisplay.textContent = `Checkmate! ${winnerName} (${gameData.winner}) wins! 🎉`;
+                }
+                rematchBtn.classList.remove('hidden');
+                if (gameData.rematch[currentUser.uid]) {
+                    rematchBtn.textContent = 'Waiting for opponent...';
+                    rematchBtn.disabled = true;
+                } else {
+                    rematchBtn.textContent = 'Request Rematch';
+                    rematchBtn.disabled = false;
+                }
+            } else if (gameData.status === 'waiting') {
+                statusDisplay.textContent = 'Waiting for Black to join...';
+            } else if (gameData.status === 'active') {
+                const turnColor = gameData.currentPlayer;
+                const inCheck = chess.inCheck();
+                if (turnColor === playerColor) {
+                    statusDisplay.textContent = `Your turn${inCheck ? ' (You are in Check!)' : ''}`;
+                    statusDisplay.classList.add('text-green-400');
+                    statusDisplay.classList.remove('text-yellow-300', 'text-red-400');
+                } else {
+                    statusDisplay.textContent = `Opponent's turn${inCheck ? ' (Opponent is in Check!)' : ''}`;
+                    statusDisplay.classList.add('text-yellow-300');
+                    statusDisplay.classList.remove('text-green-400', 'text-red-400');
+                }
+            } else if (gameData.status === 'abandoned') {
+                 statusDisplay.textContent = "Opponent left the game.";
+                 statusDisplay.classList.add('text-red-400');
+            }
+
+            // Update captured pieces
+            const capturedHTML = (pieces) => pieces.map(p => PIECES[p.color][p.type]).join(' ');
+            capturedWhiteContainer.innerHTML = capturedHTML(gameData.captured.white || []);
+            capturedBlackContainer.innerHTML = capturedHTML(gameData.captured.black || []);
+        }
+
+        // Renders the board based on the local chess.js instance
+        function renderBoard(gameData) {
+            chessBoardEl.innerHTML = ''; // Clear board
+            
+            const ranks = playerColor === 'white' ? [8, 7, 6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6, 7, 8];
+            const files = playerColor === 'white' ? ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] : ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'];
+            
+            let kingSquare = null;
+            if (chess.inCheck()) {
+                const kingColor = chess.turn(); // The king that IS in check
+                const kingPos = chess.board().flat().find(p => p && p.type === 'k' && p.color === kingColor);
+                if (kingPos) kingSquare = kingPos.square;
+            }
+
+            for (const rank of ranks) {
+                for (const file of files) {
+                    const algebraic = `${file}${rank}`;
+                    const squareEl = document.createElement('div');
+                    squareEl.classList.add('square');
+                    squareEl.classList.add((file.charCodeAt(0) + rank) % 2 === 1 ? 'dark' : 'light');
+                    squareEl.dataset.square = algebraic;
+
+                    const piece = chess.get(algebraic);
+                    if (piece) {
+                        squareEl.innerHTML = `<span class="piece-${piece.color === 'w' ? 'white' : 'black'}">${PIECES[piece.color][piece.type]}</span>`;
+                    }
+                    
+                    // Add highlights
+                    if (algebraic === selectedSquare) {
+                        squareEl.classList.add('selected-square');
+                    } else {
+                        const move = validMoves.find(m => m.to === algebraic);
+                        if (move) {
+                            squareEl.classList.add(move.flags.includes('c') ? 'valid-capture' : 'valid-move');
+                        }
+                    }
+                    
+                    // Highlight last move
+                    if (gameData.lastMove && (algebraic === gameData.lastMove.from || algebraic === gameData.lastMove.to)) {
+                        squareEl.classList.add('last-move');
+                    }
+                    
+                    // Highlight king in check
+                    if (algebraic === kingSquare) {
+                        squareEl.classList.add('in-check');
+                    }
+                    
+                    squareEl.addEventListener('click', () => handleSquareClick(algebraic, piece, gameData));
+                    chessBoardEl.appendChild(squareEl);
+                }
+            }
+        }
+
+        // Handles clicking on a square
+        async function handleSquareClick(algebraic, piece, gameData) {
+            // Check if it's the player's turn
+            if (gameData.status !== 'active' || gameData.currentPlayer !== playerColor) {
+                clearHighlights();
+                return;
+            }
+
+            // --- 1. Attempting to make a move ---
+            if (selectedSquare) {
+                const move = { from: selectedSquare, to: algebraic };
+                
+                // Check for promotion
+                const pieceType = chess.get(selectedSquare).type;
+                if (pieceType === 'p' && (algebraic.endsWith('8') || algebraic.endsWith('1'))) {
+                    pendingPromotionMove = move;
+                    showPromotionModal();
+                    return; // Wait for user to select promotion piece
+                }
+
+                // Try to make a regular move
+                try {
+                    const result = chess.move(move); // This validates the move
+                    if (result) {
+                        // Move is valid, update Firebase
+                        await updateFirebaseBoard(chess.fen(), result, gameData);
+                    }
+                } catch (e) {
+                    console.warn("Invalid move attempt:", e.message); // chess.js throws error on invalid move
+                }
+                
+                // Whether move was valid or not, clear selection
+                clearHighlights();
+                return;
+            }
+            
+            // --- 2. Selecting a piece ---
+            if (piece && piece.color === playerColor.charAt(0)) {
+                selectedSquare = algebraic;
+                // Get valid moves for this piece
+                validMoves = chess.moves({ square: algebraic, verbose: true });
+                renderBoard(gameData); // Re-render to show selection and valid moves
+            }
+        }
+        
+        function clearHighlights() {
+            selectedSquare = null;
+            validMoves = [];
+            // Re-render board without highlights (snapshot will do this, but this is faster)
+            const gameRef = doc(db, "mpchess", currentGameId);
+            getDoc(gameRef).then(doc => updateUI(doc.data()));
+        }
+        
+        function showPromotionModal() {
+            promotionModal.style.color = playerColor === 'white' ? '#FFF' : '#1f2937';
+            promotionModal.classList.remove('hidden');
+        }
+        
+        promotionModal.querySelectorAll('button').forEach(btn => {
+            btn.onclick = async () => {
+                const promotionPiece = btn.dataset.piece;
+                if (pendingPromotionMove) {
+                    try {
+                        const gameRef = doc(db, "mpchess", currentGameId);
+                        const gameSnap = await getDoc(gameRef);
+                        const gameData = gameSnap.data();
+                        // Reload state to ensure it's current
+                        chess.load(gameData.fen); 
+                        
+                        const result = chess.move({ ...pendingPromotionMove, promotion: promotionPiece });
+                        if (result) {
+                            await updateFirebaseBoard(chess.fen(), result, gameData);
+                        }
+                    } catch (e) {
+                        console.error("Error during promotion move:", e);
+                    }
+                }
+                promotionModal.classList.add('hidden');
+                clearHighlights();
+                pendingPromotionMove = null;
+            };
+        });
+
+        // Updates Firebase with the new game state
+        async function updateFirebaseBoard(newFen, lastMove, oldGameData) {
+            const gameRef = doc(db, "mpchess", currentGameId);
+            const newChessInstance = new Chess(newFen); // Use a new instance for game state
+            
+            const updates = {
+                fen: newFen,
+                currentPlayer: newChessInstance.turn() === 'w' ? 'white' : 'black',
+                lastMove: { from: lastMove.from, to: lastMove.to },
+                rematch: {} // Reset rematch requests
+            };
+            
+            // Check for game over
+            if (newChessInstance.isCheckmate()) {
+                updates.status = 'finished';
+                updates.winner = playerColor; // The player who just moved is the winner
+                updates[`scores.${playerColor}`] = oldGameData.scores[playerColor] + 1;
+            } else if (newChessInstance.isStalemate() || newChessInstance.isDraw()) {
+                updates.status = 'finished';
+                updates.winner = 'draw';
+            }
+            
+            // Update captured pieces
+            if (lastMove.captured) {
+                const capturedColor = lastMove.color === 'w' ? 'black' : 'white'; // The *opposite* color was captured
+                const piece = { type: lastMove.captured, color: capturedColor };
+                updates[`captured.${capturedColor}`] = [...(oldGameData.captured[capturedColor] || []), piece];
+            }
+
+            await updateDoc(gameRef, updates);
+        }
+        
+        // --- Rematch ---
+        rematchBtn.onclick = async () => {
+            const gameRef = doc(db, "mpchess", currentGameId);
+            const gameSnap = await getDoc(gameRef);
+            const gameData = gameSnap.data();
+            
+            const newRematchState = { ...gameData.rematch, [currentUser.uid]: true };
+            
+            if (Object.keys(newRematchState).length === 2) {
+                // Both players want a rematch
+                const newGame = new Chess();
+                await updateDoc(gameRef, {
+                    fen: newGame.fen(),
+                    currentPlayer: 'white',
+                    status: 'active',
+                    winner: null,
+                    rematch: {},
+                    lastMove: null,
+                    captured: { white: [], black: [] },
+                    // Scores are preserved, players/playerIds don't change
+                });
+            } else {
+                // Only this player has requested
+                await updateDoc(gameRef, { rematch: newRematchState });
+            }
+        };
+
+        // --- Chat ---
+        sendChatBtn.onclick = async () => {
+            const text = chatInput.value.trim();
+            if (text && currentGameId && currentUser) {
+                const chatRef = collection(db, "mpchess", currentGameId, "messages");
+                await addDoc(chatRef, {
+                    text: text,
+                    senderId: currentUser.uid,
+                    senderName: currentUser.displayName,
+                    senderColor: playerColor,
+                    timestamp: serverTimestamp()
+                });
+                chatInput.value = '';
+            }
+        };
+        chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatBtn.click(); });
+        
+        // --- Utilities ---
+        function showMessage(msg) { messageText.textContent = msg; messageModal.classList.remove('hidden'); }
+        closeModalBtn.onclick = () => messageModal.classList.add('hidden');
+        
+        gameIdDisplay.onclick = () => {
+             const shareUrl = `${window.location.origin}${window.location.pathname}?gameId=${currentGameId}`;
+             navigator.clipboard.writeText(shareUrl).then(() => {
+                gameLinkCopied.style.opacity = 1;
+                setTimeout(() => { gameLinkCopied.style.opacity = 0; }, 2000);
+             });
+        };
+
+        shareGameBtn.onclick = async () => {
+            if (!currentGameId) return;
+            const shareUrl = `${window.location.origin}${window.location.pathname}?gameId=${currentGameId}`;
+            const shareText = `I challenge you to a game of Chess! ♟️\n\nJoin my game with this code: ${currentGameId}\n\nOr click the link:`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'FalconixGaming Chess Challenge',
+                        text: shareText,
+                        url: shareUrl,
+                    });
+                } catch (error) {
+                    console.error('Error sharing:', error);
+                    showMessage('Sharing was cancelled or failed.');
+                }
+            } else {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showMessage('Share feature not supported. Game link copied to clipboard!');
+                });
+            }
+        };
+        
+        // --- Auto-Join from URL ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameIdFromUrl = urlParams.get('gameId');
+        if (gameIdFromUrl) {
+            gameIdInput.value = gameIdFromUrl;
+            // Try to auto-join if user is already logged in
+            const authCheck = onAuthStateChanged(auth, (user) => {
+                 if (user) {
+                     joinGameBtn.click(); // Automatically click join if logged in
+                     authCheck(); // Unsubscribe from this initial check
+                 } else {
+                     // If not logged in, show the auth view
+                     loadingView.classList.add('hidden');
+                     authView.classList.remove('hidden');
+                 }
+            });
+        }
+
+    </script>
+</body>
+</html>
