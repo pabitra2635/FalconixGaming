@@ -47,7 +47,10 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
-
+    <!-- *** NEW SECTION: User ID Display *** -->
+    <div id="user-id-display" class="bg-gray-900 text-gray-400 text-xs text-center py-1 px-4 break-all hidden">
+        <!-- User ID will be injected here -->
+    </div>
 
     <!-- Header -->
     <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
@@ -57,14 +60,12 @@
                  <div class="flex items-center space-x-4 text-right">
                      <!-- Display user status (name or 'Not logged in') -->
                      <div id="user-status" class="text-sm text-gray-300">Checking status...</div>
+                     <a href="index.html" class="text-gray-300 hover:text-sky-400 transition-colors flex-shrink-0">Back to Games</a>
                  </div>
             </div>
         </nav>
     </header>
-    <!-- *** NEW SECTION: User ID Display *** -->
-    <div id="user-id-display" class="bg-gray-900 text-gray-400 text-xs text-center py-1 px-4 break-all hidden">
-        <!-- User ID will be injected here -->
-    </div>
+
     <!-- Main Content: Leaderboards Section -->
     <main class="flex-grow py-16 sm:py-24 bg-gray-800/50">
         <section id="leaderboards" class="container mx-auto px-4 lg:px-8">
@@ -125,7 +126,7 @@
     </script>
     <script type="module">
         import { initializeApp } from 'firebase/app';
-        import { getFirestore, collection, getDocs } from 'firebase/firestore';
+        import { getFirestore, collection, getDocs, serverTimestamp } from 'firebase/firestore'; // Import serverTimestamp (though not used here, it's good practice)
         import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -173,7 +174,7 @@
             const noScoresMessage = document.getElementById('no-scores-message');
             const loginPrompt = document.getElementById('login-prompt');
             const userStatusEl = document.getElementById('user-status');
-            const userIdDisplayEl = document.getElementById('user-id-display'); // *** Get the new element ***
+            const userIdDisplayEl = document.getElementById('user-id-display');
 
             // --- Function to Display Global Leaderboards (Dynamically from /highscores) ---
             const displayGlobalLeaderboards = async (currentUser) => {
@@ -206,8 +207,17 @@
                             const playerName = userData.playerName || `${userId.substring(0, 6)}...`;
 
                             games.forEach(game => {
-                                if (userData[game] !== undefined && typeof userData[game] === 'number') {
-                                    allScoresByGame[game].push({ score: userData[game], playerName: playerName, userId: userId });
+                                const score = userData[game];
+                                // *** Get the timestamp for the specific game score ***
+                                const timestamp = userData[`${game}_timestamp`] || null; // e.g., Astro Jumper_timestamp
+
+                                if (score !== undefined && typeof score === 'number') {
+                                    allScoresByGame[game].push({
+                                        score: score,
+                                        playerName: playerName,
+                                        userId: userId,
+                                        timestamp: timestamp // Add timestamp to the object
+                                    });
                                     hasAnyScores = true;
                                 }
                             });
@@ -220,16 +230,62 @@
                     games.forEach(game => {
                         const scores = allScoresByGame[game];
                         let scoreLabel = 'Points';
-                        let sortOrder = 'desc';
+                        let sortOrder = 'desc'; // Default: higher is better
 
                         if (game === 'Tower Defense') scoreLabel = 'Waves';
-                        if (game === 'Memory Match') { scoreLabel = 'Moves'; sortOrder = 'asc'; }
+                        if (game === 'Memory Match') {
+                            scoreLabel = 'Moves';
+                            sortOrder = 'asc'; // Lower is better for Memory Match
+                        }
 
+                        // *** UPDATED SORTING LOGIC ***
                         scores.sort((a, b) => {
                             if (typeof a.score !== 'number') return 1;
                             if (typeof b.score !== 'number') return -1;
-                            return (sortOrder === 'asc') ? a.score - b.score : b.score - a.score;
+
+                            // 1. Primary Sort: Score
+                            if (sortOrder === 'asc') { // Memory Match (lower is better)
+                                if (a.score !== b.score) {
+                                    return a.score - b.score;
+                                }
+                            } else { // High score games (higher is better)
+                                if (a.score !== b.score) {
+                                    return b.score - a.score;
+                                }
+                            }
+
+                            // 2. Secondary Sort (Tie-breaker): Timestamp (earlier is better)
+                            // Treat null timestamps as "latest"
+                            const timeA = a.timestamp ? a.timestamp.toMillis() : Infinity;
+                            const timeB = b.timestamp ? b.timestamp.toMillis() : Infinity;
+                            
+                            if (timeA !== timeB) {
+                                return timeA - timeB; // Earlier time (lower number) comes first
+                            }
+
+                            // 3. Tertiary Sort (Fallback for same score, same/no timestamp): Player Name
+                            const nameA = a.playerName || '';
+                            const nameB = b.playerName || '';
+                            return nameA.localeCompare(nameB); // Alphabetical A-Z
                         });
+                        // *** END UPDATED SORTING LOGIC ***
+
+                        // Find the current user's rank in the *now sorted* list
+                        let userRank = -1;
+                        let userScore = null;
+                        let userTimestamp = null;
+                        const currentUserId = currentUser ? currentUser.uid : null;
+
+                        if (currentUserId) {
+                            for (let i = 0; i < scores.length; i++) {
+                                if (scores[i].userId === currentUserId) {
+                                    userRank = i + 1; // Rank is index + 1
+                                    userScore = scores[i].score;
+                                    userTimestamp = scores[i].timestamp;
+                                    break;
+                                }
+                            }
+                        }
 
                         let leaderboardHTML = `<div class="glassmorphism p-6 rounded-xl"><h3 class="text-2xl font-bold text-center text-indigo-300 mb-4">${game}</h3><ol class="space-y-3">`;
                         if (scores.length > 0) {
@@ -244,6 +300,23 @@
                                         <span class="font-bold text-sky-400 flex-shrink-0 ml-2">${entry.score} ${scoreLabel}</span>
                                     </li>`;
                             });
+
+                            // Add user's rank if they are logged in, have a score, and are NOT in the top 5
+                            if (currentUser && userRank > 5) {
+                                const playerName = currentUser.displayName || `${currentUser.uid.substring(0, 6)}...`;
+                                leaderboardHTML += `
+                                    <li class="mt-4 pt-4 border-t border-gray-700"> <!-- Add a separator -->
+                                        <div class="flex items-center justify-between text-lg bg-sky-900/50 rounded px-2 py-1">
+                                            <span class="flex items-center min-w-0">
+                                                <span class="font-bold text-gray-400 w-8 flex-shrink-0">${userRank}.</span>
+                                                <span class="text-white truncate" title="${playerName}">${playerName} (You)</span>
+                                            </span>
+                                            <span class="font-bold text-sky-400 flex-shrink-0 ml-2">${userScore} ${scoreLabel}</span>
+                                        </div>
+                                    </li>
+                                `;
+                            }
+
                         } else {
                             leaderboardHTML += `<li class="text-center text-gray-400">No scores yet for this game.</li>`;
                         }
@@ -290,8 +363,7 @@
                      if (user) {
                          // User is signed in
                          console.log("Leaderboard Page: User is signed in:", user.displayName, user.uid);
-                         // *** UPDATED: Show User Name in header status, ID above header ***
-                         userStatusEl.textContent = `${user.displayName || 'User'}`; // Display name in header
+                         userStatusEl.textContent = `Logged in as: ${user.displayName || 'User'}`; // Display name in header
                          userIdDisplayEl.textContent = `Your ID: ${user.uid}`; // Display ID above header
                          userIdDisplayEl.style.display = 'block'; // Show the ID element
                          userStatusEl.classList.remove('text-red-400');
@@ -329,3 +401,4 @@
     </script>
 </body>
 </html>
+
