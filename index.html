@@ -70,7 +70,7 @@
             opacity: 0;
             transition: opacity 0.3s ease-in-out;
         }
-        #pixelRacerModal, #towerDefenseModal, #ticTacToeModal, #memoryMatchModal {
+        #pixelRacerModal, #towerDefenseModal, #ticTacToeModal, #memoryMatchModal, #candyCrashModal, #snakeModal {
             transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
         }
         .pointer-events-passthrough {
@@ -143,22 +143,22 @@
 
         /* Fullscreen on mobile */
         @media (max-width: 768px) {
-            #pixelRacerModal, #towerDefenseModal, #ticTacToeModal, #memoryMatchModal {
+            #pixelRacerModal, #towerDefenseModal, #ticTacToeModal, #memoryMatchModal, #snakeModal, #candyCrashModal {
                 padding: 0;
             }
-            #pixelRacerModal > div, #towerDefenseModal > div, #ticTacToeModal > div, #memoryMatchModal > div {
+            #pixelRacerModal > div, #towerDefenseModal > div, #ticTacToeModal > div, #memoryMatchModal > div, #snakeModal > div, #candyCrashModal > div {
                 width: 100%;
                 height: 100%;
                 max-width: 100%;
                 max-height: 100%;
                 border-radius: 0;
             }
-            #pixelRacerModal .aspect-\[3\/4\], #towerDefenseModal .aspect-\[4\/3\] {
+            #pixelRacerModal .aspect-\[3\/4\], #towerDefenseModal .aspect-\[4\/3\], #snakeModal .aspect-square {
                 aspect-ratio: auto; /* Remove fixed aspect ratio */
                 height: 100%;
                 width: 100%;
             }
-            #closeRacerModal, #closeTowerDefenseModal, #closeTicTacToeModal, #closeMemoryMatchModal {
+            #closeRacerModal, #closeTowerDefenseModal, #closeTicTacToeModal, #closeMemoryMatchModal, #closeSnakeModal, #closeCandyCrashModal {
                 top: 1rem;
                 right: 1rem;
                 background-color: rgba(0,0,0,0.5);
@@ -182,6 +182,61 @@
             animation: pulse-text 2s ease-in-out infinite;
         }
         /* --- END OF NEW CSS --- */
+
+        /* --- NEW STYLES FOR CANDY CRASH --- */
+        #candyCrashGameGrid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            gap: 4px; /* Space between candies */
+            background-color: #374151; /* bg-gray-700 */
+            border-radius: 0.5rem;
+            padding: 4px;
+            /* This makes the grid square */
+            aspect-ratio: 1 / 1;
+            touch-action: none; /* Prevents scrolling on mobile when dragging */
+        }
+
+        .candy-cell {
+            width: 100%;
+            height: 100%;
+            border-radius: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem; /* Adjust emoji size */
+            cursor: pointer;
+            background-color: #4b5563; /* bg-gray-600 */
+            transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+        }
+
+        @media (max-width: 400px) {
+            .candy-cell {
+                font-size: 1.25rem; /* Smaller emojis on small phones */
+            }
+        }
+
+        .candy-cell.selected {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px #f472b6; /* pink-400 glow */
+            border: 2px solid #f472b6;
+        }
+
+        .candy-cell.crush {
+            animation: crush-animation 0.4s ease-out forwards;
+        }
+
+        @keyframes crush-animation {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+        /* --- END OF NEW CANDY CRASH STYLES --- */
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -241,7 +296,7 @@
                     <button id="playButton" class="btn-primary mt-8 text-xl">Play Now</button>
                     <!-- *** UPDATED PRIZE ANNOUNCEMENT ON FRONT PAGE *** -->
                     <p id="prize-announcement" class="mt-6 text-2xl font-bold text-yellow-300 pulse-text-animation">
-                        Play & Win ₹400! 💰
+                        Play & Win ₹500! 💰
                     </p>
                     <!-- *** NEW SEASON 1 DATE INFO *** -->
                     <p class="mt-2 text-lg font-semibold text-gray-200">
@@ -349,6 +404,25 @@
                             <span class="btn-warning pointer-events-none">Play Now</span>
                         </div>
                     </div>
+                    
+                    <!-- === NEW GAME CARD === -->
+                    <!-- Game Card 7: Candy Crash -->
+                    <div id="candy-crash-card" class="group relative rounded-lg overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer w-64 sm:w-auto flex-shrink-0">
+                        <img src="https://img.freepik.com/free-vector/match-3-game-items-gui-assets-set-cartoon-sweets-candies-booster-jelly-elements-ui-design_107791-9538.jpg?w=1380&t=st=1730372170~exp=1730372770~hmac=1d740523a54b679417861bc97858c7e9a8d11c0f4f03930ea34190c1737e8c1e" alt="Candy Crash" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                        <div class="absolute inset-0 p-6 flex flex-col justify-end">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-8 h-8 text-pink-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <h3 class="text-xl sm:text-2xl font-bold text-white">Candy Crash</h3>
+                            </div>
+                            <p class="text-pink-400 mt-1">Match-3 Puzzle</p>
+                        </div>
+                        <div class="game-card-overlay absolute inset-0 bg-black/70 flex items-center justify-center">
+                            <span class="btn-danger pointer-events-none">Play Now</span>
+                        </div>
+                    </div>
+                    <!-- === END OF NEW GAME CARD === -->
+
                     <!-- Coming Soon Card -->
                     <div class="group relative rounded-lg overflow-hidden shadow-lg cursor-not-allowed filter grayscale w-64 sm:w-auto flex-shrink-0">
                         <img src="https://placehold.co/400x250/1f2937/6b7280?text=?" alt="Coming Soon" class="w-full h-full object-cover">
@@ -432,7 +506,7 @@
             The top-ranked player for <strong class="text-white">each game</strong> on the global leaderboard at the end of the season will win a prize!
         </p>
         <!-- *** UPDATED PRIZE IN MODAL *** -->
-        <p class="mt-4 text-2xl font-bold text-white">Prize: <span class="text-green-400">Upto ₹400!</span> 💰</p>
+        <p class="mt-4 text-2xl font-bold text-white">Prize: <span class="text-green-400">Upto ₹500!</span> 💰</p>
         <p class="mt-2 text-lg text-gray-300">
             Season 1 runs from <strong class="text-white">November 1st</strong> to <strong class="text-white">November 30th, 2025</strong>.
         </p>
@@ -455,7 +529,7 @@
                      <button id="view-rules-btn" class="px-3 py-1 sm:px-5 sm:py-2 text-sm sm:text-base font-semibold text-indigo-400 bg-transparent border-2 border-indigo-500 rounded-lg shadow-md hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105">
                          <a href="leaderboard.html"> Global Leaderboard</a>
                      </button>
-            </div>
+        </div>
     </div>
     
 </section>
@@ -485,6 +559,8 @@
                     <button class="btn-success game-info-btn" data-game="Tower Defense">Tower Defense</button>
                     <button class="btn-secondary game-info-btn" data-game="Tic-Tac-Toe">Tic-Tac-Toe</button>
                     <button class="btn-warning game-info-btn" data-game="Memory Match">Memory Match</button>
+                    <!-- === NEW HOW-TO-PLAY BUTTON === -->
+                    <button class="btn-danger game-info-btn" data-game="Candy Crash">Candy Crash</button>
                 </div>
                 <div id="gameExplanationResult" class="mt-12 min-h-[200px] flex items-center justify-center">
                     <p class="text-gray-500">Select a game to see instructions.</p>
@@ -627,7 +703,7 @@
                     <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="1"></div>
                     <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="2"></div>
                     <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="3"></div>
-                    <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="4"></div>
+                    <div classV="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="4"></div>
                     <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="5"></div>
                     <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="6"></div>
                     <div class="ttt-cell bg-gray-700 h-24 sm:h-28 rounded-lg flex items-center justify-center text-5xl cursor-pointer hover:bg-gray-600" data-index="7"></div>
@@ -677,6 +753,59 @@
         </div>
     </div>
 
+    <!-- === NEW GAME MODAL === -->
+    <!-- Candy Crash Game Modal -->
+    <div id="candyCrashModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
+        <div class="w-full max-w-md relative">
+            <!-- Main game container -->
+            <div class="bg-gray-800 rounded-lg shadow-2xl overflow-hidden p-4 relative border border-gray-700">
+                <!-- UI Layer -->
+                <div id="candyCrashUiLayer" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 pointer-events-none z-10">
+                    <!-- Start Screen -->
+                    <div id="candyCrashStartScreen" class="pointer-events-auto flex flex-col items-center">
+                        <h2 class="text-5xl font-black-ops text-white">CANDY <span class="text-pink-500">CRASH</span></h2>
+                        <p class="mt-4 text-gray-300">Match 3 or more candies. Score as high as you can in 90 seconds!</p>
+                        <button id="candyCrashStartButton" class="btn-danger mt-8 text-xl">Start Game</button>
+                    </div>
+                    
+                    <!-- Game Over Screen -->
+                    <div id="candyCrashGameOverScreen" data-game-name="Candy Crash" class="hidden flex-col items-center justify-center glassmorphism p-8 rounded-2xl pointer-events-auto">
+                        <h2 class="text-5xl font-black-ops text-white">TIME'S UP!</h2>
+                        <p class="mt-4 text-2xl text-gray-200">Final Score: <span id="candyCrashFinalScore" class="font-bold text-pink-400">0</span></p>
+                        <div class="mt-6 flex flex-col sm:flex-row gap-4">
+                            <button id="candyCrashRestartButton" class="btn-danger-outline text-xl">Play Again</button>
+                            <button id="shareCandyCrashScore" class="btn-secondary-outline text-xl">Share Score</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- In-Game UI (Visible during play) -->
+                <div id="candyCrashInGameUI" class="hidden relative mb-4 z-20">
+                    <div class="flex justify-between items-center bg-gray-900/50 p-3 rounded-lg">
+                        <div class="text-left">
+                            <p class="text-xl font-bold text-white">Score: <span id="candyCrashScore" class="text-pink-400">0</span></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xl font-bold text-white">Time: <span id="candyCrashTimer" class="text-yellow-400">90</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Grid -->
+                <div id="candyCrashGameGrid" class="relative z-0 opacity-20">
+                    <!-- Game will be rendered here by JS -->
+                </div>
+            </div>
+
+            <!-- Close Button -->
+            <button id="closeCandyCrashModal" class="absolute -top-2 -right-2 bg-white rounded-full p-1 text-gray-800 hover:bg-gray-200 z-30">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>
+        </div>
+    </div>
+    <!-- === END OF NEW GAME MODAL === -->
+
+
     <!-- Fallback Share Modal -->
     <div id="shareModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
         <div class="glassmorphism p-8 rounded-2xl text-center max-w-md w-full relative">
@@ -710,6 +839,4 @@
     <script src="games.js" type="module"></script>
 </body>
 </html>
-
-
 
