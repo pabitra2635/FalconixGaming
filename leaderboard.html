@@ -596,7 +596,8 @@
                                 });
 
                                 // Add user's rank if they are logged in, have a rank, and are NOT in the top 5
-                                if (currentUser && userRank > 5 && userScore > 0) { // Only show rank if score is not 0
+                                // ### MODIFICATION: Removed '&& userScore > 0' to show rank even if score is 0 ###
+                                if (currentUser && userRank > 5) { 
                                     const playerName = currentUser.displayName || `${currentUser.uid.substring(0, 6)}...`;
                                     leaderboardHTML += `
                                         <li class="mt-4 pt-4 border-t border-gray-700"> <!-- Add a separator -->
@@ -700,3 +701,4 @@
     </script>
 </body>
 </html>
+
