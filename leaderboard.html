@@ -37,6 +37,37 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* --- NEW: Podium Styles --- */
+        .rank-1 {
+            color: #fbbf24; /* text-yellow-400 */
+            font-weight: 900; /* font-black */
+        }
+        .rank-2 {
+            color: #d1d5db; /* text-gray-300 */
+            font-weight: 700; /* font-bold */
+        }
+        .rank-3 {
+            color: #d97706; /* text-amber-600 */
+            font-weight: 700; /* font-bold */
+        }
+        /* --- NEW: Hover Effect for Entries --- */
+        .leaderboard-entry {
+             @apply flex items-center justify-between text-lg transition-all duration-200 px-2 py-1;
+        }
+        .leaderboard-entry:hover {
+            background-color: rgba(255, 255, 255, 0.05); /* bg-white/5 */
+            transform: scale(1.02);
+            border-radius: 0.25rem; /* rounded */
+        }
+        /* Current user highlight should override hover */
+        .user-highlight {
+            @apply bg-sky-900/50 rounded;
+        }
+        .user-highlight:hover {
+            transform: none; /* Don't scale the user's own rank */
+        }
+
          /* Responsive grid adjustments */
         @media (max-width: 768px) {
              #global-leaderboard-grid {
@@ -147,7 +178,7 @@
             <p class="mt-4 text-xl text-gray-200">
                 The top-ranked player for <strong class="text-white">each game</strong> on the global leaderboard at the end of the season will win a prize!
             </p>
-            <p class="mt-4 text-2xl font-bold text-white">Prize: <span class="text-green-400">Upto ₹400</span></p>
+            <p class="mt-4 text-2xl font-bold text-white">Prize: <span class="text-green-400">₹100</span></p>
             <p class="mt-2 text-lg text-gray-300">
                 Season 1 runs from <strong class="text-white">November 1st</strong> to <strong class="text-white">November 30th, 2025</strong>.
             </p>
@@ -232,14 +263,13 @@
         </div>
     </div>
 
-    <!-- *** UPDATED: Invite Friend Modal *** -->
+    <!-- Invite Friend Modal -->
     <div id="invite-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
         <div class="glassmorphism p-8 rounded-2xl text-center max-w-md w-full relative">
             <button id="close-invite-modal" class="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             <h3 class="text-3xl font-black-ops text-green-300">Invite a Friend</h3>
-            <!-- *** UPDATED: Text includes prize info *** -->
             <p class="mt-4 text-lg text-gray-200">
                 Share this link! Your friends can join the Season 1 challenge and win up to ₹400!
             </p>
@@ -327,7 +357,7 @@
             const viewRulesBtn = document.getElementById('view-rules-btn');
             const closeRulesModalBtn = document.getElementById('close-rules-modal');
 
-            // *** NEW: Invite Modal Elements ***
+            // --- Invite Modal Elements ---
             const inviteModal = document.getElementById('invite-modal');
             const inviteFriendBtn = document.getElementById('invite-friend-btn');
             const closeInviteModalBtn = document.getElementById('close-invite-modal');
@@ -369,12 +399,11 @@
                 }
             });
             
-            // *** UPDATED: Invite Modal + Share API Event Listeners ***
+            // --- UPDATED: Invite Modal + Share API Event Listeners ---
             inviteFriendBtn.addEventListener('click', async () => {
                 const user = auth.currentUser;
                 const referralLink = user ? `${window.location.origin}/index.html?ref=${user.uid}` : `${window.location.origin}/index.html`;
                 
-                // *** NEW: Updated share text with prize info ***
                 const shareText = "Join me on FalconixGaming! 🎮 Season 1 is live, and you can win up to ₹400! Let's play!";
 
                 const shareData = {
@@ -385,7 +414,6 @@
 
                 if (navigator.share) {
                     try {
-                        // Use Web Share API for a direct share dialog
                         await navigator.share(shareData);
                         console.log("Shared successfully");
                     } catch (err) {
@@ -396,7 +424,6 @@
                         }
                     }
                 } else {
-                    // Fallback to showing the modal
                     referralLinkInput.value = referralLink;
                     inviteModal.classList.remove('hidden');
                 }
@@ -427,7 +454,6 @@
             }
 
             copyLinkBtn.addEventListener('click', () => {
-                // Modern clipboard API
                 if (navigator.clipboard) {
                     navigator.clipboard.writeText(referralLinkInput.value).then(() => {
                         copyLinkBtn.textContent = 'Copied!';
@@ -436,26 +462,26 @@
                         }, 2000);
                     }).catch(err => {
                         console.error('Failed to copy text: ', err);
-                        // Fallback to old method
                         copyWithExecCommand();
                     });
                 } else {
-                    // Fallback for older browsers
                     copyWithExecCommand();
                 }
             });
-            // *** END UPDATED SECTION ***
-
+            
+            // --- NEW: Helper function for podium classes ---
+            function getRankClass(index) {
+                if (index === 0) return 'rank-1'; // Gold
+                if (index === 1) return 'rank-2'; // Silver
+                if (index === 2) return 'rank-3'; // Bronze
+                return ''; // Default
+            }
 
             // --- Function to Display Global Leaderboards (Dynamically from /highscores) ---
             const displayGlobalLeaderboards = async (currentUser) => {
-                // ... (rest of the displayGlobalLeaderboards function is unchanged) ...
                 console.log("Leaderboard Page: displayGlobalLeaderboards called. User:", currentUser ? currentUser.uid : 'null');
                 loadingIndicator.style.display = 'block';
-                globalLeaderboardContent.style.display = 'none';
-                errorDisplay.style.display = 'none';
-                noScoresMessage.style.display = 'none';
-                loginPrompt.style.display = 'none';
+                // ... (rest of function setup is unchanged) ...
                 globalLeaderboardGrid.innerHTML = '';
 
                 const games = ["Astro Jumper", "Car Racer", "Tower Defense", "Memory Match"];
@@ -468,12 +494,11 @@
 
                 try {
                     const highscoresCol = collection(db, "highscores");
-                    console.log("Leaderboard Page: Fetching documents from /highscores...");
                     snapshot = await getDocs(highscoresCol);
-                    console.log("Leaderboard Page: Fetched snapshot. Empty:", snapshot.empty, "Size:", snapshot.size);
 
                     if (!snapshot.empty) {
                         snapshot.forEach(doc => {
+                            // ... (user data processing is unchanged) ...
                             const userData = doc.data();
                             const userId = doc.id;
                             const playerName = userData.playerName || `${userId.substring(0, 6)}...`;
@@ -487,11 +512,11 @@
                                     score: score,
                                     playerName: playerName,
                                     userId: userId,
-                                    timestamp: timestamp // Add timestamp to the object
+                                    timestamp: timestamp 
                                 });
                             });
                         });
-                        hasAnyScores = true; // Set true if we have any user documents
+                        hasAnyScores = true; 
                     }
 
                     console.log("Leaderboard Page: Aggregated scores:", allScoresByGame);
@@ -500,60 +525,55 @@
                     games.forEach(game => {
                         const scores = allScoresByGame[game];
                         let scoreLabel = 'Points';
-                        let sortOrder = 'desc'; // Default: higher is better
+                        let sortOrder = 'desc'; 
 
                         if (game === 'Tower Defense') scoreLabel = 'Waves';
                         if (game === 'Memory Match') {
                             scoreLabel = 'Moves';
-                            sortOrder = 'asc'; // Lower is better for Memory Match
+                            sortOrder = 'asc'; 
                         }
 
-                        // UPDATED SORTING LOGIC
+                        // Sorting logic is unchanged
                         scores.sort((a, b) => {
                             if (typeof a.score !== 'number') return 1;
                             if (typeof b.score !== 'number') return -1;
 
                             // 1. Primary Sort: Score
-                            if (sortOrder === 'asc') { // Memory Match (lower is better)
-                                // --- Handle 0 scores ---
+                            if (sortOrder === 'asc') { 
                                 if (a.score === 0 && b.score !== 0) return 1; 
                                 if (a.score !== 0 && b.score === 0) return -1;
-                                // --- End Handle 0 scores ---
-
                                 if (a.score !== b.score) {
                                     return a.score - b.score;
                                 }
-                            } else { // High score games (higher is better)
+                            } else { 
                                 if (a.score !== b.score) {
                                     return b.score - a.score;
                                 }
                             }
 
-                            // 2. Secondary Sort (Tie-breaker): Timestamp (earlier is better)
+                            // 2. Secondary Sort (Tie-breaker): Timestamp
                             const timeA = a.timestamp ? a.timestamp.toMillis() : Infinity;
                             const timeB = b.timestamp ? b.timestamp.toMillis() : Infinity;
-                            
                             if (timeA !== timeB) {
-                                return timeA - timeB; // Earlier time (lower number) comes first
+                                return timeA - timeB; 
                             }
 
-                            // 3. Tertiary Sort (Fallback for same score, same/no timestamp): Player Name
+                            // 3. Tertiary Sort (Fallback): Player Name
                             const nameA = a.playerName || '';
                             const nameB = b.playerName || '';
-                            return nameA.localeCompare(nameB); // Alphabetical A-Z
+                            return nameA.localeCompare(nameB); 
                         });
-                        // END UPDATED SORTING LOGIC
 
-                        // Find the current user's rank in the *now sorted* list
+                        // Find user's rank (unchanged)
                         let userRank = -1;
-                        let userScore = 0; // Default to 0
+                        let userScore = 0; 
                         const currentUserId = currentUser ? currentUser.uid : null;
 
                         if (currentUserId) {
                             for (let i = 0; i < scores.length; i++) {
                                 if (scores[i].userId === currentUserId) {
-                                    userRank = i + 1; // Rank is index + 1
-                                    userScore = scores[i].score; // Get their actual score (which might be 0)
+                                    userRank = i + 1; 
+                                    userScore = scores[i].score; 
                                     break;
                                 }
                             }
@@ -561,24 +581,28 @@
 
                         let leaderboardHTML = `<div class="glassmorphism p-6 rounded-xl"><h3 class="text-2xl font-bold text-center text-indigo-300 mb-4">${game}</h3><ol class="space-y-3">`;
                         if (scores.length > 0) {
-                            scores.slice(0, 5).forEach((entry, index) => { // Show Top 5
+                            
+                            // *** UPDATED: Applying podium styles ***
+                            scores.slice(0, 5).forEach((entry, index) => { 
                                 const isCurrentUser = currentUser && entry.userId === currentUser.uid;
+                                const rankClass = getRankClass(index); // Get Gold, Silver, Bronze class
+                                
                                 leaderboardHTML += `
-                                    <li class="flex items-center justify-between text-lg ${isCurrentUser ? 'bg-sky-900/50 rounded px-2 py-1' : ''}">
+                                    <li class="leaderboard-entry ${isCurrentUser ? 'user-highlight' : ''}">
                                         <span class="flex items-center min-w-0">
-                                            <span class="font-bold text-gray-400 w-8 flex-shrink-0">${index + 1}.</span>
-                                            <span class="text-white truncate" title="${entry.playerName}">${entry.playerName} ${isCurrentUser ? '(You)' : ''}</span>
+                                            <span class="font-bold w-8 flex-shrink-0 ${rankClass}">${index + 1}.</span>
+                                            <span class="truncate ${rankClass}" title="${entry.playerName}">${entry.playerName} ${isCurrentUser ? '(You)' : ''}</span>
                                         </span>
                                         <span class="font-bold text-sky-400 flex-shrink-0 ml-2">${entry.score} ${scoreLabel}</span>
                                     </li>`;
                             });
 
-                            // Add user's rank if they are logged in, have a rank, and are NOT in the top 5
+                            // Add user's rank (unchanged)
                             if (currentUser && userRank > 5) {
                                 const playerName = currentUser.displayName || `${currentUser.uid.substring(0, 6)}...`;
                                 leaderboardHTML += `
-                                    <li class="mt-4 pt-4 border-t border-gray-700"> <!-- Add a separator -->
-                                        <div class="flex items-center justify-between text-lg bg-sky-900/50 rounded px-2 py-1">
+                                    <li class="mt-4 pt-4 border-t border-gray-700"> 
+                                        <div class="leaderboard-entry user-highlight">
                                             <span class="flex items-center min-w-0">
                                                 <span class="font-bold text-gray-400 w-8 flex-shrink-0">${userRank}.</span>
                                                 <span class="text-white truncate" title="${playerName}">${playerName} (You)</span>
@@ -597,10 +621,8 @@
                     });
 
                 } catch (error) {
+                    // ... (error handling is unchanged) ...
                     console.error("Leaderboard Page: Error fetching or processing high scores: ", error);
-                    console.error("Error Name:", error.name);
-                    console.error("Error Code:", error.code);
-                    console.error("Error Message:", error.message);
                     fetchError = true;
                      if (error.code === 'permission-denied' || error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions')) {
                          errorDisplay.innerHTML = `<p>Could not load leaderboards due to permissions. Please ensure you are logged in and Firestore rules allow list access for authenticated users on the 'highscores' collection.</p>`;
@@ -608,6 +630,7 @@
                          errorDisplay.innerHTML = `<p>Could not load leaderboards. An unexpected error occurred: ${error.message}</p>`;
                      }
                 } finally {
+                    // ... (finally block is unchanged) ...
                     loadingIndicator.style.display = 'none';
                     if (fetchError) {
                         errorDisplay.style.display = 'block';
@@ -620,9 +643,9 @@
                 }
             };
 
-             // *** Authentication Check ***
-             console.log("Leaderboard Page: Setting up onAuthStateChanged listener...");
+             // --- Authentication Check ---
              const unsubscribe = onAuthStateChanged(auth, (user) => {
+                // ... (auth check logic is unchanged) ...
                  console.log("Leaderboard Page: onAuthStateChanged triggered. User:", user ? user.uid : 'null', "User Object:", user);
                  loadingIndicator.style.display = 'none';
                  globalLeaderboardContent.style.display = 'none';
@@ -630,28 +653,26 @@
                  noScoresMessage.style.display = 'none';
                  loginPrompt.style.display = 'none';
                  userIdDisplayEl.style.display = 'none'; 
-                 // inviteFriendBtn.style.display = 'none'; // No longer need to hide by default
 
                  try {
                      if (user) {
                          // User is signed in
                          console.log("Leaderboard Page: User is signed in:", user.displayName, user.uid);
-                         userStatusEl.textContent = `${user.displayName || 'User'}`; // Display name in header
-                         userIdDisplayEl.textContent = `Your ID: ${user.uid}`; // Display ID above header
-                         userIdDisplayEl.style.display = 'block'; // Show the ID element
+                         userStatusEl.textContent = `Logged in as: ${user.displayName || 'User'}`; 
+                         userIdDisplayEl.textContent = `Your ID: ${user.uid}`; 
+                         userIdDisplayEl.style.display = 'block'; 
                          userStatusEl.classList.remove('text-red-400');
                          userStatusEl.classList.add('text-green-400');
-                         // inviteFriendBtn.style.display = 'inline-block'; // No longer need to show, it's always visible
-                         displayGlobalLeaderboards(user); // Fetch and display leaderboards
+                         displayGlobalLeaderboards(user); 
                      } else {
                          // User is signed out
                          console.log("Leaderboard Page: User is signed out.");
                          userStatusEl.textContent = 'Not logged in';
-                         userIdDisplayEl.textContent = ''; // Clear ID display
-                         userIdDisplayEl.style.display = 'none'; // Hide ID display
+                         userIdDisplayEl.textContent = ''; 
+                         userIdDisplayEl.style.display = 'none'; 
                          userStatusEl.classList.remove('text-green-400');
                          userStatusEl.classList.add('text-red-400');
-                         loginPrompt.style.display = 'block'; // Show the login prompt message
+                         loginPrompt.style.display = 'block'; 
                      }
                  } catch (uiError) {
                      console.error("Leaderboard Page: Error updating UI in onAuthStateChanged:", uiError);
@@ -661,7 +682,7 @@
              }, (error) => {
                   console.error("Leaderboard Page: Error in onAuthStateChanged listener:", error);
                   userStatusEl.textContent = 'Auth Error';
-                  userIdDisplayEl.style.display = 'none'; // Hide ID display on auth error
+                  userIdDisplayEl.style.display = 'none'; 
                   userStatusEl.classList.add('text-red-400');
                   errorDisplay.innerHTML = '<p>Could not check-in authentication status. Please refresh the page.</p>';
                   errorDisplay.style.display = 'block';
