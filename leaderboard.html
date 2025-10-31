@@ -55,9 +55,9 @@
             <div class="flex items-center justify-between h-16">
                 <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
                  <div class="flex items-center text-right">
-                     <!-- Display user status (name or 'Not logged in') -->
-                     <div id="user-status" class="text-sm text-gray-300">Checking status...</div>
-                     <!-- "Back to Games" link removed -->
+                       <!-- Display user status (name or 'Not logged in') -->
+                       <div id="user-status" class="text-sm text-gray-300">Checking status...</div>
+                       <!-- "Back to Games" link removed -->
                  </div>
             </div>
         </nav>
@@ -115,8 +115,8 @@
             <!-- Global Leaderboard Content - Initially hidden -->
             <div id="global-leaderboard-content" class="hidden">
                  <div id="global-leaderboard-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-                    <!-- Leaderboard cards injected here -->
-                </div>
+                     <!-- Leaderboard cards injected here -->
+                 </div>
             </div>
 
             <!-- Error Display - Initially hidden -->
@@ -277,6 +277,8 @@
             // #############################################
             // ### FIREBASE SETUP                      ###
             // #############################################
+            
+            // Use environment variables or a configuration file in production
             const firebaseConfig = {
                 apiKey: "AIzaSyD02ui4dhTuGLz-Ff1af36ERdqqsn4iIeU",
                 authDomain: "falconixgaming-46210.firebaseapp.com",
@@ -459,6 +461,7 @@
                 loginPrompt.style.display = 'none';
                 globalLeaderboardGrid.innerHTML = '';
 
+                // Define the games to display leaderboards for
                 const games = ["Astro Jumper", "Car Racer", "Tower Defense", "Memory Match"];
                 const allScoresByGame = {};
                 games.forEach(game => allScoresByGame[game] = []);
@@ -516,7 +519,7 @@
 
                             // 1. Primary Sort: Score
                             if (sortOrder === 'asc') { // Memory Match (lower is better)
-                                // --- Handle 0 scores ---
+                                // --- Handle 0 scores (push them to the bottom) ---
                                 if (a.score === 0 && b.score !== 0) return 1; 
                                 if (a.score !== 0 && b.score === 0) return -1;
                                 // --- End Handle 0 scores ---
@@ -561,33 +564,54 @@
                         }
 
                         let leaderboardHTML = `<div class="glassmorphism p-6 rounded-xl"><h3 class="text-2xl font-bold text-center text-indigo-300 mb-4">${game}</h3><ol class="space-y-3">`;
-                        if (scores.length > 0) {
-                            scores.slice(0, 5).forEach((entry, index) => { // Show Top 5
-                                const isCurrentUser = currentUser && entry.userId === currentUser.uid;
-                                leaderboardHTML += `
-                                    <li class="flex items-center justify-between text-lg ${isCurrentUser ? 'bg-sky-900/50 rounded px-2 py-1' : ''}">
-                                        <span class="flex items-center min-w-0">
-                                            <span class="font-bold text-gray-400 w-8 flex-shrink-0">${index + 1}.</span>
-                                            <span class="text-white truncate" title="${entry.playerName}">${entry.playerName} ${isCurrentUser ? '(You)' : ''}</span>
-                                        </span>
-                                        <span class="font-bold text-sky-400 flex-shrink-0 ml-2">${entry.score} ${scoreLabel}</span>
-                                    </li>`;
-                            });
+                        if (scores.length > 0 && scores.some(s => s.score !== 0 || sortOrder === 'desc')) { // Check if any score is non-zero, or if it's a high-score game (where 0 is a valid score to show)
+                            // Filter out zero scores for 'asc' games if they are not the only scores
+                            const scoresToShow = (sortOrder === 'asc') ? scores.filter(s => s.score > 0) : scores;
+                            const displayScores = (scoresToShow.length > 0) ? scoresToShow : (sortOrder === 'asc' ? [] : scores); // If filtering made 'asc' empty, show nothing, otherwise show filtered, or show all for 'desc'
 
-                            // Add user's rank if they are logged in, have a rank, and are NOT in the top 5
-                            if (currentUser && userRank > 5) {
-                                const playerName = currentUser.displayName || `${currentUser.uid.substring(0, 6)}...`;
-                                leaderboardHTML += `
-                                    <li class="mt-4 pt-4 border-t border-gray-700"> <!-- Add a separator -->
-                                        <div class="flex items-center justify-between text-lg bg-sky-900/50 rounded px-2 py-1">
+                            if (displayScores.length > 0) {
+                                displayScores.slice(0, 5).forEach((entry, index) => { // Show Top 5
+                                    const isCurrentUser = currentUser && entry.userId === currentUser.uid;
+                                    
+                                    // ### MODIFICATION: Added Medal Logic ###
+                                    let medal = '';
+                                    if (index === 0) {
+                                        medal = ' 🥇'; // Gold
+                                    } else if (index === 1) {
+                                        medal = ' 🥈'; // Silver
+                                    } else if (index === 2) {
+                                        medal = ' 🥉'; // Bronze
+                                    }
+                                    // ### END MODIFICATION ###
+
+                                    leaderboardHTML += `
+                                        <li class="flex items-center justify-between text-lg ${isCurrentUser ? 'bg-sky-900/50 rounded px-2 py-1' : ''}">
                                             <span class="flex items-center min-w-0">
-                                                <span class="font-bold text-gray-400 w-8 flex-shrink-0">${userRank}.</span>
-                                                <span class="text-white truncate" title="${playerName}">${playerName} (You)</span>
+                                                <span class="font-bold text-gray-400 w-8 flex-shrink-0">${index + 1}.</span>
+                                                <!-- ### MODIFICATION: Added medal variable ### -->
+                                                <span class="text-white truncate" title="${entry.playerName}">${entry.playerName}${medal} ${isCurrentUser ? '(You)' : ''}</span>
                                             </span>
-                                            <span class="font-bold text-sky-400 flex-shrink-0 ml-2">${userScore} ${scoreLabel}</span>
-                                        </div>
-                                    </li>
-                                `;
+                                            <span class="font-bold text-sky-400 flex-shrink-0 ml-2">${entry.score} ${scoreLabel}</span>
+                                        </li>`;
+                                });
+
+                                // Add user's rank if they are logged in, have a rank, and are NOT in the top 5
+                                if (currentUser && userRank > 5 && userScore > 0) { // Only show rank if score is not 0
+                                    const playerName = currentUser.displayName || `${currentUser.uid.substring(0, 6)}...`;
+                                    leaderboardHTML += `
+                                        <li class="mt-4 pt-4 border-t border-gray-700"> <!-- Add a separator -->
+                                            <div class="flex items-center justify-between text-lg bg-sky-900/50 rounded px-2 py-1">
+                                                <span class="flex items-center min-w-0">
+                                                    <span class="font-bold text-gray-400 w-8 flex-shrink-0">${userRank}.</span>
+                                                    <span class="text-white truncate" title="${playerName}">${playerName} (You)</span>
+                                                </span>
+                                                <span class="font-bold text-sky-400 flex-shrink-0 ml-2">${userScore} ${scoreLabel}</span>
+                                            </div>
+                                        </li>
+                                    `;
+                                }
+                            } else {
+                                leaderboardHTML += `<li class="text-center text-gray-400">No scores yet for this game.</li>`;
                             }
 
                         } else {
@@ -676,4 +700,3 @@
     </script>
 </body>
 </html>
-
