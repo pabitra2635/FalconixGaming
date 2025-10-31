@@ -239,15 +239,14 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             <h3 class="text-3xl font-black-ops text-green-300">Invite a Friend</h3>
+            <!-- *** UPDATED: Text includes prize info *** -->
             <p class="mt-4 text-lg text-gray-200">
-                <!-- *** UPDATED: Simplified text *** -->
-                Share this link with your friends to invite them to play!
+                Share this link! Your friends can join the Season 1 challenge and win up to ₹400!
             </p>
             <!-- Referral Link Input -->
             <input type="text" id="referral-link-input" class="w-full p-2 mt-4 bg-gray-900 border border-gray-700 text-gray-300 rounded-lg text-center" readonly value="Loading your link...">
             
             <!-- Copy Button -->
-            <!-- *** UPDATED: Copy button smaller on mobile *** -->
             <button id="copy-link-btn" class="mt-4 w-full px-4 py-2 sm:px-5 sm:py-2 text-sm sm:text-base font-semibold text-white bg-sky-500 rounded-lg shadow-md hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 transition-all duration-300">
                 Copy Link
             </button>
@@ -370,12 +369,37 @@
                 }
             });
             
-            // *** UPDATED: Invite Modal Event Listeners ***
-            inviteFriendBtn.addEventListener('click', () => {
-                // Generate the simple link, no user needed
-                const referralLink = `${window.location.origin}/index.html`;
-                referralLinkInput.value = referralLink;
-                inviteModal.classList.remove('hidden');
+            // *** UPDATED: Invite Modal + Share API Event Listeners ***
+            inviteFriendBtn.addEventListener('click', async () => {
+                const user = auth.currentUser;
+                const referralLink = user ? `${window.location.origin}/index.html?ref=${user.uid}` : `${window.location.origin}/index.html`;
+                
+                // *** NEW: Updated share text with prize info ***
+                const shareText = "Join me on FalconixGaming! 🎮 Season 1 is live, and you can win up to ₹400! Let's play!";
+
+                const shareData = {
+                    title: 'FalconixGaming - Season 1 Challenge!',
+                    text: shareText,
+                    url: referralLink
+                };
+
+                if (navigator.share) {
+                    try {
+                        // Use Web Share API for a direct share dialog
+                        await navigator.share(shareData);
+                        console.log("Shared successfully");
+                    } catch (err) {
+                        console.error("Share failed:", err.message);
+                        if (err.name !== 'AbortError') {
+                            referralLinkInput.value = referralLink;
+                            inviteModal.classList.remove('hidden');
+                        }
+                    }
+                } else {
+                    // Fallback to showing the modal
+                    referralLinkInput.value = referralLink;
+                    inviteModal.classList.remove('hidden');
+                }
             });
 
             closeInviteModalBtn.addEventListener('click', () => {
@@ -388,13 +412,37 @@
                 }
             });
             
-            copyLinkBtn.addEventListener('click', () => {
+            function copyWithExecCommand() {
                 referralLinkInput.select();
-                document.execCommand('copy'); // Fallback for browsers
-                copyLinkBtn.textContent = 'Copied!';
-                setTimeout(() => {
-                    copyLinkBtn.textContent = 'Copy Link';
-                }, 2000);
+                try {
+                    document.execCommand('copy');
+                    copyLinkBtn.textContent = 'Copied!';
+                    setTimeout(() => {
+                        copyLinkBtn.textContent = 'Copy Link';
+                    }, 2000);
+                } catch (err) {
+                    console.error('Fallback copy failed: ', err);
+                    copyLinkBtn.textContent = 'Error!';
+                }
+            }
+
+            copyLinkBtn.addEventListener('click', () => {
+                // Modern clipboard API
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(referralLinkInput.value).then(() => {
+                        copyLinkBtn.textContent = 'Copied!';
+                        setTimeout(() => {
+                            copyLinkBtn.textContent = 'Copy Link';
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('Failed to copy text: ', err);
+                        // Fallback to old method
+                        copyWithExecCommand();
+                    });
+                } else {
+                    // Fallback for older browsers
+                    copyWithExecCommand();
+                }
             });
             // *** END UPDATED SECTION ***
 
