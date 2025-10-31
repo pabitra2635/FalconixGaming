@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FalconixGaming - Global Leaderboards</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn/tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
     <style>
+        /* --- Reverted to Original Theme --- */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #111827; /* bg-gray-900 */
@@ -38,7 +39,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- NEW: Podium Styles --- */
+        /* --- KEPT: Podium Styles --- */
         .rank-1 {
             color: #fbbf24; /* text-yellow-400 */
             font-weight: 900; /* font-black */
@@ -51,7 +52,7 @@
             color: #d97706; /* text-amber-600 */
             font-weight: 700; /* font-bold */
         }
-        /* --- NEW: Hover Effect for Entries --- */
+        /* --- KEPT: Hover Effect for Entries --- */
         .leaderboard-entry {
              @apply flex items-center justify-between text-lg transition-all duration-200 px-2 py-1;
         }
@@ -60,7 +61,7 @@
             transform: scale(1.02);
             border-radius: 0.25rem; /* rounded */
         }
-        /* Current user highlight should override hover */
+        /* --- KEPT: Current user highlight --- */
         .user-highlight {
             @apply bg-sky-900/50 rounded;
         }
@@ -85,14 +86,12 @@
             <div class="flex items-center justify-between h-16">
                 <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
                  <div class="flex items-center text-right">
-                     <!-- Display user status (name or 'Not logged in') -->
                      <div id="user-status" class="text-sm text-gray-300">Checking status...</div>
-                     <!-- "Back to Games" link removed -->
                  </div>
             </div>
         </nav>
     </header>
-    <!-- *** NEW SECTION: User ID Display *** -->
+    <!-- User ID Display -->
     <div id="user-id-display" class="bg-gray-900 text-gray-400 text-xs text-center py-1 px-4 break-all hidden">
         <!-- User ID will be injected here -->
     </div>
@@ -101,22 +100,20 @@
     <main class="flex-grow py-16 sm:py-24 bg-gray-800/50">
         <section id="leaderboards" class="container mx-auto px-4 lg:px-8">
             
-            <!-- *** UPDATED: Season 1 Headline *** -->
+            <!-- Season 1 Headline -->
             <div class="text-center mb-12 glassmorphism p-6 rounded-lg max-w-3xl mx-auto">
                 <h2 class="text-3xl font-black-ops text-yellow-300">Season 1 is LIVE!</h2>
                 <p class="text-lg text-gray-200 mt-2">
                     Compete from <strong class="text-white">Nov 1st - Nov 30th</strong>. The top player in each game wins <strong class="text-green-400">100!</strong>
                 </p>
-                <!-- *** UPDATED: Button Group (Made smaller on mobile) *** -->
+                <!-- Button Group (Reverted to original colors) -->
                 <div class="mt-4 flex flex-col sm:flex-row gap-4 justify-center">
                     <button id="view-prizes-btn" class="px-3 py-1 sm:px-5 sm:py-2 text-sm sm:text-base font-semibold text-white bg-indigo-500 rounded-lg shadow-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105">
                         View Details
                     </button>
-                    <!-- *** NEW: Rules Button *** -->
                     <button id="view-rules-btn" class="px-3 py-1 sm:px-5 sm:py-2 text-sm sm:text-base font-semibold text-indigo-400 bg-transparent border-2 border-indigo-500 rounded-lg shadow-md hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105">
                         Read Rules
                     </button>
-                    <!-- *** NEW: Invite Button *** -->
                     <button id="invite-friend-btn" class="px-3 py-1 sm:px-5 sm:py-2 text-sm sm:text-base font-semibold text-green-400 bg-transparent border-2 border-green-500 rounded-lg shadow-md hover:bg-green-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105">
                         Invite a Friend
                     </button>
@@ -125,11 +122,9 @@
             
             <h1 class="text-4xl font-black-ops text-center mb-12">Global Leaderboards (Top 5)</h1>
 
-            <!-- Login Prompt - Initially hidden -->
+            <!-- Login Prompt (Reverted to original colors) -->
             <div id="login-prompt" class="hidden text-center text-gray-300 glassmorphism p-8 rounded-lg max-w-md mx-auto">
                 <p class="text-xl mb-4">Please log in to view the Global Leaderboards.</p>
-                <!-- Link to main page with query param to suggest login -->
-                <!-- *** UPDATED: Login button smaller on mobile *** -->
                 <a href="index.html?login=true" class="inline-block px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base font-semibold text-white bg-sky-500 rounded-lg shadow-md hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 transition-colors duration-300">
                     Login on Main Page
                 </a>
@@ -161,7 +156,7 @@
         </section>
     </main>
 
-    <!-- Footer -->
+    <!-- Footer (Reverted to original colors) -->
     <footer class="bg-gray-900 border-t border-gray-700 mt-auto">
         <div class="container mx-auto px-4 lg:px-8 py-8 text-center text-gray-400">
             <p>&copy; 2025 <a href="https://chat.whatsapp.com/DUXdfaOxJoPC87KjRWbkjo" style="text-decoration:underline;">FalconixGaming</a>. All Rights Reserved.</p>
@@ -188,22 +183,18 @@
 
     <!-- Season 1 Rules Modal -->
     <div id="rules-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-        <!-- Modal content -->
         <div class="glassmorphism p-6 sm:p-8 rounded-2xl max-w-2xl w-full relative max-h-[80vh] overflow-y-auto">
-            <!-- Close Button -->
             <button id="close-rules-modal" class="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            
+            <!-- Rules title (Kept yellow) -->
             <h3 class="text-3xl font-black-ops text-center text-yellow-300 mb-6">Season 1 Rules & Regulations</h3>
-            
             <div class="text-left space-y-6">
-                <!-- Section 1: Duration -->
+                <!-- ... (Rules content is unchanged) ... -->
                 <div>
                     <h4 class="text-xl font-bold text-white">🗓 Season Duration</h4>
                     <p class="mt-1 text-gray-300">1 November – 30 November 2025</p>
                 </div>
-                <!-- Section 2: Player Login -->
                 <div>
                     <h4 class="text-xl font-bold text-white">👤 Player Login</h4>
                     <ul class="list-disc list-inside mt-2 text-gray-300 space-y-1">
@@ -213,7 +204,6 @@
                         <li>Logging out and switching accounts during a match is not allowed.</li>
                     </ul>
                 </div>
-                <!-- Section 3: Gameplay -->
                 <div>
                     <h4 class="text-xl font-bold text-white">🏁 Gameplay Rules</h4>
                     <ul class="list-disc list-inside mt-2 text-gray-300 space-y-1">
@@ -223,7 +213,6 @@
                         <li>Any use of bots, scripts, or unfair methods leads to instant disqualification.</li>
                     </ul>
                 </div>
-                <!-- Section 4: Rewards -->
                 <div>
                     <h4 class="text-xl font-bold text-white">💰 Rewards</h4>
                     <ul class="list-disc list-inside mt-2 text-gray-300 space-y-1">
@@ -233,7 +222,6 @@
                         <li>In case of a tie, the player who reached the top score first will be declared the winner.</li>
                     </ul>
                 </div>
-                <!-- Section 5: Leaderboard -->
                 <div>
                     <h4 class="text-xl font-bold text-white">🌍 Leaderboard & Ranking</h4>
                     <ul class="list-disc list-inside mt-2 text-gray-300 space-y-1">
@@ -242,7 +230,6 @@
                         <li>The leaderboard resets after each season.</li>
                     </ul>
                 </div>
-                <!-- Section 6: Fair Play -->
                 <div>
                     <h4 class="text-xl font-bold text-white">⚖ Fair Play Policy</h4>
                     <ul class="list-disc list-inside mt-2 text-gray-300 space-y-1">
@@ -251,7 +238,6 @@
                         <li>The admin’s decision will be final and binding.</li>
                     </ul>
                 </div>
-                <!-- Section 7: Community -->
                 <div>
                     <h4 class="text-xl font-bold text-white">📢 Community & Support</h4>
                     <ul class="list-disc list-inside mt-2 text-gray-300 space-y-1">
@@ -263,7 +249,7 @@
         </div>
     </div>
 
-    <!-- Invite Friend Modal -->
+    <!-- Invite Friend Modal (Reverted to original colors) -->
     <div id="invite-modal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
         <div class="glassmorphism p-8 rounded-2xl text-center max-w-md w-full relative">
             <button id="close-invite-modal" class="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors">
@@ -273,10 +259,7 @@
             <p class="mt-4 text-lg text-gray-200">
                 Share this link! Your friends can join the Season 1 challenge and win up to ₹400!
             </p>
-            <!-- Referral Link Input -->
             <input type="text" id="referral-link-input" class="w-full p-2 mt-4 bg-gray-900 border border-gray-700 text-gray-300 rounded-lg text-center" readonly value="Loading your link...">
-            
-            <!-- Copy Button -->
             <button id="copy-link-btn" class="mt-4 w-full px-4 py-2 sm:px-5 sm:py-2 text-sm sm:text-base font-semibold text-white bg-sky-500 rounded-lg shadow-md hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-opacity-75 transition-all duration-300">
                 Copy Link
             </button>
@@ -481,8 +464,8 @@
             const displayGlobalLeaderboards = async (currentUser) => {
                 console.log("Leaderboard Page: displayGlobalLeaderboards called. User:", currentUser ? currentUser.uid : 'null');
                 loadingIndicator.style.display = 'block';
-                // ... (rest of function setup is unchanged) ...
                 globalLeaderboardGrid.innerHTML = '';
+                // ... (rest of setup)
 
                 const games = ["Astro Jumper", "Car Racer", "Tower Defense", "Memory Match"];
                 const allScoresByGame = {};
@@ -498,15 +481,13 @@
 
                     if (!snapshot.empty) {
                         snapshot.forEach(doc => {
-                            // ... (user data processing is unchanged) ...
                             const userData = doc.data();
                             const userId = doc.id;
                             const playerName = userData.playerName || `${userId.substring(0, 6)}...`;
 
-                            // Add user to all game lists
                             games.forEach(game => {
                                 const score = (userData[game] !== undefined && typeof userData[game] === 'number') ? userData[game] : 0;
-                                const timestamp = userData[`${game}_timestamp`] || null; // e.g., Astro Jumper_timestamp
+                                const timestamp = userData[`${game}_timestamp`] || null; 
 
                                 allScoresByGame[game].push({
                                     score: score,
@@ -533,12 +514,10 @@
                             sortOrder = 'asc'; 
                         }
 
-                        // Sorting logic is unchanged
+                        // Sorting logic (unchanged)
                         scores.sort((a, b) => {
                             if (typeof a.score !== 'number') return 1;
                             if (typeof b.score !== 'number') return -1;
-
-                            // 1. Primary Sort: Score
                             if (sortOrder === 'asc') { 
                                 if (a.score === 0 && b.score !== 0) return 1; 
                                 if (a.score !== 0 && b.score === 0) return -1;
@@ -550,15 +529,11 @@
                                     return b.score - a.score;
                                 }
                             }
-
-                            // 2. Secondary Sort (Tie-breaker): Timestamp
                             const timeA = a.timestamp ? a.timestamp.toMillis() : Infinity;
                             const timeB = b.timestamp ? b.timestamp.toMillis() : Infinity;
                             if (timeA !== timeB) {
                                 return timeA - timeB; 
                             }
-
-                            // 3. Tertiary Sort (Fallback): Player Name
                             const nameA = a.playerName || '';
                             const nameB = b.playerName || '';
                             return nameA.localeCompare(nameB); 
@@ -568,7 +543,6 @@
                         let userRank = -1;
                         let userScore = 0; 
                         const currentUserId = currentUser ? currentUser.uid : null;
-
                         if (currentUserId) {
                             for (let i = 0; i < scores.length; i++) {
                                 if (scores[i].userId === currentUserId) {
@@ -579,6 +553,7 @@
                             }
                         }
 
+                        // *** REVERTED: Leaderboard card title to indigo ***
                         let leaderboardHTML = `<div class="glassmorphism p-6 rounded-xl"><h3 class="text-2xl font-bold text-center text-indigo-300 mb-4">${game}</h3><ol class="space-y-3">`;
                         if (scores.length > 0) {
                             
@@ -587,6 +562,7 @@
                                 const isCurrentUser = currentUser && entry.userId === currentUser.uid;
                                 const rankClass = getRankClass(index); // Get Gold, Silver, Bronze class
                                 
+                                // *** REVERTED: Score to text-sky-400, highlight to bg-sky-900/50 ***
                                 leaderboardHTML += `
                                     <li class="leaderboard-entry ${isCurrentUser ? 'user-highlight' : ''}">
                                         <span class="flex items-center min-w-0">
@@ -597,7 +573,7 @@
                                     </li>`;
                             });
 
-                            // Add user's rank (unchanged)
+                            // Add user's rank (Reverted highlight color)
                             if (currentUser && userRank > 5) {
                                 const playerName = currentUser.displayName || `${currentUser.uid.substring(0, 6)}...`;
                                 leaderboardHTML += `
@@ -645,8 +621,8 @@
 
              // --- Authentication Check ---
              const unsubscribe = onAuthStateChanged(auth, (user) => {
-                // ... (auth check logic is unchanged) ...
-                 console.log("Leaderboard Page: onAuthStateChanged triggered. User:", user ? user.uid : 'null', "User Object:", user);
+                 // ... (auth check logic is unchanged) ...
+                 console.log("LeaderBaoard Page: onAuthStateChanged triggered. User:", user ? user.uid : 'null', "User Object:", user);
                  loadingIndicator.style.display = 'none';
                  globalLeaderboardContent.style.display = 'none';
                  errorDisplay.style.display = 'none';
@@ -662,7 +638,7 @@
                          userIdDisplayEl.textContent = `Your ID: ${user.uid}`; 
                          userIdDisplayEl.style.display = 'block'; 
                          userStatusEl.classList.remove('text-red-400');
-                         userStatusEl.classList.add('text-green-400');
+                         userStatusEl.classList.add('text-green-400'); // Reverted to green
                          displayGlobalLeaderboards(user); 
                      } else {
                          // User is signed out
@@ -671,7 +647,7 @@
                          userIdDisplayEl.textContent = ''; 
                          userIdDisplayEl.style.display = 'none'; 
                          userStatusEl.classList.remove('text-green-400');
-                         userStatusEl.classList.add('text-red-400');
+                         userStatusEl.classList.add('text-red-400'); // Reverted to red
                          loginPrompt.style.display = 'block'; 
                      }
                  } catch (uiError) {
