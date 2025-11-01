@@ -475,9 +475,12 @@
                 <div id="leaderboard-content" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     <!-- Leaderboard cards will be injected here -->
                 </div>
-                 <div id="leaderboard-login-prompt" class="text-center text-gray-400">
-                     <p>Please log in to see your high scores.</p>
-                 </div>
+                <div id="leaderboard-login-prompt" class="text-center text-gray-400">
+                    <p>Log in to save your high scores and compete on the leaderboards!</p>
+                                <button id="modal-login-button" class="btn-primary w-full mt-6 text-lg">
+                Login with Google
+            </button></div>
+
             </div>
 
         </section>
@@ -546,20 +549,6 @@
         </div>
     </div>
 
-    <!-- Mobile Welcome Modal -->
-    <div id="mobile-welcome-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden md:hidden">
-        <div class="glassmorphism p-8 rounded-2xl text-center max-w-sm w-full relative">
-            <button id="close-welcome-modal" class="absolute top-2 right-2 text-gray-400 hover:text-white">
-                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <h2 class="text-3xl font-black-ops text-white">Welcome to <br>FALCONIX<span class="text-sky-400">GAMING</span></h2>
-            <p class="mt-4 text-gray-300">Log in to save your high scores and compete on the leaderboards!</p>
-            <button id="modal-login-button" class="btn-primary w-full mt-6 text-lg">
-                Login with Google
-            </button>
-        </div>
-    </div>
-    
     <!-- Car Racer Game Modal -->
     <div id="pixelRacerModal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 invisible opacity-0">
         <div class="w-full max-w-md lg:max-w-lg relative">
