@@ -247,7 +247,10 @@
                     <p class="mt-2 text-lg font-semibold text-gray-200">
                         Season 1 is ON! <span class="text-white">(Nov 1st - Nov 30th)</span>
                     </p>
-                    <!-- *** END OF NEW CONTENT *** -->
+                    <!-- *** NEW: REFERRAL INFO DIV *** -->
+                    <div id="referral-info" class="text-green-400 mt-4 text-lg font-semibold hidden">
+                        <!-- JS will populate this -->
+                    </div>
                 </div>
                 <div id="inGameUI" class="hidden absolute top-5 left-5 text-left pointer-events-passthrough">
                     <p class="text-2xl font-bold">Score: <span id="score">0</span></p>
@@ -452,10 +455,10 @@
             <button id="main-view-prizes-btn" class="mt-4 px-5 py-2 font-semibold text-white bg-indigo-500 rounded-lg shadow-md hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105">
                 View Details
             </button>
-                     <button id="view-rules-btn" class="px-3 py-1 sm:px-5 sm:py-2 text-sm sm:text-base font-semibold text-indigo-400 bg-transparent border-2 border-indigo-500 rounded-lg shadow-md hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105">
-                         <a href="leaderboard.html"> Global Leaderboard</a>
-                     </button>
-            </div>
+                       <button id="view-rules-btn" class="px-3 py-1 sm:px-5 sm:py-2 text-sm sm:text-base font-semibold text-indigo-400 bg-transparent border-2 border-indigo-500 rounded-lg shadow-md hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105">
+                             <a href="leaderboard.html"> Global Leaderboard</a>
+                       </button>
+        </div>
     </div>
     
 </section>
@@ -495,7 +498,7 @@
 
     <!-- Footer -->
     <footer class="bg-gray-900 border-t border-gray-700">
-                    <!-- NEW SOCIAL ICONS DIV -->
+                     <!-- NEW SOCIAL ICONS DIV -->
             <div class="flex justify-center space-x-6 mb-4" style="margin-top: 20px;">
                 <!-- WhatsApp Icon Link -->
                 <a href="https://chat.whatsapp.com/JOHZ6qwcTFTEfpP58MGBpx?mode=wwt" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors duration-300">
@@ -510,7 +513,7 @@
                 <!-- Instagram Icon Link -->
                 <a href="https://www.instagram.com/thenameispabitra_?igsh=MXRmODdlanQwcnp5bQ==" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors duration-300">
                     <span class="sr-only">Instagram</span>
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.148 3.227-1.669 4.771-4.919 4.919-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.07-1.646-.07-4.85s.012-3.584.07-4.85c.148-3.227 1.669-4.771 4.919-4.919 1.266-.058 1.646-.07 4.85-.07zm0-2.163c-3.273 0-3.662.014-4.948.072-4.305.197-7.304 3.196-7.502 7.502-.058 1.287-.072 1.675-.072 4.948s.014 3.661.072 4.948c.198 4.305 3.196 7.304 7.502 7.502 1.287.058 1.675.072 4.948.072s3.661-.014 4.948-.072c4.305-.197 7.304-3.196 7.502-7.502.058-1.287.072-1.675.072-4.948s-.014-3.661-.072-4.948c-.198-4.305-3.196-7.304-7.502-7.502-1.287-.058-1.675-.072-4.948-.072zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44 1.441-.645 1.441-1.44-.645-1.44-1.441-1.44z"></path></svg>
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.148 3.227-1.669 4.771-4.919 4.919-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.07-1.646-.07-4.85s.012-3.584.07-4.85c.148-3.227 1.669 4.771 4.919-4.919 1.266-.058 1.646.07 4.85-.07zm0-2.163c-3.273 0-3.662.014-4.948.072-4.305.197-7.304 3.196-7.502 7.502-.058 1.287-.072 1.675-.072 4.948s.014 3.661.072 4.948c.198 4.305 3.196 7.304 7.502 7.502 1.287.058 1.675.072 4.948.072s3.661-.014 4.948-.072c4.305-.197 7.304-3.196 7.502-7.502.058-1.287.072-1.675.072-4.948s-.014-3.661-.072-4.948c-.198-4.305-3.196-7.304-7.502-7.502-1.287-.058-1.675-.072-4.948-.072zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44 1.441-.645 1.441-1.44-.645-1.44-1.441-1.44z"></path></svg>
                 </a>
             </div>
         <div class="container mx-auto px-4 lg:px-8 py-8 text-center text-gray-400">
@@ -725,6 +728,154 @@
         }
     }
     </script>
+
+    <!-- *** NEW AUTH & REFERRAL SCRIPT *** -->
+    <!-- This script loads *before* games.js to provide auth and referral functions -->
+    <script type="module">
+        import { initializeApp } from 'firebase/app';
+        import { 
+            getFirestore, doc, getDoc, setDoc, updateDoc, 
+            serverTimestamp, increment 
+        } from 'firebase/firestore';
+        import { 
+            getAuth, GoogleAuthProvider, 
+            signInWithPopup, getAdditionalUserInfo 
+        } from 'firebase/auth';
+
+        console.log("Auth & Referral Script: Initializing Firebase...");
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD02ui4dhTuGLz-Ff1af36ERdqqsn4iIeU",
+            authDomain: "falconixgaming-46210.firebaseapp.com",
+            projectId: "falconixgaming-46210",
+            storageBucket: "falconixgaming-46210.appspot.com",
+            messagingSenderId: "1096905282147",
+            appId: "1:1096905282147:web:e2faa9105d31c6ec009e56",
+            measurementId: "G-VJ6YC0GXK5"
+        };
+
+        let app, db, auth, provider;
+
+        try {
+            // Initialize Firebase
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            provider = new GoogleAuthProvider();
+            console.log("Auth & Referral Script: Firebase initialized.");
+
+            // *** EXPOSE TO globalThis (window) for games.js to use ***
+            // This allows games.js to access these initialized services and functions
+            globalThis.app = app;
+            globalThis.db = db;
+            globalThis.auth = auth;
+            globalThis.provider = provider;
+            globalThis.handleSuccessfulLogin = handleSuccessfulLogin; // The referral logic function
+            globalThis.signInWithPopup = signInWithPopup; // Pass the auth function
+            globalThis.getAdditionalUserInfo = getAdditionalUserInfo; // Pass the auth utility
+
+        } catch (error) {
+            console.error("Auth & Referral Script: Firebase initialization failed:", error);
+            // Optionally, display this error to the user in a UI element
+        }
+        
+        /**
+         * Checks for a referral ID in the URL and stores it in session storage.
+         */
+        function checkReferralOnLoad() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const referrerId = urlParams.get('ref');
+                const referralInfoEl = document.getElementById('referral-info');
+                
+                if (referrerId) {
+                    console.log(`Auth & Referral Script: Referral ID detected: ${referrerId}`);
+                    // Store in session storage to survive page reloads before login
+                    sessionStorage.setItem('referrerId', referrerId);
+                    if (referralInfoEl) {
+                        referralInfoEl.textContent = `Joining through a friend's invite! You're awesome.`;
+                        referralInfoEl.classList.remove('hidden');
+                    }
+                }
+            } catch (e) {
+                console.error("Error reading referral param:", e);
+            }
+        }
+
+        /**
+         * Handles the referral bonus logic after a successful login.
+         * This function is EXPOSED to games.js via globalThis.
+         * @param {User} user - The Firebase user object from the login result.
+         * @param {boolean} isNewUser - Whether this is the user's first login.
+         */
+        async function handleSuccessfulLogin(user, isNewUser) {
+            console.log(`Auth & Referral Script: handleSuccessfulLogin. User: ${user.uid}, isNewUser: ${isNewUser}`);
+            
+            const userDocRef = doc(db, 'highscores', user.uid);
+            const referrerId = sessionStorage.getItem('referrerId');
+            
+            let hasRedeemed = false;
+            try {
+                // Check if this user has *already* redeemed a referral
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists() && userDocSnap.data().redeemedReferral) {
+                    hasRedeemed = true;
+                }
+            } catch (e) {
+                console.error("Error checking existing user doc:", e);
+            }
+
+            // ** APPLY BONUS IF: It's a new user AND there's a referrerId AND they haven't already redeemed **
+            if (isNewUser && referrerId && !hasRedeemed) {
+                console.log(`Applying referral bonus for referrer: ${referrerId}`);
+                
+                const referrerDocRef = doc(db, 'highscores', referrerId);
+                const bonusAmount = 50; // The 50 point bonus
+
+                try {
+                    // Atomically increment the referrer's "Car Racer" score
+                    await updateDoc(referrerDocRef, {
+                        "Car Racer": increment(bonusAmount),
+                        "Car Racer_timestamp": serverTimestamp()
+                    });
+                    console.log(`Bonus of ${bonusAmount} applied to referrer ${referrerId}`);
+
+                    // Mark this new user as having redeemed the referral
+                    // This also creates their document for the first time
+                    await setDoc(userDocRef, {
+                        playerName: user.displayName || 'New Player',
+                        playerEmail: user.email,
+                        redeemedReferral: referrerId, // Mark as redeemed
+                        joinedAt: serverTimestamp()
+                    }, { merge: true }); // Use merge to not overwrite existing scores
+
+                    // Clear the referrerId from session storage so it's not reused
+                    sessionStorage.removeItem('referrerId');
+
+                } catch (error) {
+                    console.error(`Failed to apply referral bonus:`, error);
+                    // Don't block the login, just log the error
+                }
+            }
+
+            // Standard create/update user's own profile doc (runs for everyone)
+            await setDoc(userDocRef, {
+                playerName: user.displayName || 'New Player',
+                playerEmail: user.email,
+                lastLogin: serverTimestamp()
+            }, { merge: true }); // Use merge to not overwrite scores or referral status
+
+            console.log("Auth & Referral Script: Login/Referral logic complete.");
+            // games.js is expected to handle UI updates after this promise resolves
+        }
+
+        // Check for referral immediately on page load
+        checkReferralOnLoad();
+
+    </script>
+
     <script src="games.js" type="module"></script>
 </body>
 </html>
+
