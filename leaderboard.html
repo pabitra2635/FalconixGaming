@@ -398,7 +398,8 @@
             // *** UPDATED: Invite Modal + Share API Event Listeners ***
             inviteFriendBtn.addEventListener('click', async () => {
                 const user = auth.currentUser;
-                const referralLink = user ? `${window.location.origin}/index.html?ref=${user.uid}` : `${window.location.origin}/index.html`;
+                // ### MODIFIED: Added /FalconixGaming/ to the path
+                const referralLink = user ? `${window.location.origin}/FalconixGaming/index.html?ref=${user.uid}` : `${window.location.origin}/FalconixGaming/index.html`;
                 
                 // *** NEW: Updated share text with prize info ***
                 const shareText = "Join me on FalconixGaming! 🎮 Season 1 is live, and you can win up to ₹400! Let's play!";
@@ -724,4 +725,5 @@
     </script>
 </body>
 </html>
+
 
