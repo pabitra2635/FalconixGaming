@@ -55,9 +55,9 @@
             <div class="flex items-center justify-between h-16">
                 <a href="index.html" class="text-3xl font-black-ops text-white">FALCONIX<span class="text-sky-400">GAMING</span></a>
                  <div class="flex items-center text-right">
-                       <!-- Display user status (name or 'Not logged in') -->
-                       <div id="user-status" class="text-sm text-gray-300">Checking status...</div>
-                       <!-- "Back to Games" link removed -->
+                         <!-- Display user status (name or 'Not logged in') -->
+                         <div id="user-status" class="text-sm text-gray-300">Checking status...</div>
+                         <!-- "Back to Games" link removed -->
                  </div>
             </div>
         </nav>
@@ -88,7 +88,7 @@
                     </button>
                     <!-- *** MODIFIED: Invite Button Text Changed to Referral *** -->
                     <button id="invite-friend-btn" class="px-3 py-1 sm:px-5 sm:py-2 text-sm sm:text-base font-semibold text-green-400 bg-transparent border-2 border-green-500 rounded-lg shadow-md hover:bg-green-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105">
-                        Invite a friend
+                       Invite a friend
                     </button>
                 </div>
                 <!-- *** NEW: Added Referral Bonus Mention *** -->
@@ -137,7 +137,7 @@
 
     <!-- Footer -->
     <footer class="bg-gray-900 border-t border-gray-700 mt-auto">
-                     <!-- NEW SOCIAL ICONS DIV -->
+                         <!-- NEW SOCIAL ICONS DIV -->
             <div class="flex justify-center space-x-6 mb-4" style="margin-top: 20px;">
                 <!-- WhatsApp Icon Link -->
                 <a href="https://chat.whatsapp.com/JOHZ6qwcTFTEfpP58MGBpx?mode=wwt" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors duration-300">
@@ -176,12 +176,12 @@
             </p>
             <p class="mt-4 text-gray-400 text-sm">Scores will be finalized at midnight (IST) on November 30th. Winners will be announced on December 1st. Good luck!</p>
             
-            <!-- *** NEW WHATSAPP LINK ADDED *** -->
+            <!-- *** NEW WHATSAPP LINK ADDED
             <p class="mt-6 text-lg">
                 <a href="https://chat.whatsapp.com/JOHZ6qwcTFTEfpP58MGBpx?mode=wwt" target="_blank" rel="noopener noreferrer" class="text-green-400 hover:text-green-300 font-semibold underline transition-colors">
                     Join our Whatsapp community
                 </a>
-            </p>
+            </p> *** -->
         </div>
     </div>
 
@@ -481,11 +481,9 @@
             // *** END UPDATED SECTION ***
 
 
-            // =====================================================================================
-            // ### START OF UPDATED FUNCTION: displayGlobalLeaderboards ###
-            // This function now contains the improved sorting logic with clear comments.
-            // =====================================================================================
+            // --- Function to Display Global Leaderboards (Dynamically from /highscores) ---
             const displayGlobalLeaderboards = async (currentUser) => {
+                // ... (rest of the displayGlobalLeaderboards function is unchanged) ...
                 console.log("Leaderboard Page: displayGlobalLeaderboards called. User:", currentUser ? currentUser.uid : 'null');
                 loadingIndicator.style.display = 'block';
                 globalLeaderboardContent.style.display = 'none';
@@ -545,54 +543,41 @@
                             sortOrder = 'asc'; // Lower is better for Memory Match
                         }
 
-                        // ============================================================================
-                        // ### UPDATED SORTING LOGIC WITH CLEARER COMMENTS ###
-                        // This logic handles all cases:
-                        // 1. Primary Sort: Based on the score (descending for most, ascending for Memory Match).
-                        // 2. Secondary (Tie-breaker): Based on the timestamp (earlier is always better).
-                        // 3. Tertiary (Fallback): Based on player name if scores and timestamps are identical.
-                        // ============================================================================
+                        // UPDATED SORTING LOGIC
                         scores.sort((a, b) => {
-                            // Ensure scores are numbers for comparison
                             if (typeof a.score !== 'number') return 1;
                             if (typeof b.score !== 'number') return -1;
 
-                            // --- 1. Primary Sort: By Score ---
-                            let scoreDifference;
-                            if (sortOrder === 'asc') { // For Memory Match (lower is better)
-                                // Push players who haven't played (score 0) to the bottom
+                            // 1. Primary Sort: Score
+                            if (sortOrder === 'asc') { // Memory Match (lower is better)
+                                // --- Handle 0 scores (push them to the bottom) ---
                                 if (a.score === 0 && b.score !== 0) return 1; 
                                 if (a.score !== 0 && b.score === 0) return -1;
-                                scoreDifference = a.score - b.score;
-                            } else { // For all other games (higher is better)
-                                scoreDifference = b.score - a.score;
+                                // --- End Handle 0 scores ---
+
+                                if (a.score !== b.score) {
+                                    return a.score - b.score;
+                                }
+                            } else { // High score games (higher is better)
+                                if (a.score !== b.score) {
+                                    return b.score - a.score;
+                                }
                             }
 
-                            // If scores are different, we're done sorting these two.
-                            if (scoreDifference !== 0) {
-                                return scoreDifference;
-                            }
-
-                            // --- 2. Secondary Sort (Tie-breaker): By Timestamp ---
-                            // This block only runs if the scores are TIED (scoreDifference was 0).
-                            // It applies to ALL games, including Memory Match.
-                            const timeA = a.timestamp ? a.timestamp.toMillis() : Infinity; // Players without a timestamp go last
+                            // 2. Secondary Sort (Tie-breaker): Timestamp (earlier is better)
+                            const timeA = a.timestamp ? a.timestamp.toMillis() : Infinity;
                             const timeB = b.timestamp ? b.timestamp.toMillis() : Infinity;
                             
-                            const timeDifference = timeA - timeB; // Earlier time (lower number) comes first
-
-                            if (timeDifference !== 0) {
-                                return timeDifference;
+                            if (timeA !== timeB) {
+                                return timeA - timeB; // Earlier time (lower number) comes first
                             }
 
-                            // --- 3. Tertiary Sort (Fallback): By Player Name ---
-                            // This only runs if scores AND timestamps are identical.
+                            // 3. Tertiary Sort (Fallback for same score, same/no timestamp): Player Name
                             const nameA = a.playerName || '';
                             const nameB = b.playerName || '';
                             return nameA.localeCompare(nameB); // Alphabetical A-Z
                         });
-                        // ### END OF UPDATED SORTING LOGIC ###
-
+                        // END UPDATED SORTING LOGIC
 
                         // Find the current user's rank in the *now sorted* list
                         let userRank = -1;
@@ -603,41 +588,50 @@
                             for (let i = 0; i < scores.length; i++) {
                                 if (scores[i].userId === currentUserId) {
                                     userRank = i + 1; // Rank is index + 1
-                                    userScore = scores[i].score; // Get their actual score
+                                    userScore = scores[i].score; // Get their actual score (which might be 0)
                                     break;
                                 }
                             }
                         }
 
-                        // --- The rest of the function remains the same ---
                         let leaderboardHTML = `<div class="glassmorphism p-6 rounded-xl"><h3 class="text-2xl font-bold text-center text-indigo-300 mb-4">${game}</h3><ol class="space-y-3">`;
-                        if (scores.length > 0 && scores.some(s => s.score !== 0 || sortOrder === 'desc')) {
+                        if (scores.length > 0 && scores.some(s => s.score !== 0 || sortOrder === 'desc')) { // Check if any score is non-zero, or if it's a high-score game (where 0 is a valid score to show)
+                            // Filter out zero scores for 'asc' games if they are not the only scores
                             const scoresToShow = (sortOrder === 'asc') ? scores.filter(s => s.score > 0) : scores;
-                            const displayScores = (scoresToShow.length > 0) ? scoresToShow : (sortOrder === 'asc' ? [] : scores);
+                            const displayScores = (scoresToShow.length > 0) ? scoresToShow : (sortOrder === 'asc' ? [] : scores); // If filtering made 'asc' empty, show nothing, otherwise show filtered, or show all for 'desc'
 
                             if (displayScores.length > 0) {
                                 displayScores.slice(0, 5).forEach((entry, index) => { // Show Top 5
                                     const isCurrentUser = currentUser && entry.userId === currentUser.uid;
                                     
+                                    // ### MODIFICATION: Added Medal Logic ###
                                     let medal = '';
-                                    if (index === 0) medal = ' 🥇';
-                                    else if (index === 1) medal = ' 🥈';
-                                    else if (index === 2) medal = ' 🥉';
+                                    if (index === 0) {
+                                        medal = ' 🥇'; // Gold
+                                    } else if (index === 1) {
+                                        medal = ' 🥈'; // Silver
+                                    } else if (index === 2) {
+                                        medal = ' 🥉'; // Bronze
+                                    }
+                                    // ### END MODIFICATION ###
 
                                     leaderboardHTML += `
                                         <li class="flex items-center justify-between text-lg ${isCurrentUser ? 'bg-sky-900/50 rounded px-2 py-1' : ''}">
                                             <span class="flex items-center min-w-0">
                                                 <span class="font-bold text-gray-400 w-8 flex-shrink-0">${index + 1}.</span>
+                                                <!-- ### MODIFICATION: Added medal variable ### -->
                                                 <span class="text-white truncate" title="${entry.playerName}">${entry.playerName}${medal} ${isCurrentUser ? '(You)' : ''}</span>
                                             </span>
                                             <span class="font-bold text-sky-400 flex-shrink-0 ml-2">${entry.score} ${scoreLabel}</span>
                                         </li>`;
                                 });
-                                
+
+                                // Add user's rank if they are logged in, have a rank, and are NOT in the top 5
+                                // ### MODIFICATION: Removed '&& userScore > 0' to show rank even if score is 0 ###
                                 if (currentUser && userRank > 5) { 
                                     const playerName = currentUser.displayName || `${currentUser.uid.substring(0, 6)}...`;
                                     leaderboardHTML += `
-                                        <li class="mt-4 pt-4 border-t border-gray-700">
+                                        <li class="mt-4 pt-4 border-t border-gray-700"> <!-- Add a separator -->
                                             <div class="flex items-center justify-between text-lg bg-sky-900/50 rounded px-2 py-1">
                                                 <span class="flex items-center min-w-0">
                                                     <span class="font-bold text-gray-400 w-8 flex-shrink-0">${userRank}.</span>
@@ -665,27 +659,23 @@
                     console.error("Error Code:", error.code);
                     console.error("Error Message:", error.message);
                     fetchError = true;
-                        if (error.code === 'permission-denied' || error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions')) {
-                            errorDisplay.innerHTML = `<p>Could not load leaderboards due to permissions. Please ensure you are logged in and Firestore rules allow list access for authenticated users on the 'highscores' collection.</p>`;
-                        } else {
-                            errorDisplay.innerHTML = `<p>Could not load leaderboards. An unexpected error occurred: ${error.message}</p>`;
-                        }
+                     if (error.code === 'permission-denied' || error.message.includes('permission-denied') || error.message.includes('Missing or insufficient permissions')) {
+                         errorDisplay.innerHTML = `<p>Could not load leaderboards due to permissions. Please ensure you are logged in and Firestore rules allow list access for authenticated users on the 'highscores' collection.</p>`;
+                     } else {
+                         errorDisplay.innerHTML = `<p>Could not load leaderboards. An unexpected error occurred: ${error.message}</p>`;
+                     }
                 } finally {
                     loadingIndicator.style.display = 'none';
                     if (fetchError) {
                         errorDisplay.style.display = 'block';
                     } else if (hasAnyScores) {
-                        globalLeaderboardContent.style.display = 'block';
+                         globalLeaderboardContent.style.display = 'block';
                     } else {
-                        noScoresMessage.style.display = 'block';
+                         noScoresMessage.style.display = 'block';
                     }
-                        console.log("Leaderboard Page: displayGlobalLeaderboards finished.");
+                     console.log("Leaderboard Page: displayGlobalLeaderboards finished.");
                 }
             };
-            // =====================================================================================
-            // ### END OF UPDATED FUNCTION ###
-            // =====================================================================================
-
 
              // *** Authentication Check ***
              console.log("Leaderboard Page: Setting up onAuthStateChanged listener...");
@@ -742,3 +732,6 @@
     </script>
 </body>
 </html>
+
+
+
